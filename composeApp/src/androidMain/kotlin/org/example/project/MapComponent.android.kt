@@ -32,7 +32,7 @@ actual fun MapComponent() {
 
         options =
             MapOptions(
-                
+                ornamentOptions = OrnamentOptions.OnlyLogo,
                 gestureOptions =
                     GestureOptions(
                         isTiltEnabled = true,
