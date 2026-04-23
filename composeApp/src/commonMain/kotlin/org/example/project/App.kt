@@ -80,7 +80,7 @@ fun App() {
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    MaplibreMap()
+                    MapComponent()
                 }
 
             },
