@@ -18,7 +18,7 @@ actual fun MapComponent() {
             firstPosition =
                 CameraPosition(
                     target = Position(latitude = 60.448985, longitude = 22.292180),
-                    zoom = 13.0
+                    zoom = 16.0
                 )
         )
 

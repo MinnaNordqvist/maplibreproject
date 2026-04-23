@@ -54,8 +54,7 @@ fun App() {
 
 
             sheetContent = {
-
-
+                BottomSheetContent()
             },
             topBar = {
                 TopAppBar(
