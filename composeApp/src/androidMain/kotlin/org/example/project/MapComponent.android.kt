@@ -1,9 +1,15 @@
 package org.example.project
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import mablibreproject.composeapp.generated.resources.Res
+
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
@@ -41,5 +47,8 @@ actual fun MapComponent() {
                         isScrollEnabled = true,
                     )
             )
-    )
+    ){
+
+            Marker()
+    }
 }
