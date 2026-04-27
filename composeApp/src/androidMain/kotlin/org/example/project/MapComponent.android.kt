@@ -69,48 +69,7 @@ actual fun MapComponent() {
             ),
 
     ) {
-        MapContent()
+        Marker()
     }
 
-}
-
-@Composable
-fun MapContent(){
-
-
-    val imarker = painterResource(R.drawable.bus)
-
-
-    val markerJson = """
-    {
-      "type": "FeatureCollection",
-      "features": [
-        {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [ 22.291599999999998971134118619374930858612060546875, 60.45002000000000208501660381443798542022705078125]
-          },
-          "properties": {}
-        }
-      ]
-    }
-        """.trimIndent()
-
-
-
-    val markerSource = rememberGeoJsonSource( GeoJsonData.JsonString(markerJson))
-
-
-    SymbolLayer(
-        id = "bus-stop",
-        source = markerSource,
-        iconImage = image(imarker),
-        visible = true,
-        iconAllowOverlap = const(true),
-        iconAnchor = const(SymbolAnchor.Center),
-        minZoom = 0.0f,
-        maxZoom = 24.0f,
-        iconSize = const(3.0f)
-    )
 }
