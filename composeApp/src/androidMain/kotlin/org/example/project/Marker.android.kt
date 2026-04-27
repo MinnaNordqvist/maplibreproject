@@ -2,7 +2,7 @@ package org.example.project
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
-import org.maplibre.android.style.layers.PropertyFactory.iconSize
+
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.layers.SymbolLayer
@@ -23,7 +23,7 @@ actual fun Marker() {
           "type": "Feature",
           "geometry": {
             "type": "Point",
-            "coordinates": [ 60.448985, 22.292180]
+            "coordinates": [60.45002000000000208501660381443798542022705078125, 22.291599999999998971134118619374930858612060546875]
           },
           "properties": {}
         }
@@ -31,15 +31,29 @@ actual fun Marker() {
     }
         """.trimIndent()
 
+    val mJson = "{\n" +
+            "     \"type\": \"FeatureCollection\",\n" +
+            "     \"features\": [\n" +
+            "         {\n" +
+            "         \"type\": \"Feature\",\n" +
+            "         \"geometry\": {\n" +
+            "              \"type\": \"Point\",\n" +
+            "              \"coordinates\": [60.45002000000000208501660381443798542022705078125, 22.291599999999998971134118619374930858612060546875]\n" +
+            "             },\n" +
+            "          \"properties\": {}\n" +
+            "          }\n" +
+            "      ]\n" +
+            "}"
+
     val markerSource = rememberGeoJsonSource(
-        GeoJsonData.JsonString(markerJson)
+        GeoJsonData.JsonString(mJson)
     )
 
     SymbolLayer(
         id = "bus-stop",
         source = markerSource,
-        iconImage = image((marker), drawAsSdf = true),
-        iconSize = const(1.5f)
+        iconImage = image(marker),
+        visible = true
     )
 
 }
