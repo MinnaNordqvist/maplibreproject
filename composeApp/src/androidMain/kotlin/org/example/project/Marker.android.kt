@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -35,9 +36,16 @@ import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.window.Popup
+import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
+import org.maplibre.spatialk.geojson.toJson
+
+
+private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(null)
+
 
 @Composable
 actual fun Marker() {
@@ -45,26 +53,28 @@ actual fun Marker() {
     val marker = painterResource(R.drawable.bus)
 
     val markerJson = """
-    {
-      "type": "FeatureCollection",
-      "features": [
         {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [ 22.291599999999998971134118619374930858612060546875, 60.45002000000000208501660381443798542022705078125]
-          },
-          "properties": {}
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [ 22.291599999999998971134118619374930858612060546875, 60.45002000000000208501660381443798542022705078125]
+              },
+              "properties": {
+                "stop_code": "1047",
+                "stop_name": "Hammasklinikka"
+              }
+            }
+          ]
         }
-      ]
-    }
-        """.trimIndent()
+            """.trimIndent()
 
     val markerSource = rememberGeoJsonSource(
         GeoJsonData.JsonString(markerJson)
     )
 
-    var selectedFeature by remember {mutableStateOf<Feature<Geometry, JsonObject?>?>(null)}
 
     SymbolLayer(
         id = "bus-stop",
@@ -78,25 +88,63 @@ actual fun Marker() {
         maxZoom = 24.0f,
         iconSize = const(3.0f),
         onClick = { features ->
+            println("Clicked on ${features[0].toJson()}")
             selectedFeature = features.firstOrNull()
 
             ClickResult.Consume
         },
-       // textField = format(span("Hammasklinikka 1047")),
-       // textFont = const(listOf("Noto Sans Regular")),
+
     )
 
     selectedFeature?.let { feature ->
         AlertDialog(
             onDismissRequest = { selectedFeature = null },
             confirmButton = {},
-            title = { Text("Hammasklinikka") },
+            title = { Text(feature.getStringProperty("stop_name") ?: "") },
             text = {
                 Column {
-                    Text("Station Code: 1047")
+                    Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
                 }
             }
         )
     }
+
 }
+
+ @Composable
+ fun MarkerInfo(){
+    /*
+        selectedFeature?.let { feature ->
+            AlertDialog(
+                onDismissRequest = { selectedFeature = null },
+                confirmButton = {},
+                title = { Text("Hammasklinikka") },
+                text = {
+                    Column {
+                        Text("Station Code: 1047")
+                    }
+                }
+            )
+        }
+
+*/
+    selectedFeature?.let { feature ->
+        Card {
+            Column(
+                modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("Hammasklinikka 1047")
+            }
+        }
+    }
+
+
+}
+
+
+
+
+
+
 
