@@ -47,10 +47,6 @@ actual fun MapComponent() {
     val styleState = rememberStyleState()
 
 
-
-
-
-
     MaplibreMap(
         baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
         cameraState = camera,
@@ -70,6 +66,7 @@ actual fun MapComponent() {
 
     ) {
         Marker()
+
     }
 
 }

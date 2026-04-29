@@ -1,5 +1,6 @@
 package org.example.project
 
+import android.app.LauncherActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -36,17 +37,31 @@ import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RichTooltip
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.window.Popup
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.toJson
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.material3.ListItem
 
 
 private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(null)
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun Marker() {
 
@@ -75,6 +90,12 @@ actual fun Marker() {
         GeoJsonData.JsonString(markerJson)
     )
 
+    val tooltipState = rememberTooltipState()
+    val scope = rememberCoroutineScope()
+
+    var isClicked by remember {
+        mutableStateOf(false)
+    }
 
     SymbolLayer(
         id = "bus-stop",
@@ -88,13 +109,22 @@ actual fun Marker() {
         maxZoom = 24.0f,
         iconSize = const(3.0f),
         onClick = { features ->
-            println("Clicked on ${features[0].toJson()}")
+            /*
+            features
+                .firstOrNull()
+                ?.let{
+                    scope.launch {
+
+                    }
+            }
+            */
             selectedFeature = features.firstOrNull()
+            println("Clicked on ${features[0].toJson()}")
 
             ClickResult.Consume
         },
 
-    )
+        )
 
     selectedFeature?.let { feature ->
         AlertDialog(
@@ -107,13 +137,72 @@ actual fun Marker() {
                 }
             }
         )
-    }
 
+    }
 }
 
- @Composable
- fun MarkerInfo(){
+/*
+    if(isClicked){
+        CardColumn { Text("User Location clicked  times") }
+    }
+
+
+    TooltipBox(
+        modifier = Modifier.fillMaxSize(),
+        state = tooltipState,
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        tooltip = {
+            RichTooltip(
+                title = { Text("text") },
+                action = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                tooltipState.dismiss()
+                            }
+                        }
+                    ) { Text("text") }
+                }
+            ) { Text("text") }
+        },
+        onDismissRequest = { selectedFeature = null },
+    ) {
+
+    }
     /*
+    selectedFeature?.let { feature ->
+
+       Card(
+           modifier = Modifier.fillMaxSize(),
+       ){
+           Column(
+               verticalArrangement = Arrangement.Center
+           ){
+               Text(feature.getStringProperty("stop_name") ?: "")
+               Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
+           }
+       }
+
+
+       AlertDialog(
+           onDismissRequest = { selectedFeature = null },
+           confirmButton = {},
+           title = { Text(feature.getStringProperty("stop_name") ?: "") },
+           text = {
+               Column {
+                   Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
+               }
+           }
+       )
+
+    }
+*/
+}
+
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+ fun MarkerInfo() {
+     /*
         selectedFeature?.let { feature ->
             AlertDialog(
                 onDismissRequest = { selectedFeature = null },
@@ -128,6 +217,34 @@ actual fun Marker() {
         }
 
 */
+     val tooltipState = rememberTooltipState()
+     val scope = rememberCoroutineScope()
+
+     TooltipBox(
+         modifier = Modifier.fillMaxSize(),
+         state = tooltipState,
+         positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+         tooltip = {
+             RichTooltip(
+                 title = { Text("text") },
+                 action = {
+                     TextButton(
+                         onClick = {
+                             scope.launch {
+                                 tooltipState.dismiss()
+                             }
+                         }
+                     ) { Text("text") }
+                 }
+             ) { Text("text") }
+         },
+         onDismissRequest = { selectedFeature = null },
+         ) {
+
+     }
+
+
+/*
     selectedFeature?.let { feature ->
         Card {
             Column(
@@ -138,13 +255,32 @@ actual fun Marker() {
             }
         }
     }
+*/
 
+}
 
+@Composable
+fun CardColumn(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(contentPadding),
+            verticalArrangement = verticalArrangement,
+        ) {
+            content()
+        }
+    }
 }
 
 
 
 
 
-
-
+*/
