@@ -102,6 +102,8 @@ actual fun MapComponent() {
 
 
     Box(modifier = Modifier.fillMaxSize()) {
+
+        // Map Layer
         MaplibreMap(
             baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
             cameraState = camera,
@@ -110,10 +112,14 @@ actual fun MapComponent() {
             onMapClick = { point, screenPoint ->
 
                     popupPosition = DpOffset(screenPoint.x, screenPoint.y)
-
+                    selectedFeature = null
                     ClickResult.Pass
             },
 
+            onMapLongClick = { point, screenPoint ->
+                selectedFeature = null
+                ClickResult.Pass
+            },
             options =
                 MapOptions(
                     ornamentOptions = OrnamentOptions.OnlyLogo,
@@ -130,6 +136,8 @@ actual fun MapComponent() {
             )
 
         {
+
+            // Symbol layer
             val markerSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(markerJson)
             )
@@ -156,7 +164,8 @@ actual fun MapComponent() {
 
         }
 
-        if(camera.projection != null) {
+            //  UI Layer
+        if (selectedFeature != null) {
             selectedFeature?.let { feature ->
                 popupPosition?.let { position ->
                     PopupCard(
@@ -192,7 +201,7 @@ fun BoxScope.PopupCard(
             .offset {
                 IntOffset(
                     x = off.x.toInt() - 100, // center horizontally (adjust based on card width)
-                    y = off.y.toInt() - 220  // position above the marker
+                    y = off.y.toInt() - 190  // position above the marker
                 )
             }
             .width(200.dp),
@@ -200,14 +209,9 @@ fun BoxScope.PopupCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = feature.getStringProperty("stop_name") ?: "",
+                text = feature.getStringProperty("stop_name") + " " + feature.getStringProperty("stop_code"),
                 style = MaterialTheme.typography.titleMedium
             )
-            Text(
-                text = feature.getStringProperty("stop_code") ?: "",
-                style = MaterialTheme.typography.bodySmall
-            )
-
         }
     }
 }
