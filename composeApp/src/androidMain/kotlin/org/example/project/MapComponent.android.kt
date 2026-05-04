@@ -50,6 +50,7 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.toJson
 
 import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.Point
 
 
 private   val markerJson = """
@@ -110,14 +111,14 @@ actual fun MapComponent() {
             styleState = styleState,
 
             onMapClick = { point, screenPoint ->
-
-                    popupPosition = DpOffset(screenPoint.x, screenPoint.y)
+                    popupPosition = null
                     selectedFeature = null
                     ClickResult.Pass
             },
 
             onMapLongClick = { point, screenPoint ->
                 selectedFeature = null
+                popupPosition = null
                 ClickResult.Pass
             },
             options =
@@ -136,11 +137,11 @@ actual fun MapComponent() {
             )
 
         {
-
             // Symbol layer
             val markerSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(markerJson)
             )
+            var target by remember { mutableStateOf<Position?>(null) }
 
             SymbolLayer(
                 id = "bus-stop",
@@ -153,6 +154,16 @@ actual fun MapComponent() {
                 maxZoom = 24.0f,
                 iconSize = const(3.0f),
                 onClick = { features ->
+                    features
+                        .firstOrNull()
+                        ?.let {
+                            target = (it.geometry as Point).coordinates
+                        }
+
+                    var point = target?.let { camera.projection?.screenLocationFromPosition(it) }
+                    var cardOff = point?.y?.let { DpOffset(point.x, it) }
+                    popupPosition = cardOff
+
                     selectedFeature = features.firstOrNull()
 
                     println("Clicked on ${features[0].toJson()}")
@@ -161,6 +172,7 @@ actual fun MapComponent() {
                     ClickResult.Consume
                 },
                 )
+
 
         }
 
