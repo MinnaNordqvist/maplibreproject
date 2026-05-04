@@ -192,7 +192,7 @@ fun BoxScope.PopupCard(
             .offset {
                 IntOffset(
                     x = off.x.toInt() - 100, // center horizontally (adjust based on card width)
-                    y = off.y.toInt() - 150  // position above the marker
+                    y = off.y.toInt() - 220  // position above the marker
                 )
             }
             .width(200.dp),
