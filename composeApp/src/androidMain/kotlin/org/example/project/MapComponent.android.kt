@@ -1,20 +1,35 @@
 package org.example.project
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
-import org.maplibre.android.style.layers.PropertyFactory.iconAllowOverlap
 
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
-import org.maplibre.compose.expressions.dsl.Feature
+
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.value.SymbolAnchor
@@ -30,14 +45,49 @@ import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 //import org.maplibre.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Position
-import org.maplibre.spatialk.geojson.FeatureCollection
-import org.maplibre.geojson.FeatureCollection.fromFeature
+import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
-import org.maplibre.spatialk.geojson.Point
+import org.maplibre.spatialk.geojson.toJson
+
+import org.maplibre.spatialk.geojson.Feature
+
+
+private   val markerJson = """
+        {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [ 22.291599999999998971134118619374930858612060546875, 60.45002000000000208501660381443798542022705078125]
+              },
+              "properties": {
+                "stop_code": "1047",
+                "stop_name": "Hammasklinikka"
+              }
+            }
+          ]
+        }
+            """.trimIndent()
+
+
+// Helper functions to convert between Pixels and DP
+@Composable
+fun Offset.toDpOffset(): DpOffset = with(LocalDensity.current) { DpOffset(x.toDp(), y.toDp()) }
+
+@Composable
+fun DpOffset.toOffset(): Offset = with(LocalDensity.current) { Offset(x.toPx(), y.toPx()) }
+
+
 
 
 @Composable
 actual fun MapComponent() {
+    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+    var popupPosition by remember { mutableStateOf<DpOffset?>(null) }
+    val marker = painterResource(R.drawable.bus)
+
 
     val camera =
         rememberCameraState(
@@ -51,31 +101,114 @@ actual fun MapComponent() {
     val styleState = rememberStyleState()
 
 
-    MaplibreMap(
-        baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
-        cameraState = camera,
-        styleState = styleState,
-        onMapClick = {point, screenPoint ->
-            ClickResult.Pass
-        },
+    Box(modifier = Modifier.fillMaxSize()) {
+        MaplibreMap(
+            baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
+            cameraState = camera,
+            styleState = styleState,
 
-        options =
-            MapOptions(
-                ornamentOptions = OrnamentOptions.OnlyLogo,
-                gestureOptions =
-                    GestureOptions(
-                        isTiltEnabled = true,
-                        isZoomEnabled = true,
-                        isRotateEnabled = true,
-                        isScrollEnabled = true,
+            onMapClick = { point, screenPoint ->
+
+                    popupPosition = DpOffset(screenPoint.x, screenPoint.y)
+
+                    ClickResult.Pass
+            },
+
+            options =
+                MapOptions(
+                    ornamentOptions = OrnamentOptions.OnlyLogo,
+                    gestureOptions =
+                        GestureOptions(
+                            isTiltEnabled = true,
+                            isZoomEnabled = true,
+                            isRotateEnabled = true,
+                            isScrollEnabled = true,
+                        )
+                ),
+
+
+            )
+
+        {
+            val markerSource = rememberGeoJsonSource(
+                GeoJsonData.JsonString(markerJson)
+            )
+
+            SymbolLayer(
+                id = "bus-stop",
+                source = markerSource,
+                iconImage = image(marker),
+                visible = true,
+                iconAllowOverlap = const(true),
+                iconAnchor = const(SymbolAnchor.Center),
+                minZoom = 0.0f,
+                maxZoom = 24.0f,
+                iconSize = const(3.0f),
+                onClick = { features ->
+                    selectedFeature = features.firstOrNull()
+
+                    println("Clicked on ${features[0].toJson()}")
+                    println(selectedFeature)
+                    println(popupPosition)
+                    ClickResult.Consume
+                },
+                )
+
+        }
+
+        if(camera.projection != null) {
+            selectedFeature?.let { feature ->
+                popupPosition?.let { position ->
+                    PopupCard(
+                        feature = feature,
+                        position = position,
+                        onDismiss = {
+                            selectedFeature = null
+                            popupPosition = null
+                        }
                     )
-            ),
 
-        )
+                }
+            }
+        }
 
-    {
-            Marker()
+    }
+}
 
+
+
+@Composable
+fun BoxScope.PopupCard(
+    feature: Feature<Geometry, JsonObject?>,
+    position: DpOffset,
+    onDismiss: () -> Unit
+) {
+    // Position the card relative to the click point
+    // Adjust offset so popup appears above/beside the marker
+    val off = position.toOffset()
+
+    Card(
+        modifier = Modifier
+            .offset {
+                IntOffset(
+                    x = off.x.toInt() - 100, // center horizontally (adjust based on card width)
+                    y = off.y.toInt() - 150  // position above the marker
+                )
+            }
+            .width(200.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = feature.getStringProperty("stop_name") ?: "",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = feature.getStringProperty("stop_code") ?: "",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+        }
     }
 }
 
