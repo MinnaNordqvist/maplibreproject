@@ -98,16 +98,16 @@ actual fun Marker(
             features
                 .firstOrNull()
                 ?.let {
-                    scope.launch {
-                        target = (it.geometry as Point).coordinates
-                        stopName = (it.getStringProperty("stop_name") ?: "")
-                        stopCode = (it.getStringProperty("stop_code") ?: "")
-                    }
+                    target = (it.geometry as Point).coordinates
+                    stopName = (it.getStringProperty("stop_name") ?: "")
+                    stopCode = (it.getStringProperty("stop_code") ?: "")
                 }
 
             // selectedFeature = features.firstOrNull()
             println("Clicked on ${features[0].toJson()}")
-            println(target?.plus(" ")?.plus(stopName)?.plus(" ")?.plus(stopCode))
+            println(target)
+            println(stopName)
+            println(stopCode)
             ClickResult.Consume
         },
 
