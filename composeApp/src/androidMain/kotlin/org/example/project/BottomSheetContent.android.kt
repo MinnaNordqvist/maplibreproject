@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -34,11 +35,8 @@ import kotlinx.coroutines.launch
 actual fun BottomSheetContent() {
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
-    // Basic parameters
 
-    //val showCaret by remember(false)
 
-    // State management
     val tooltipState = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
 
@@ -67,7 +65,8 @@ actual fun BottomSheetContent() {
             ) {
                 // Tooltip implementation
                 TooltipBox(
-                    positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+                    positionProvider =
+                        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                     tooltip = {
                         RichTooltip(
                             title = { Text("Lähde") },

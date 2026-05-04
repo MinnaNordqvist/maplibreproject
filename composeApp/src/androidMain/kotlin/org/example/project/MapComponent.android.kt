@@ -1,7 +1,10 @@
 package org.example.project
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -24,6 +27,7 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
+import org.maplibre.compose.util.ClickResult
 //import org.maplibre.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Position
 import org.maplibre.spatialk.geojson.FeatureCollection
@@ -51,6 +55,9 @@ actual fun MapComponent() {
         baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
         cameraState = camera,
         styleState = styleState,
+        onMapClick = {point, screenPoint ->
+            ClickResult.Pass
+        },
 
         options =
             MapOptions(
@@ -64,9 +71,12 @@ actual fun MapComponent() {
                     )
             ),
 
-    ) {
-        Marker()
+        )
+
+    {
+            Marker()
 
     }
-
 }
+
+

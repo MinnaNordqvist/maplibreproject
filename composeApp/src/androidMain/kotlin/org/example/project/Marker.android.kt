@@ -1,33 +1,23 @@
 package org.example.project
 
-import android.app.LauncherActivity
-import androidx.compose.foundation.Image
+import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import org.maplibre.compose.expressions.dsl.const
-import org.maplibre.compose.expressions.dsl.format
 import org.maplibre.compose.expressions.dsl.image
-import org.maplibre.compose.expressions.dsl.span
 import org.maplibre.compose.expressions.value.SymbolAnchor
 import org.maplibre.compose.layers.SymbolLayer
 
@@ -39,23 +29,20 @@ import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.RichTooltip
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.window.Popup
-import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
-import org.maplibre.spatialk.geojson.toJson
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.launch
-import androidx.compose.material3.ListItem
+import org.maplibre.compose.camera.CameraState
+import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
+import org.maplibre.spatialk.geojson.Point
+import org.maplibre.spatialk.geojson.Position
+import org.maplibre.spatialk.geojson.toJson
 
 
 private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(null)
@@ -63,7 +50,9 @@ private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(n
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-actual fun Marker() {
+actual fun Marker(
+
+) {
 
     val marker = painterResource(R.drawable.bus)
 
@@ -89,19 +78,16 @@ actual fun Marker() {
     val markerSource = rememberGeoJsonSource(
         GeoJsonData.JsonString(markerJson)
     )
-
-    val tooltipState = rememberTooltipState()
     val scope = rememberCoroutineScope()
 
-    var isClicked by remember {
-        mutableStateOf(false)
-    }
+    var target by remember { mutableStateOf<Position?>(null) }
+    var stopName by remember { mutableStateOf("") }
+    var stopCode by remember { mutableStateOf("") }
 
     SymbolLayer(
         id = "bus-stop",
         source = markerSource,
         iconImage = image(marker),
-
         visible = true,
         iconAllowOverlap = const(true),
         iconAnchor = const(SymbolAnchor.Center),
@@ -109,23 +95,26 @@ actual fun Marker() {
         maxZoom = 24.0f,
         iconSize = const(3.0f),
         onClick = { features ->
-            /*
             features
                 .firstOrNull()
-                ?.let{
+                ?.let {
                     scope.launch {
-
+                        target = (it.geometry as Point).coordinates
+                        stopName = (it.getStringProperty("stop_name") ?: "")
+                        stopCode = (it.getStringProperty("stop_code") ?: "")
                     }
-            }
-            */
-            selectedFeature = features.firstOrNull()
-            println("Clicked on ${features[0].toJson()}")
+                }
 
+            // selectedFeature = features.firstOrNull()
+            println("Clicked on ${features[0].toJson()}")
+            println(target?.plus(" ")?.plus(stopName)?.plus(" ")?.plus(stopCode))
             ClickResult.Consume
         },
 
         )
+}
 
+/*
     selectedFeature?.let { feature ->
         AlertDialog(
             onDismissRequest = { selectedFeature = null },
@@ -134,41 +123,37 @@ actual fun Marker() {
             text = {
                 Column {
                     Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
+                    println(feature.geometry)
+                }
+            },
+
+            )
+
+    }
+
+*/
+    /*
+
+        MarkerInfo(
+            cameraState = state,
+            targetPosition = target,
+
+            ) {
+
+                Card(
+
+                ) {
+                    Text(stopName)
+                    Text(stopCode)
                 }
             }
-        )
 
-    }
-}
-
-/*
-    if(isClicked){
-        CardColumn { Text("User Location clicked  times") }
-    }
+*/
 
 
-    TooltipBox(
-        modifier = Modifier.fillMaxSize(),
-        state = tooltipState,
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-        tooltip = {
-            RichTooltip(
-                title = { Text("text") },
-                action = {
-                    TextButton(
-                        onClick = {
-                            scope.launch {
-                                tooltipState.dismiss()
-                            }
-                        }
-                    ) { Text("text") }
-                }
-            ) { Text("text") }
-        },
-        onDismissRequest = { selectedFeature = null },
-    ) {
 
-    }
+
+
     /*
     selectedFeature?.let { feature ->
 
@@ -197,90 +182,55 @@ actual fun Marker() {
 
     }
 */
-}
 
+
+ @SuppressLint("UnrememberedMutableState")
  @OptIn(ExperimentalMaterial3Api::class)
  @Composable
- fun MarkerInfo() {
-     /*
-        selectedFeature?.let { feature ->
-            AlertDialog(
-                onDismissRequest = { selectedFeature = null },
-                confirmButton = {},
-                title = { Text("Hammasklinikka") },
-                text = {
-                    Column {
-                        Text("Station Code: 1047")
-                    }
-                }
-            )
-        }
+ fun MarkerInfo(
+     targetPosition: Position?,
+     modifier: Modifier = Modifier,
+     //onDismiss: () -> Unit,
 
-*/
-     val tooltipState = rememberTooltipState()
-     val scope = rememberCoroutineScope()
+     contentPadding: PaddingValues = PaddingValues(12.dp),
+     content: @Composable (BoxScope.() -> Unit),
+ ) {
+         Box(modifier = modifier.fillMaxSize()) {
+             Column(
+                 modifier = modifier.fillMaxSize(),
+             ) {
+                 Box(modifier = Modifier.padding(contentPadding)) {
+                        content()
 
-     TooltipBox(
-         modifier = Modifier.fillMaxSize(),
-         state = tooltipState,
-         positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-         tooltip = {
-             RichTooltip(
-                 title = { Text("text") },
-                 action = {
-                     TextButton(
-                         onClick = {
-                             scope.launch {
-                                 tooltipState.dismiss()
-                             }
-                         }
-                     ) { Text("text") }
                  }
-             ) { Text("text") }
-         },
-         onDismissRequest = { selectedFeature = null },
-         ) {
+             }
+         }
 
-     }
+ }
 
 
-/*
-    selectedFeature?.let { feature ->
-        Card {
-            Column(
-                modifier = Modifier.padding(8.dp).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text("Hammasklinikka 1047")
-            }
-        }
-    }
-*/
 
-}
 
 @Composable
 fun CardColumn(
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
-    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(contentPadding),
-            verticalArrangement = verticalArrangement,
-        ) {
-            content()
-        }
-    }
-}
+                 modifier: Modifier = Modifier,
+                 contentPadding: PaddingValues = PaddingValues(0.dp),
+                 verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+                 content: @Composable ColumnScope.() -> Unit,
+             ) {
+                 Card(
+                     modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+                     colors = CardDefaults.cardColors(),
+                 ) {
+                     Column(
+                         modifier = Modifier.fillMaxWidth().padding(contentPadding),
+                         verticalArrangement = verticalArrangement,
+                     ) {
+                         content()
+                     }
+                 }
+             }
 
 
 
 
-
-*/
