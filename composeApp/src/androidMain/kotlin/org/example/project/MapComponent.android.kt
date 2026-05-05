@@ -58,42 +58,50 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.toJson
 
 import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
+import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 
 
-private   val markerJson = """
-        {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "geometry": {
-                "type": "Point",
-                "coordinates": [ 22.291599999999998971134118619374930858612060546875, 60.45002000000000208501660381443798542022705078125]
-              },
-              "properties": {
-                "stop_code": "1047",
-                "stop_name": "Hammasklinikka"
-              }
-            }
-          ]
-        }
-            """.trimIndent()
-
+private  var data by mutableStateOf(featureCollectionOf().toJson())
 
 @Composable
 fun DpOffset.toOffset(): Offset = with(LocalDensity.current) { Offset(x.toPx(), y.toPx()) }
 
+
+private suspend fun getStopsAsGeoJson(): String{
+
+    // lähetetään http-get pyyntö GTFS-rajapintaan
+    // https://data.foli.fi/gtfs/stops
+    val mapping: Map<String, Stop>  =  getStops()
+    //println("Pysäkkejä: " + mapping.size)
+
+    val features = mapping.values.map{ value ->
+        Feature(
+            geometry =
+                Point(
+                    Position(
+                        longitude = value.stop_lon,
+                        latitude = value.stop_lat,
+                    )
+                ),
+            properties =
+                mapOf(
+                    "stop_code" to (value.stop_code),
+                    "stop_name" to (value.stop_name)
+                ),
+        )
+    }
+    return FeatureCollection(features).toJson()
+}
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun MapComponent() {
-    // Kun sovellus käynnistyy, lähetetään http-get pyyntö GTFS-rajapintaan
-    // https://data.foli.fi/gtfs/stops
-    val mapping: Map<String, Stop>  = remember { runBlocking { getStops()}}
-    println("Pysäkkejä: " + mapping.size)
+    data = runBlocking { getStopsAsGeoJson() }
+
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     val marker = painterResource(R.drawable.bus)
@@ -145,7 +153,7 @@ actual fun MapComponent() {
             {
                 // Symbol layer
                 val markerSource = rememberGeoJsonSource(
-                    GeoJsonData.JsonString(markerJson)
+                    GeoJsonData.JsonString(data)
                 )
 
                 SymbolLayer(
