@@ -27,10 +27,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 import mablibreproject.composeapp.generated.resources.Res
 import mablibreproject.composeapp.generated.resources.compose_multiplatform
+import org.example.project.data.getStopStatus
 import org.maplibre.compose.map.MaplibreMap
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +56,10 @@ fun App() {
 
 
             sheetContent = {
+                coroutineScope.launch{
+                    val httpStat = getStopStatus()
+                    println(httpStat)
+                }
                 BottomSheetContent()
             },
             topBar = {

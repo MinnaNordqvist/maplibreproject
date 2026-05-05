@@ -31,7 +31,7 @@ actual val client: HttpClient = HttpClient(OkHttp) {
 
     }
     install(UserAgent) {
-        agent = "MapProject Android"
+        agent = "MapLibreProject Android"
     }
 
     defaultRequest {
@@ -41,7 +41,7 @@ actual val client: HttpClient = HttpClient(OkHttp) {
             host = "data.foli.fi"
             parameters.append("?hash_id=", "$rnds")
         }
-        header("MapProject-Android-Header", "Hello")
+        header("MapLibreProject-Android-Header", "Hello")
     }
 
     install(ContentNegotiation) {

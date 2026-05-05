@@ -44,16 +44,14 @@ import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.maplibre.spatialk.geojson.toJson
 
-
-private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(null)
-
+//private var selectedFeature by mutableStateOf<Feature<Geometry, JsonObject?>?>(null)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun Marker(
 
 ) {
-
+    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     val marker = painterResource(R.drawable.bus)
 
     val markerJson = """
@@ -78,7 +76,7 @@ actual fun Marker(
     val markerSource = rememberGeoJsonSource(
         GeoJsonData.JsonString(markerJson)
     )
-    val scope = rememberCoroutineScope()
+
 
     var target by remember { mutableStateOf<Position?>(null) }
     var stopName by remember { mutableStateOf("") }
@@ -95,141 +93,26 @@ actual fun Marker(
         maxZoom = 24.0f,
         iconSize = const(3.0f),
         onClick = { features ->
-            features
-                .firstOrNull()
-                ?.let {
-                    target = (it.geometry as Point).coordinates
-                    stopName = (it.getStringProperty("stop_name") ?: "")
-                    stopCode = (it.getStringProperty("stop_code") ?: "")
-                }
-
-            // selectedFeature = features.firstOrNull()
+            selectedFeature = features.firstOrNull()
             println("Clicked on ${features[0].toJson()}")
             println(target)
             println(stopName)
             println(stopCode)
+            println(selectedFeature)
             ClickResult.Consume
         },
-
         )
+
+
+
 }
 
-/*
-    selectedFeature?.let { feature ->
-        AlertDialog(
-            onDismissRequest = { selectedFeature = null },
-            confirmButton = {},
-            title = { Text(feature.getStringProperty("stop_name") ?: "") },
-            text = {
-                Column {
-                    Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
-                    println(feature.geometry)
-                }
-            },
-
-            )
-
-    }
-
-*/
-    /*
-
-        MarkerInfo(
-            cameraState = state,
-            targetPosition = target,
-
-            ) {
-
-                Card(
-
-                ) {
-                    Text(stopName)
-                    Text(stopCode)
-                }
-            }
-
-*/
 
 
 
 
 
-    /*
-    selectedFeature?.let { feature ->
 
-       Card(
-           modifier = Modifier.fillMaxSize(),
-       ){
-           Column(
-               verticalArrangement = Arrangement.Center
-           ){
-               Text(feature.getStringProperty("stop_name") ?: "")
-               Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
-           }
-       }
-
-
-       AlertDialog(
-           onDismissRequest = { selectedFeature = null },
-           confirmButton = {},
-           title = { Text(feature.getStringProperty("stop_name") ?: "") },
-           text = {
-               Column {
-                   Text("Station Code: ${feature.getStringProperty("stop_code") ?: ""}")
-               }
-           }
-       )
-
-    }
-*/
-
-
- @SuppressLint("UnrememberedMutableState")
- @OptIn(ExperimentalMaterial3Api::class)
- @Composable
- fun MarkerInfo(
-     targetPosition: Position?,
-     modifier: Modifier = Modifier,
-     //onDismiss: () -> Unit,
-
-     contentPadding: PaddingValues = PaddingValues(12.dp),
-     content: @Composable (BoxScope.() -> Unit),
- ) {
-         Box(modifier = modifier.fillMaxSize()) {
-             Column(
-                 modifier = modifier.fillMaxSize(),
-             ) {
-                 Box(modifier = Modifier.padding(contentPadding)) {
-                        content()
-
-                 }
-             }
-         }
-
- }
-
-
-
-
-@Composable
-fun CardColumn(
-                 modifier: Modifier = Modifier,
-                 contentPadding: PaddingValues = PaddingValues(0.dp),
-                 verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-                 content: @Composable ColumnScope.() -> Unit,
-             ) {
-                 Card(
-                     modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
-                     colors = CardDefaults.cardColors(),
-                 ) {
-                     Column(
-                         modifier = Modifier.fillMaxWidth().padding(contentPadding),
-                         verticalArrangement = verticalArrangement,
-                     ) {
-                         content()
-                     }
-                 }
-             }
 
 
 

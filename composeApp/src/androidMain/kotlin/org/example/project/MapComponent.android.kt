@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,8 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
+import org.example.project.data.Stop
+
+import org.example.project.data.getStops
 
 
 import org.maplibre.compose.camera.CameraPosition
@@ -76,95 +81,97 @@ private   val markerJson = """
             """.trimIndent()
 
 
-// Helper functions to convert between Pixels and DP
-@Composable
-fun Offset.toDpOffset(): DpOffset = with(LocalDensity.current) { DpOffset(x.toDp(), y.toDp()) }
-
 @Composable
 fun DpOffset.toOffset(): Offset = with(LocalDensity.current) { Offset(x.toPx(), y.toPx()) }
 
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun MapComponent() {
+    // Kun sovellus käynnistyy, lähetetään http-get pyyntö GTFS-rajapintaan
+    // https://data.foli.fi/gtfs/stops
+    val mapping: Map<String, Stop>  = remember { runBlocking { getStops()}}
+    println("Pysäkkejä: " + mapping.size)
+
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     val marker = painterResource(R.drawable.bus)
 
     val camera =
-        rememberCameraState(
-            firstPosition =
-                CameraPosition(
-                    target = Position(latitude = 60.448985, longitude = 22.292180),
-                    zoom = 15.0
-                )
-        )
+            rememberCameraState(
+                firstPosition =
+                    CameraPosition(
+                        target = Position(latitude = 60.448985, longitude = 22.292180),
+                        zoom = 15.0
+                    )
+            )
 
     val styleState = rememberStyleState()
 
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Map Layer
-        MaplibreMap(
-            baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
-            cameraState = camera,
-            styleState = styleState,
+            // Map Layer
+            MaplibreMap(
+                baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
+                cameraState = camera,
+                styleState = styleState,
 
-            onMapClick = { point, screenPoint ->
+                onMapClick = { point, screenPoint ->
                     selectedFeature = null
                     ClickResult.Pass
-            },
-
-            onMapLongClick = { point, screenPoint ->
-                selectedFeature = null
-                ClickResult.Pass
-            },
-            options =
-                MapOptions(
-                    ornamentOptions = OrnamentOptions.OnlyLogo,
-                    gestureOptions =
-                        GestureOptions(
-                            isTiltEnabled = true,
-                            isZoomEnabled = true,
-                            isRotateEnabled = true,
-                            isScrollEnabled = true,
-                        )
-                ),
-
-
-            )
-
-        {
-            // Symbol layer
-            val markerSource = rememberGeoJsonSource(
-                GeoJsonData.JsonString(markerJson)
-            )
-
-            SymbolLayer(
-                id = "bus-stop",
-                source = markerSource,
-                iconImage = image(marker),
-                visible = true,
-                iconAllowOverlap = const(true),
-                iconAnchor = const(SymbolAnchor.Center),
-                minZoom = 0.0f,
-                maxZoom = 24.0f,
-                iconSize = const(3.0f),
-                onClick = { features ->
-                    features
-                    selectedFeature = features.firstOrNull()
-                    println("Clicked on ${features[0].toJson()}")
-                    println(selectedFeature)
-                    ClickResult.Consume
                 },
+
+                onMapLongClick = { point, screenPoint ->
+                    selectedFeature = null
+                    ClickResult.Pass
+                },
+                options =
+                    MapOptions(
+                        ornamentOptions = OrnamentOptions.OnlyLogo,
+                        gestureOptions =
+                            GestureOptions(
+                                isTiltEnabled = true,
+                                isZoomEnabled = true,
+                                isRotateEnabled = true,
+                                isScrollEnabled = true,
+                            )
+                    ),
+
+
                 )
 
-        }
+            {
+                // Symbol layer
+                val markerSource = rememberGeoJsonSource(
+                    GeoJsonData.JsonString(markerJson)
+                )
+
+                SymbolLayer(
+                    id = "bus-stop",
+                    source = markerSource,
+                    iconImage = image(marker),
+                    visible = true,
+                    iconAllowOverlap = const(true),
+                    iconAnchor = const(SymbolAnchor.Center),
+                    minZoom = 0.0f,
+                    maxZoom = 24.0f,
+                    iconSize = const(3.0f),
+                    onClick = { features ->
+                        features
+                        selectedFeature = features.firstOrNull()
+                        println("Clicked on ${features[0].toJson()}")
+                        println(selectedFeature)
+                        ClickResult.Consume
+                    },
+                )
+
+            }
 
             //  UI Layer
-        if (selectedFeature != null) {
-            selectedFeature?.let { feature ->
+            if (selectedFeature != null) {
+                selectedFeature?.let { feature ->
                     PopupCard(
                         feature = feature,
                         cameraState = camera,
@@ -174,11 +181,11 @@ actual fun MapComponent() {
                         }
                     )
 
+                }
             }
-        }
     }
+ }
 
-}
 
 
 
@@ -190,9 +197,9 @@ fun BoxScope.PopupCard(
     onDismiss: () -> Unit
 ) {
 
-   val pos = (feature.geometry as Point).coordinates
+    val pos = (feature.geometry as Point).coordinates
 
-    val dpTarg = remember(pos, cameraState.position){
+    val dpTarg = remember(pos, cameraState.position) {
         cameraState.projection?.screenLocationFromPosition(pos)
     }
 
@@ -202,7 +209,8 @@ fun BoxScope.PopupCard(
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
-                    x = off?.x?.toInt()?.minus(100) ?: 0, // center horizontally (adjust based on card width)
+                    x = off?.x?.toInt()?.minus(100)
+                        ?: 0, // center horizontally (adjust based on card width)
                     y = off?.y?.toInt()?.minus(190) ?: 0  // position above the marker
                 )
             }
