@@ -3,6 +3,7 @@ package org.example.project
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -27,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
 
+
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
 
 import org.maplibre.compose.expressions.dsl.const
@@ -43,7 +46,7 @@ import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
-//import org.maplibre.geojson.FeatureCollection
+
 import org.maplibre.spatialk.geojson.Position
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
@@ -86,9 +89,7 @@ fun DpOffset.toOffset(): Offset = with(LocalDensity.current) { Offset(x.toPx(), 
 @Composable
 actual fun MapComponent() {
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
-    var popupPosition by remember { mutableStateOf<DpOffset?>(null) }
     val marker = painterResource(R.drawable.bus)
-
 
     val camera =
         rememberCameraState(
@@ -111,14 +112,12 @@ actual fun MapComponent() {
             styleState = styleState,
 
             onMapClick = { point, screenPoint ->
-                    popupPosition = null
                     selectedFeature = null
                     ClickResult.Pass
             },
 
             onMapLongClick = { point, screenPoint ->
                 selectedFeature = null
-                popupPosition = null
                 ClickResult.Pass
             },
             options =
@@ -141,7 +140,6 @@ actual fun MapComponent() {
             val markerSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(markerJson)
             )
-            var target by remember { mutableStateOf<Position?>(null) }
 
             SymbolLayer(
                 id = "bus-stop",
@@ -155,65 +153,57 @@ actual fun MapComponent() {
                 iconSize = const(3.0f),
                 onClick = { features ->
                     features
-                        .firstOrNull()
-                        ?.let {
-                            target = (it.geometry as Point).coordinates
-                        }
-
-                    var point = target?.let { camera.projection?.screenLocationFromPosition(it) }
-                    var cardOff = point?.y?.let { DpOffset(point.x, it) }
-                    popupPosition = cardOff
-
                     selectedFeature = features.firstOrNull()
-
                     println("Clicked on ${features[0].toJson()}")
                     println(selectedFeature)
-                    println(popupPosition)
                     ClickResult.Consume
                 },
                 )
-
 
         }
 
             //  UI Layer
         if (selectedFeature != null) {
             selectedFeature?.let { feature ->
-                popupPosition?.let { position ->
                     PopupCard(
                         feature = feature,
-                        position = position,
+                        cameraState = camera,
                         onDismiss = {
                             selectedFeature = null
-                            popupPosition = null
+
                         }
                     )
 
-                }
             }
         }
-
     }
+
 }
+
 
 
 
 @Composable
 fun BoxScope.PopupCard(
     feature: Feature<Geometry, JsonObject?>,
-    position: DpOffset,
+    cameraState: CameraState,
     onDismiss: () -> Unit
 ) {
-    // Position the card relative to the click point
-    // Adjust offset so popup appears above/beside the marker
-    val off = position.toOffset()
+
+   val pos = (feature.geometry as Point).coordinates
+
+    val dpTarg = remember(pos, cameraState.position){
+        cameraState.projection?.screenLocationFromPosition(pos)
+    }
+
+    val off = dpTarg?.toOffset()
 
     Card(
         modifier = Modifier
-            .offset {
+            .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt() - 100, // center horizontally (adjust based on card width)
-                    y = off.y.toInt() - 190  // position above the marker
+                    x = off?.x?.toInt()?.minus(100) ?: 0, // center horizontally (adjust based on card width)
+                    y = off?.y?.toInt()?.minus(190) ?: 0  // position above the marker
                 )
             }
             .width(200.dp),
