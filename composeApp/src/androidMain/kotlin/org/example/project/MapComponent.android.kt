@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
@@ -176,13 +176,14 @@ actual fun MapComponent() {
                     minZoom = 0.0f,
                     maxZoom = 24.0f,
                     iconSize = const(3.0f),
+
                     onClick = { features ->
-                        features
                         selectedFeature = features.firstOrNull()
-                       // println("Clicked on ${features[0].toJson()}")
-                       // println(selectedFeature)
+                        println("Clicked on ${features[0].toJson()}")
+                        println(selectedFeature)
                         ClickResult.Consume
                     },
+
                     onLongClick = { features ->
                         selectedFeature = null
                         ClickResult.Pass

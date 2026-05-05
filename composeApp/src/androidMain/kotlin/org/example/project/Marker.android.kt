@@ -92,7 +92,16 @@ actual fun Marker(
         minZoom = 0.0f,
         maxZoom = 24.0f,
         iconSize = const(3.0f),
+        textField = const("").cast(),
         onClick = { features ->
+            features
+                .firstOrNull()
+                ?.let {
+                    target = (it.geometry as Point).coordinates
+                    stopName = (it.getStringProperty("stop_name") ?: "")
+                    stopCode = (it.getStringProperty("stop_code") ?: "")
+                }
+
             selectedFeature = features.firstOrNull()
             println("Clicked on ${features[0].toJson()}")
             println(target)
