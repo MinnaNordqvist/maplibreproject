@@ -67,14 +67,13 @@ import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 
 
-private  var data by mutableStateOf(featureCollectionOf().toJson())
+
 
 @Composable
 fun DpOffset.toOffset(): Offset = with(LocalDensity.current) { Offset(x.toPx(), y.toPx()) }
 
 
 private suspend fun getStopsAsGeoJson(): String{
-
     // lähetetään http-get pyyntö GTFS-rajapintaan
     // https://data.foli.fi/gtfs/stops
     val mapping: Map<String, Stop> = getStops()
@@ -99,7 +98,7 @@ private suspend fun getStopsAsGeoJson(): String{
     return FeatureCollection(features).toJson()
 }
 
-
+private  var data by mutableStateOf(featureCollectionOf().toJson())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,10 +179,14 @@ actual fun MapComponent() {
                     onClick = { features ->
                         features
                         selectedFeature = features.firstOrNull()
-                        println("Clicked on ${features[0].toJson()}")
-                        println(selectedFeature)
+                       // println("Clicked on ${features[0].toJson()}")
+                       // println(selectedFeature)
                         ClickResult.Consume
                     },
+                    onLongClick = { features ->
+                        selectedFeature = null
+                        ClickResult.Pass
+                    }
                 )
 
             }
@@ -242,7 +245,7 @@ fun BoxScope.PopupCard(
             )
             Text(
                 text = feature.getStringProperty("stop_code") ?: "",
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
