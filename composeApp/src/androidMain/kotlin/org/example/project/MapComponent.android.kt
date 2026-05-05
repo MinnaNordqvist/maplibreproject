@@ -217,18 +217,20 @@ fun BoxScope.PopupCard(
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
-                    x = off?.x?.toInt()?.minus(100)
-                        ?: 0, // center horizontally (adjust based on card width)
+                    x = off?.x?.toInt()?.minus(100) ?: 0, // center horizontally (adjust based on card width)
                     y = off?.y?.toInt()?.minus(190) ?: 0  // position above the marker
                 )
-            }
-            .width(200.dp),
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = feature.getStringProperty("stop_name") + " " + feature.getStringProperty("stop_code"),
+                text = feature.getStringProperty("stop_name") ?: "",
                 style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = feature.getStringProperty("stop_code") ?: "",
+                style = MaterialTheme.typography.titleSmall
             )
         }
     }
