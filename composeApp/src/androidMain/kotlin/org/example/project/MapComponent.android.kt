@@ -15,18 +15,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
 import org.example.project.data.Stop
@@ -73,7 +77,7 @@ private suspend fun getStopsAsGeoJson(): String{
 
     // lähetetään http-get pyyntö GTFS-rajapintaan
     // https://data.foli.fi/gtfs/stops
-    val mapping: Map<String, Stop>  =  getStops()
+    val mapping: Map<String, Stop> = getStops()
     //println("Pysäkkejä: " + mapping.size)
 
     val features = mapping.values.map{ value ->
@@ -100,8 +104,15 @@ private suspend fun getStopsAsGeoJson(): String{
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun MapComponent() {
-    data = runBlocking { getStopsAsGeoJson() }
-
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.Default) {
+            try {
+                data = getStopsAsGeoJson()
+            } catch(e: Exception){
+                e.printStackTrace()
+            }
+        }
+    }
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     val marker = painterResource(R.drawable.bus)
@@ -221,9 +232,10 @@ fun BoxScope.PopupCard(
                     y = off?.y?.toInt()?.minus(190) ?: 0  // position above the marker
                 )
             },
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = feature.getStringProperty("stop_name") ?: "",
                 style = MaterialTheme.typography.titleMedium
