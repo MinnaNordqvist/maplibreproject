@@ -171,7 +171,6 @@ fun MapComponent(
 
                     selectedFeature?.let { onMarkerClick(it) }
                     println("Clicked on ${features[0].toJson()}")
-                    println(selectedFeature)
                     ClickResult.Consume
                 },
             )

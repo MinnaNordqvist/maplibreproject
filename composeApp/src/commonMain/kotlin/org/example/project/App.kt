@@ -20,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,8 +53,11 @@ fun App() {
         bottomSheetState = sheetState
     )
 
-    val onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit = {
-        println("Marker $it")
+    var selectedMarker  by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+
+    val onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit = { markerdata ->
+        selectedMarker = markerdata
+        println("Marker $selectedMarker")
     }
 
 
