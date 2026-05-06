@@ -14,8 +14,6 @@ import mablibreproject.composeapp.generated.resources.Res
 import mablibreproject.composeapp.generated.resources.bus
 import org.jetbrains.compose.resources.painterResource
 
-import org.jetbrains.compose.resources.decodeToImageBitmap
-import org.jetbrains.compose.resources.imageResource
 
 
 @Composable

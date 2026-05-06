@@ -61,7 +61,7 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 import org.maplibre.spatialk.geojson.toJson
-import androidx.compose.ui.platform.LocalDensity
+
 
 
 private suspend fun getStopsAsGeoJson(): String{
