@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -103,10 +105,13 @@ private  var data by mutableStateOf(featureCollectionOf().toJson())
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun MapComponent() {
+    var isLoading by remember { mutableStateOf(true) }
+
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
             try {
                 data = getStopsAsGeoJson()
+                isLoading = false
             } catch(e: Exception){
                 e.printStackTrace()
             }
@@ -129,7 +134,6 @@ actual fun MapComponent() {
 
 
     Box(modifier = Modifier.fillMaxSize()) {
-
             // Map Layer
             MaplibreMap(
                 baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
@@ -193,6 +197,20 @@ actual fun MapComponent() {
             }
 
             //  UI Layer
+
+            if (isLoading && data.isEmpty()) {
+                Box(Modifier.fillMaxSize(),
+                //contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                    modifier = Modifier.width(64.dp),
+                    color = Color.Red,
+                    trackColor = Color.White,
+                    )
+                    println("buffering")
+                }
+            }
+
             if (selectedFeature != null) {
                 selectedFeature?.let { feature ->
                     PopupCard(
