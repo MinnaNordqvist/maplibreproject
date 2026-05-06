@@ -144,6 +144,7 @@ actual fun MapComponent() {
                 baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
                 cameraState = camera,
                 styleState = styleState,
+                zoomRange = 6.8f..17f,
 
                 onMapClick = { point, screenPoint ->
                     selectedFeature = null
