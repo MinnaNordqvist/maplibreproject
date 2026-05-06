@@ -26,18 +26,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
 import mablibreproject.composeapp.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
-
-
-
-
+import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
+import org.maplibre.spatialk.geojson.Geometry
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetContent(){
+fun BottomSheetContent(
+    feature: Feature<Geometry, JsonObject?>?,
+    onDismiss: () -> Unit
+){
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
@@ -56,8 +59,19 @@ fun BottomSheetContent(){
         item {
             Column(Modifier.padding(bottom = 16.dp)) {
                 Text(text = "Valitse pysäkki", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+
+                feature.let{
+                    Text("Pysäkki: ${it?.getStringProperty("stop_name")} ")
+                    Text("Numero:  ${it?.getStringProperty("stop_code")}  ")
+                }
             }
+
         }
+
+
+
+
+
         item{
 
             Column(

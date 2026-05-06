@@ -74,7 +74,14 @@ fun App() {
 
             sheetContent = {
 
-                BottomSheetContent()
+                BottomSheetContent(
+                    feature = selectedMarker,
+                    onDismiss = {
+                        coroutineScope.launch {
+                        selectedMarker = null
+                    }
+                    }
+                )
 
             },
             topBar = {
