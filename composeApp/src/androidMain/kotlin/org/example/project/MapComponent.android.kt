@@ -30,12 +30,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
 import org.example.project.data.Stop
+import org.example.project.data.getStopStatus
 
 import org.example.project.data.getStops
 
@@ -101,6 +103,7 @@ private suspend fun getStopsAsGeoJson(): String{
 }
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
+private var httpStat by mutableStateOf(0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,8 +113,10 @@ actual fun MapComponent() {
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
             try {
+                httpStat = getStopStatus().value
                 data = getStopsAsGeoJson()
                 isLoading = false
+                println(httpStat)
             } catch(e: Exception){
                 e.printStackTrace()
             }
@@ -198,16 +203,19 @@ actual fun MapComponent() {
 
             //  UI Layer
 
-            if (isLoading && data.isEmpty()) {
-                Box(Modifier.fillMaxSize(),
-                //contentAlignment = Alignment.Center
+            if (isLoading && httpStat == 0) {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                    modifier = Modifier.width(64.dp),
-                    color = Color.Red,
-                    trackColor = Color.White,
-                    )
-                    println("buffering")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally){
+                        CircularProgressIndicator(
+                            modifier = Modifier.width(64.dp),
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    }
+
                 }
             }
 

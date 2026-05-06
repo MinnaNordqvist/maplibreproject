@@ -56,10 +56,7 @@ fun App() {
 
 
             sheetContent = {
-                coroutineScope.launch{
-                    val httpStat = getStopStatus()
-                    println(httpStat)
-                }
+
                 BottomSheetContent()
             },
             topBar = {
