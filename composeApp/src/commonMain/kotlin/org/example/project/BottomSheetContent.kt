@@ -1,15 +1,19 @@
 package org.example.project
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,8 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import mablibreproject.composeapp.generated.resources.Res
@@ -40,7 +47,7 @@ import org.maplibre.spatialk.geojson.Geometry
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
     onDismiss: () -> Unit
-){
+) {
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
@@ -58,21 +65,52 @@ fun BottomSheetContent(
     ) {
         item {
             Column(Modifier.padding(bottom = 16.dp)) {
-                Text(text = "Valitse pysäkki", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-
-                feature.let{
-                    Text("Pysäkki: ${it?.getStringProperty("stop_name")} ")
-                    Text("Numero:  ${it?.getStringProperty("stop_code")}  ")
-                }
+                Text(
+                    text = "Valitse pysäkki",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
         }
+        stickyHeader {
+            feature.let {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    border = BorderStroke(2.dp, Color.Black),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = " ${it?.getStringProperty("stop_name")}  ${
+                                    it?.getStringProperty(
+                                        "stop_code"
+                                    )
+                                } ",
+                                fontWeight = FontWeight.Bold, fontSize = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp)
+                                    .weight(3.0f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
-
-
-
-
-        item{
+        item {
 
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -109,5 +147,6 @@ fun BottomSheetContent(
             }
         }
     }
+
 }
 
