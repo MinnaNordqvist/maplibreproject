@@ -58,6 +58,7 @@ fun App() {
             sheetContent = {
 
                 BottomSheetContent()
+
             },
             topBar = {
                 TopAppBar(
@@ -82,7 +83,8 @@ fun App() {
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    MapComponent()
+                    //MapComponent()
+                    MapLibreComponent()
                 }
 
             },
