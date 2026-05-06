@@ -46,7 +46,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.runBlocking
 import mablibreproject.composeapp.generated.resources.refresh
+import org.example.project.data.Routes
+import org.example.project.data.Trips
+import org.example.project.data.getRoutes
+import org.example.project.data.getTrips
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +64,35 @@ fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
     onDismiss: () -> Unit
 ) {
+
+    // Kun ohjelma käynnistyy, 2 lähetetään http-get pyyntöä GTFS rajapintaan
+    // https://data.foli.fi/gtfs/routes
+    val routes: List<Routes> = remember { runBlocking { getRoutes() } }
+    // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä
+    val trips: List<Trips> = remember {runBlocking { getTrips() }}
+
+
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
     val tooltipState = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
+
+    var httpStatus by remember {mutableStateOf(0)}
+    var stopSearch by remember { mutableStateOf(feature?.getStringProperty("stop_code") ?: "" )}
+    val stopTimes = remember {mutableMapOf<String, Set<String>> ()}
+
+    // Route
+    val routeDetails = remember {mutableMapOf<String, String>()}
+    val routesAndIds = remember {mutableMapOf<String, String>()}
+    for (value in routes){
+        routeDetails.put(value.route_short_name, value.route_color)
+        routesAndIds.put(value.route_id, value.route_short_name)
+    }
+
+    // Linjojen värit
+    fun Color.Companion.fromHex(colorString: String?) = Color(("#$colorString").hashCode())
+
 
     LazyColumn(
         modifier = Modifier.padding(bottom = 20.dp),
@@ -69,16 +103,19 @@ fun BottomSheetContent(
         reverseLayout = false,
         overscrollEffect = overScrollEffect,
     ) {
-        item {
-            Column(Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    text = "Valitse pysäkki",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
 
+        if (httpStatus != 200) {
+            item {
+                Column(Modifier.padding(bottom = 16.dp)) {
+                    Text(
+                        text = "Valitse pysäkki",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+            }
         }
         stickyHeader {
             feature.let {

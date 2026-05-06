@@ -106,7 +106,7 @@ fun MapComponent(
                 httpStat = getStopStatus().value
                 data = getStopsAsGeoJson()
                 isLoading = false
-                println(httpStat)
+                //println(httpStat)
             } catch(e: Exception){
                 e.printStackTrace()
             }
