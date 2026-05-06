@@ -63,11 +63,6 @@ import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 import org.maplibre.spatialk.geojson.toJson
 import androidx.compose.ui.platform.LocalDensity
 
-@Composable
-expect fun MapComponent()
-
-
-
 
 private suspend fun getStopsAsGeoJson(): String{
     // lähetetään http-get pyyntö GTFS-rajapintaan
@@ -99,7 +94,7 @@ private var httpStat by mutableStateOf(0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapLibreComponent(){
+fun MapComponent(){
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
