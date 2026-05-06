@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -40,7 +41,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
-
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import mablibreproject.composeapp.generated.resources.refresh
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +110,27 @@ fun BottomSheetContent(
                                     .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp)
                                     .weight(3.0f)
                             )
+                            OutlinedIconButton(
+                                onClick = {
+                                    println("Refreshing")
+                                },
+                                modifier = Modifier
+                                    .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 6.dp)
+                                    .height(30.dp)
+                                    .width(30.dp),
+                                enabled = true,
+                                shape = RoundedCornerShape(1.dp),
+                                border = BorderStroke(1.dp, Color.Black),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = Color.White
+                                )
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.refresh),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
                         }
                     }
                 }
