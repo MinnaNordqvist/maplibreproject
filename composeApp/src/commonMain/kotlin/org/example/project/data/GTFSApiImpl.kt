@@ -17,3 +17,23 @@ suspend fun getStopStatus(): HttpStatusCode {
         method = HttpMethod.Get
     }.status
 }
+
+
+suspend fun getRoutes(): List<Routes> {
+    return org.example.project.client.get("/gtfs/routes"){
+        method = HttpMethod.Get
+    }.body()
+
+}
+
+suspend fun getTrips(): List<Trips> {
+    return org.example.project.client.get("/gtfs/trips/all"){
+        method = HttpMethod.Get
+    }.body()
+}
+
+suspend fun getStopTimes(stop_id: String?) : List<StopTimes> {
+    return org.example.project.client.get("/gtfs/stop_times/stop/$stop_id"){
+        method = HttpMethod.Get
+    }.body()
+}
