@@ -28,12 +28,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
 
 import mablibreproject.composeapp.generated.resources.Res
 import mablibreproject.composeapp.generated.resources.compose_multiplatform
 import org.example.project.data.getStopStatus
+import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.Geometry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +51,15 @@ fun App() {
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = sheetState
     )
+
+    val onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit = {
+        println("Marker $it")
+    }
+
+
+
+
+
     MaterialTheme {
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
@@ -83,7 +96,7 @@ fun App() {
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    MapComponent()
+                    MapComponent(onMarkerClick = onMarkerClick)
                 }
 
             },

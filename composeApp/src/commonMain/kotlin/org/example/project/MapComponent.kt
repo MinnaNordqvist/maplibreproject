@@ -54,6 +54,7 @@ import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Position
 import org.maplibre.compose.style.StyleState
+import org.maplibre.compose.util.FeaturesClickHandler
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.FeatureCollection
@@ -94,7 +95,9 @@ private var httpStat by mutableStateOf(0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapComponent(){
+fun MapComponent(
+    onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit
+){
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
@@ -165,6 +168,8 @@ fun MapComponent(){
                 iconSize = const(3.0f),
                 onClick = { features ->
                     selectedFeature = features.firstOrNull()
+
+                    selectedFeature?.let { onMarkerClick(it) }
                     println("Clicked on ${features[0].toJson()}")
                     println(selectedFeature)
                     ClickResult.Consume
