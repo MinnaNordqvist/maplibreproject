@@ -32,13 +32,12 @@ import org.jetbrains.compose.resources.painterResource
 
 
 
-@Composable
-expect fun BottomSheetContent()
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomS(){
+fun BottomSheetContent(){
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
