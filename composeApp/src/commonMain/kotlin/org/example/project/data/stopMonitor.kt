@@ -110,10 +110,9 @@ data class Response(
 
 }
 
-/*
+
 interface SiriApi {
     suspend fun getBusList(stop_code: String?): List<Response.Bus>?
     suspend fun getResponseStatus(stop_code: String?): HttpStatusCode
 }
 
- */

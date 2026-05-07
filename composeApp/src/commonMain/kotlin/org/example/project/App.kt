@@ -30,89 +30,97 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
-import org.jetbrains.compose.resources.painterResource
-import org.example.project.data.getStopStatus
-import org.maplibre.compose.expressions.dsl.feature
-import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Geometry
+import org.example.project.di.koinConfig
 
-@OptIn(ExperimentalMaterial3Api::class)
+import org.koin.compose.KoinApplication
+
+import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.dsl.koinConfiguration
+
+
+@OptIn(ExperimentalMaterial3Api::class, KoinExperimentalAPI::class)
 @Composable
 @Preview
 fun App() {
-    val coroutineScope = rememberCoroutineScope()
-    val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded
-    )
-
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = sheetState
-    )
-
-    var selectedMarker  by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
-
-    val onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit = { markerdata ->
-        selectedMarker = markerdata
-        println("Marker $selectedMarker")
-    }
+    KoinApplication(configuration = koinConfiguration(koinConfig), content = {
 
 
-
-
-
-    MaterialTheme {
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
-            sheetSwipeEnabled = true,
-            sheetPeekHeight = 260.dp,
-            sheetMaxWidth = Dp.Unspecified,
-
-
-            sheetContent = {
-
-                BottomSheetContent(
-                    feature = selectedMarker,
-                    onDismiss = {
-                        coroutineScope.launch {
-                        selectedMarker = null
-                    }
-                    }
-                )
-
-            },
-            topBar = {
-                TopAppBar(
-                    colors = topAppBarColors(
-
-                        titleContentColor = Color.Black,
-                    ),
-                    title = {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text = "Föli Zone"
-                        )
-                    }
-                )
-            },  // Main content
-            content = { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    MapComponent(onMarkerClick = onMarkerClick)
-                }
-
-            },
-
-            modifier = Modifier.fillMaxWidth()
-
+        val coroutineScope = rememberCoroutineScope()
+        val sheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.PartiallyExpanded
         )
 
-    }
+        val scaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = sheetState
+        )
+
+        var selectedMarker by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+
+        val onMarkerClick: (feature: Feature<Geometry, JsonObject?>) -> Unit = { markerdata ->
+            selectedMarker = markerdata
+            println("Marker $selectedMarker")
+        }
+
+
+
+
+
+        MaterialTheme {
+            BottomSheetScaffold(
+                scaffoldState = scaffoldState,
+                sheetSwipeEnabled = true,
+                sheetPeekHeight = 260.dp,
+                sheetMaxWidth = Dp.Unspecified,
+
+
+                sheetContent = {
+
+                    BottomSheetContent(
+                        feature = selectedMarker,
+                        onDismiss = {
+                            coroutineScope.launch {
+                                selectedMarker = null
+                                scaffoldState.bottomSheetState.hide()
+                            }
+                        }
+                    )
+
+                },
+                topBar = {
+                    TopAppBar(
+                        colors = topAppBarColors(
+
+                            titleContentColor = Color.Black,
+                        ),
+                        title = {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                text = "Föli Zone"
+                            )
+                        }
+                    )
+                },  // Main content
+                content = { paddingValues ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        MapComponent(onMarkerClick = onMarkerClick)
+                    }
+
+                },
+
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+        }
+    })
 }
 

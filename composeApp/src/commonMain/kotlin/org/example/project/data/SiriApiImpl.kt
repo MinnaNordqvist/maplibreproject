@@ -5,7 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 
-/*
+
 class SiriApiImpl (
 
 ) : SiriApi {
@@ -22,9 +22,9 @@ class SiriApiImpl (
     }
 }
 
- */
 
 
+/*
 suspend fun getBusList(stop_code: String?): List<Response.Bus>? {
     return  org.example.project.client.get("/siri/sm/$stop_code") {
         method = HttpMethod.Get
@@ -37,4 +37,4 @@ suspend fun getResponseStatus(stop_code: String?): HttpStatusCode {
         method = HttpMethod.Get
     }.status
 }
-
+*/

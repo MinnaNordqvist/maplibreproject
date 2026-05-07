@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -56,17 +57,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import kotlinx.coroutines.runBlocking
 import maplibreproject.composeapp.generated.resources.refresh
 import org.example.project.data.Response
 import org.example.project.data.Routes
 import org.example.project.data.Trips
-import org.example.project.data.getBusList
-import org.example.project.data.getResponseStatus
+
 import org.example.project.data.getRoutes
 import org.example.project.data.getTrips
-
+import org.koin.compose.viewmodel.koinViewModel
 
 
 fun String.toColor(): Color {
@@ -100,6 +101,12 @@ fun BottomSheetContent(
     val tooltipState = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
 
+
+    val busViewModel: BusViewModel = koinViewModel()
+    val uiState by busViewModel.uiState.collectAsStateWithLifecycle()
+    val lines by busViewModel.linesList.collectAsStateWithLifecycle()
+
+
     var httpStatus by remember {mutableStateOf(0)}
     var stopSearch: String? by remember { mutableStateOf(feature?.getStringProperty("stop_code") ?: "" )}
     val stopTimes = remember {mutableMapOf<String, Set<String>> ()}
@@ -117,22 +124,15 @@ fun BottomSheetContent(
 
     LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
         stopSearch = feature?.getStringProperty("stop_code")
-        httpStatus = getResponseStatus(stopSearch).value
-
 
         if (stopSearch != null) {
-            getBusList(stopSearch)?.forEach { bus ->
-                val line = Response.Bus(
-                    bus.lineref,
-                    bus.monitored,
-                    bus.destinationdisplay,
-                    bus.aimeddeparturetime,
-                    bus.expecteddeparturetime,
-                )
-                busList.add(line)
-            }
+            busViewModel.getBusList(stopSearch)
+
+            httpStatus = busViewModel.getResponseStatus(stopSearch).value
+
+
         }
-        println("busList size: " + busList.size)
+
 
     }
 
@@ -220,7 +220,7 @@ fun BottomSheetContent(
                 }
             }
         }
-        items(busList) { bus ->
+        itemsIndexed(uiState.busList) { index, bus ->
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = Color(0XFFf3f6f4)
@@ -262,7 +262,7 @@ fun BottomSheetContent(
                 }
             }
         }
-        if (httpStatus == 200 && busList.isEmpty()) {
+        if (httpStatus == 200 &&  uiState.busList.isEmpty()) {
             item {
                 Card(
                     colors = CardDefaults.cardColors(
