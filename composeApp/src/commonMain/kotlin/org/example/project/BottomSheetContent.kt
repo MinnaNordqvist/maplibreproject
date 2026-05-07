@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.LaunchedEffect
@@ -81,7 +82,7 @@ fun String.toColor(): Color {
 }
 
 val busList = arrayListOf<Response.Bus>()
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
@@ -260,6 +261,11 @@ fun BottomSheetContent(
                         }
 
                         Text(text = bus.destinationdisplay, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, modifier = Modifier.weight(3.1f), style = MaterialTheme.typography.titleLarge)
+                        if(bus.aikaero() >= 60){Text(text = "! ", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 25.sp)}
+                        if(bus.aikaero() <= -60){
+                            Text(text = "? ", color = Color.Blue, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+                            println(bus.aikaero())
+                        }
                         Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f),  style = MaterialTheme.typography.titleLarge)
                     }
                 }
