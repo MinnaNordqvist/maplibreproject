@@ -43,6 +43,7 @@ import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -54,8 +55,10 @@ import androidx.compose.runtime.setValue
 
 import kotlinx.coroutines.runBlocking
 import maplibreproject.composeapp.generated.resources.refresh
+import org.example.project.data.Response
 import org.example.project.data.Routes
 import org.example.project.data.Trips
+import org.example.project.data.getBusList
 import org.example.project.data.getResponseStatus
 import org.example.project.data.getRoutes
 import org.example.project.data.getTrips
@@ -72,6 +75,7 @@ fun String.toColor(): Color {
     return Color(colorLong)
 }
 
+val busList = arrayListOf<Response.Bus>()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetContent(
@@ -82,7 +86,7 @@ fun BottomSheetContent(
     // Kun ohjelma käynnistyy, 2 lähetetään http-get pyyntöä GTFS rajapintaan
     // https://data.foli.fi/gtfs/routes
     val routes: List<Routes> = remember { runBlocking { getRoutes() } }
-    // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä
+    // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
     val trips: List<Trips> = remember {runBlocking { getTrips() }}
 
 
@@ -104,13 +108,27 @@ fun BottomSheetContent(
         routesAndIds.put(value.route_id, value.route_short_name)
     }
 
-    // Linjojen värit
+
 
 
     LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
         stopSearch = feature?.getStringProperty("stop_code")
         httpStatus = getResponseStatus(stopSearch).value
         println("Status " + httpStatus)
+
+        if (stopSearch != null) {
+            getBusList(stopSearch)?.forEach { bus ->
+                var line = Response.Bus(
+                    bus.lineref,
+                    bus.monitored,
+                    bus.destinationdisplay,
+                    bus.aimeddeparturetime,
+                    bus.expecteddeparturetime,
+                )
+                busList.add(line)
+            }
+        }
+        println("busList size: " + busList.size)
 
     }
 
@@ -143,7 +161,7 @@ fun BottomSheetContent(
 
         }
         stickyHeader {
-            feature.let {
+            feature?.let {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -161,8 +179,8 @@ fun BottomSheetContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = " ${it?.getStringProperty("stop_name")}  ${
-                                    it?.getStringProperty(
+                                text = " ${it.getStringProperty("stop_name")}  ${
+                                    it.getStringProperty(
                                         "stop_code"
                                     )
                                 } ",
@@ -195,6 +213,19 @@ fun BottomSheetContent(
                             }
                         }
                     }
+                }
+            }
+        }
+        items(busList) { bus ->
+            Card(
+                border = BorderStroke(1.dp, Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("${bus.lineref} ${bus.destinationdisplay} ${bus.getDeparture()}")
                 }
             }
         }
