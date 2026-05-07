@@ -3,6 +3,7 @@ package org.example.project
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,16 +59,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import kotlinx.coroutines.runBlocking
 import maplibreproject.composeapp.generated.resources.refresh
+import maplibreproject.composeapp.generated.resources.bolt
+import maplibreproject.composeapp.generated.resources.hourglass
 import org.example.project.data.Response
 import org.example.project.data.Routes
 import org.example.project.data.Trips
 
 import org.example.project.data.getRoutes
 import org.example.project.data.getTrips
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -80,6 +86,8 @@ fun String.toColor(): Color {
     }
     return Color(colorLong)
 }
+
+
 
 val busList = arrayListOf<Response.Bus>()
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -245,9 +253,9 @@ fun BottomSheetContent(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
-                                .size(60.dp, 30.dp)
+                                .size(60.dp, 40.dp)
                                 .background(routeDetails[bus.lineref]!!.toColor())
-                                .weight(0.7f),
+                                .weight(0.8f),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
@@ -255,23 +263,50 @@ fun BottomSheetContent(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         }
 
-                        Text(text = bus.destinationdisplay, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, modifier = Modifier.weight(3.1f), style = MaterialTheme.typography.titleLarge)
-                        if(bus.aikaero() >= 60){Text(text = "! ", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 25.sp)}
-                        if(bus.aikaero() <= -60){
-                            Text(text = "? ", color = Color.Blue, fontWeight = FontWeight.Bold, fontSize = 25.sp)
-                            println(bus.aikaero())
+                        Text(
+                            text = bus.destinationdisplay,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(3.1f),
+                            style = MaterialTheme.typography.titleLarge,
+                            softWrap = true
+                        )
+                        if (bus.aikaero() >= 60) {
+                            Image(
+                                painter = painterResource(Res.drawable.hourglass),
+                                contentDescription = null,
+                                modifier = Modifier.size(25.dp, 25.dp),
+                            )
                         }
-                        Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f),  style = MaterialTheme.typography.titleLarge)
-                        println(bus.destinationdisplay + " aimed " + bus.getAimedDeparture() + " expected " + bus.getDeparture())
+                        if (bus.aikaero() <= -60) {
+                                Image(
+                                    painter = painterResource(Res.drawable.bolt),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp, 35.dp),
+                                    alignment = Alignment.TopCenter
+                                )
+                                println(bus.aikaero())
+                        }
+                            Text(
+                                text = bus.getDeparture(),
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.weight(0.8f),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
+                        }
                     }
                 }
             }
-        }
+
         if (httpStatus == 200 &&  uiState.busList.isEmpty()) {
             item {
                 Card(
