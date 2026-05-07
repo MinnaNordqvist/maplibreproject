@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
-import mablibreproject.composeapp.generated.resources.Res
-import mablibreproject.composeapp.generated.resources.info
+import maplibreproject.composeapp.generated.resources.Res
+import maplibreproject.composeapp.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
@@ -46,13 +46,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 import kotlinx.coroutines.runBlocking
-import mablibreproject.composeapp.generated.resources.refresh
+import maplibreproject.composeapp.generated.resources.refresh
 import org.example.project.data.Routes
 import org.example.project.data.Trips
 import org.example.project.data.getRoutes
@@ -91,7 +92,7 @@ fun BottomSheetContent(
     val scope = rememberCoroutineScope()
 
     var httpStatus by remember {mutableStateOf(0)}
-    var stopSearch by remember { mutableStateOf(feature?.getStringProperty("stop_code") ?: "" )}
+    var stopSearch: String? by remember { mutableStateOf(feature?.getStringProperty("stop_code") ?: "" )}
     val stopTimes = remember {mutableMapOf<String, Set<String>> ()}
 
     // Route
@@ -103,7 +104,14 @@ fun BottomSheetContent(
     }
 
     // Linjojen värit
-    val lineColor = "0bbbef".toColor()
+
+
+    LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
+        stopSearch = feature?.getStringProperty("stop_code")
+        println("Etsitään " + stopSearch)
+
+    }
+
 
 
     LazyColumn(
@@ -123,7 +131,7 @@ fun BottomSheetContent(
                         text = "Valitse pysäkki",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
 
                     )
                 }

@@ -5,7 +5,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 
 /*
  Linja-autokohtainen vastaus osoitteesta https://data.foli.fi/siri/sm/stop_code
@@ -76,8 +80,36 @@ data class Response(
         val direction_id: String? = null,
     ) {
 
+        fun getDeparture(): String {
+            val instant1 = Instant.fromEpochSeconds(expecteddeparturetime)
+            val departure = instant1.toLocalDateTime(TimeZone.currentSystemDefault()).format(
+                LocalDateTime.Format {
+                    hour()
+                    char(':')
+                    minute()
+                })
+            return departure
+        }
+
+        fun getAimedDeparture(): String {
+            val instant1 = Instant.fromEpochSeconds(aimeddeparturetime)
+            val departure = instant1.toLocalDateTime(TimeZone.currentSystemDefault()).format(
+                LocalDateTime.Format {
+                    hour()
+                    char(':')
+                    minute()
+                })
+            return departure
+        }
+
+        fun aikaero() : Long {
+            val erotus = expecteddeparturetime - aimeddeparturetime
+            return erotus
+        }
     }
+
 }
+
 
 interface SiriApi {
     suspend fun getBusList(stop_code: String?): List<Response.Bus>?

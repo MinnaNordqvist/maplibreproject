@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import mablibreproject.composeapp.generated.resources.Res
-import mablibreproject.composeapp.generated.resources.bus
+import maplibreproject.composeapp.generated.resources.Res
+import maplibreproject.composeapp.generated.resources.bus
 import org.jetbrains.compose.resources.painterResource
 
 

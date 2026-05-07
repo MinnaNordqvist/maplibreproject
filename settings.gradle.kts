@@ -1,4 +1,4 @@
-rootProject.name = "MabLibreProject"
+rootProject.name = "MapLibreProject"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

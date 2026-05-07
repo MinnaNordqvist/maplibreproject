@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
-import mablibreproject.composeapp.generated.resources.Res
-import mablibreproject.composeapp.generated.resources.bus
+import maplibreproject.composeapp.generated.resources.Res
+import maplibreproject.composeapp.generated.resources.bus
 import org.example.project.data.Stop
 import org.example.project.data.getStopStatus
 import org.example.project.data.getStops

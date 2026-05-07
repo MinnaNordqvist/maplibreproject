@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
-
-import mablibreproject.composeapp.generated.resources.Res
-import mablibreproject.composeapp.generated.resources.compose_multiplatform
 import org.example.project.data.getStopStatus
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.map.MaplibreMap
