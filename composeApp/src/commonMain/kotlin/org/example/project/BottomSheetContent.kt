@@ -56,6 +56,7 @@ import kotlinx.coroutines.runBlocking
 import maplibreproject.composeapp.generated.resources.refresh
 import org.example.project.data.Routes
 import org.example.project.data.Trips
+import org.example.project.data.getResponseStatus
 import org.example.project.data.getRoutes
 import org.example.project.data.getTrips
 
@@ -108,7 +109,8 @@ fun BottomSheetContent(
 
     LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
         stopSearch = feature?.getStringProperty("stop_code")
-        println("Etsitään " + stopSearch)
+        httpStatus = getResponseStatus(stopSearch).value
+        println("Status " + httpStatus)
 
     }
 
