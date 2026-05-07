@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+
 import kotlinx.coroutines.runBlocking
 import mablibreproject.composeapp.generated.resources.refresh
 import org.example.project.data.Routes
@@ -57,6 +58,17 @@ import org.example.project.data.Trips
 import org.example.project.data.getRoutes
 import org.example.project.data.getTrips
 
+
+
+fun String.toColor(): Color {
+    val hex = this
+    val colorLong = when (hex.length) {
+        6 -> ("FF$hex").toLong(16) // Add full opacity if missing
+        8 -> hex.toLong(16)        // Use provided alpha
+        else -> throw IllegalArgumentException("Invalid hex color format")
+    }
+    return Color(colorLong)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +103,7 @@ fun BottomSheetContent(
     }
 
     // Linjojen värit
-    fun Color.Companion.fromHex(colorString: String?) = Color(("#$colorString").hashCode())
+    val lineColor = "0bbbef".toColor()
 
 
     LazyColumn(
@@ -111,11 +123,14 @@ fun BottomSheetContent(
                         text = "Valitse pysäkki",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+
                     )
                 }
 
             }
+
+
         }
         stickyHeader {
             feature.let {
