@@ -2,10 +2,13 @@ package org.example.project
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +45,7 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -114,11 +118,11 @@ fun BottomSheetContent(
     LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
         stopSearch = feature?.getStringProperty("stop_code")
         httpStatus = getResponseStatus(stopSearch).value
-        println("Status " + httpStatus)
+
 
         if (stopSearch != null) {
             getBusList(stopSearch)?.forEach { bus ->
-                var line = Response.Bus(
+                val line = Response.Bus(
                     bus.lineref,
                     bus.monitored,
                     bus.destinationdisplay,
@@ -218,55 +222,85 @@ fun BottomSheetContent(
         }
         items(busList) { bus ->
             Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0XFFf3f6f4)
+                ),
                 border = BorderStroke(1.dp, Color.Black),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(2.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("${bus.lineref} ${bus.destinationdisplay} ${bus.getDeparture()}")
-                }
-            }
-        }
-
-        // Infobutton. Näytetään lähde ja selitykset symboleille.
-        item {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                // Tooltip implementation
-                TooltipBox(
-                    positionProvider =
-                        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = {
-                        RichTooltip(
-                            title = { Text("Lähde") },
-                            caretShape = null,
-                        ) {
-                            Text("Turun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
-                        }
-                    },
-                    state = tooltipState
-                ) {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                tooltipState.show()
-                            }
-                        }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Image(
-                            painter = painterResource(Res.drawable.info),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
+                                .size(60.dp, 30.dp)
+                                .background(routeDetails[bus.lineref]!!.toColor())
+                                .weight(0.7f),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = bus.lineref,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        Text(text = bus.destinationdisplay, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, modifier = Modifier.weight(3.1f))
+                        Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f))
                     }
                 }
             }
         }
-    }
+                // Infobutton. Näytetään lähde ja selitykset symboleille.
+                item {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        // Tooltip implementation
+                        TooltipBox(
+                            positionProvider =
+                                TooltipDefaults.rememberTooltipPositionProvider(
+                                    TooltipAnchorPosition.Above
+                                ),
+                            tooltip = {
+                                RichTooltip(
+                                    title = { Text("Lähde") },
+                                    caretShape = null,
+                                ) {
+                                    Text("Turun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
+                                }
+                            },
+                            state = tooltipState
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        tooltipState.show()
+                                    }
+                                }
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.info),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
-}
+        }
 
