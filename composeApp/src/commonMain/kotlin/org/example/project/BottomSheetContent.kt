@@ -196,7 +196,9 @@ fun BottomSheetContent(
                             )
                             OutlinedIconButton(
                                 onClick = {
-                                    println("Refreshing")
+                                    scope.launch {
+                                        busViewModel.getBusList(it.getStringProperty("stop_code"))
+                                    }
                                 },
                                 modifier = Modifier
                                     .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 6.dp)
@@ -252,12 +254,13 @@ fun BottomSheetContent(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
 
-                        Text(text = bus.destinationdisplay, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, modifier = Modifier.weight(3.1f))
-                        Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f))
+                        Text(text = bus.destinationdisplay, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, modifier = Modifier.weight(3.1f), style = MaterialTheme.typography.titleLarge)
+                        Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f),  style = MaterialTheme.typography.titleLarge)
                     }
                 }
             }
@@ -275,7 +278,7 @@ fun BottomSheetContent(
                         modifier = Modifier.padding(8.dp),
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text("Ei linjoja seuraavan tunnin aikana")
+                        Text(text = "Ei linjoja seuraavan tunnin aikana", style = MaterialTheme.typography.titleLarge)
                     }
                 }
             }
