@@ -91,7 +91,7 @@ fun BottomSheetContent(
     // https://data.foli.fi/gtfs/routes
     val routes: List<Routes> = remember { runBlocking { getRoutes() } }
     // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
-    val trips: List<Trips> = remember {runBlocking { getTrips() }}
+   // val trips: List<Trips> = remember {runBlocking { getTrips() }}
 
 
     val lazyListState = rememberLazyListState()
@@ -262,8 +262,27 @@ fun BottomSheetContent(
                 }
             }
         }
-                // Infobutton. Näytetään lähde ja selitykset symboleille.
-                item {
+        if (httpStatus == 200 && busList.isEmpty()) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0XFFf3f6f4)
+                    ),
+                    border = BorderStroke(1.dp, Color.Black),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("Ei linjoja seuraavan tunnin aikana")
+                    }
+                }
+            }
+        }
+
+        // Infobutton. Näytetään lähde ja selitykset symboleille.
+            item {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.Bottom
