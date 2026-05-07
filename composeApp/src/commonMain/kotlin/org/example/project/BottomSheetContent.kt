@@ -267,6 +267,7 @@ fun BottomSheetContent(
                             println(bus.aikaero())
                         }
                         Text(text = bus.getDeparture(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(0.7f),  style = MaterialTheme.typography.titleLarge)
+                        println(bus.destinationdisplay + " aimed " + bus.getAimedDeparture() + " expected " + bus.getDeparture())
                     }
                 }
             }
