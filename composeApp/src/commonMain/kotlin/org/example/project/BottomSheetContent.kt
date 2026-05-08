@@ -160,8 +160,8 @@ fun BottomSheetContent(
 
     }
 
-    fun getDisplayNames(): List<String>? {
-        return displayNames[stopSearch]?.toList()?.distinct()
+    fun getDisplayNames(): String? {
+        return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
     }
 
 
@@ -246,7 +246,7 @@ fun BottomSheetContent(
                                 )
                             }
                         }
-                        Text(text = "Linjat: " + getDisplayNames()?.joinToString { it }, fontWeight = FontWeight.Light)
+                        Text(text = ("Linjat: " + getDisplayNames() ), fontWeight = FontWeight.Light)
                     }
                 }
             }
