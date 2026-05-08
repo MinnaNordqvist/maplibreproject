@@ -130,24 +130,38 @@ fun App() {
                                     ) {
 
                                         Column(
-                                            verticalArrangement = Arrangement.Bottom
+                                            verticalArrangement = Arrangement.Center
                                         ) {
-                                            Image(
-                                                painter = painterResource(Res.drawable.bolt),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(25.dp, 30.dp)
-                                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
-                                                //alignment = Alignment.TopEnd
-                                            )
-                                            Text("\n")
-                                            Image(
-                                                painter = painterResource(Res.drawable.hourglass),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(25.dp, 30.dp)
-                                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
-                                               // alignment = Alignment.TopEnd
-                                            )
-                                            Text("\n")
+                                            Row() {
+                                                Image(
+                                                    painter = painterResource(Res.drawable.bolt),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(25.dp, 25.dp)
+                                                        .padding(
+                                                            start = 0.dp,
+                                                            top = 0.dp,
+                                                            end = 0.dp,
+                                                            bottom = 0.dp
+                                                        ),
+
+                                                    )
+                                                Text("Bussi on ainakin minuutin etuajassa aikataulusta \n")
+                                            }
+                                            Row() {
+                                                Image(
+                                                    painter = painterResource(Res.drawable.hourglass),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(25.dp, 25.dp)
+                                                        .padding(
+                                                            start = 0.dp,
+                                                            top = 0.dp,
+                                                            end = 0.dp,
+                                                            bottom = 0.dp
+                                                        ),
+
+                                                    )
+                                                Text("Bussi on ainakin minuutin myöhässä aikataulusta \n")
+                                            }
                                             Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
                                         }
                                     }
