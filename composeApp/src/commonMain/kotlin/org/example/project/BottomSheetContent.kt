@@ -254,8 +254,9 @@ fun BottomSheetContent(
                                 .fillMaxHeight()
                                 .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
                                 .size(60.dp, 40.dp)
-                                .background(routeDetails[bus.lineref]!!.toColor())
-                                .weight(0.8f),
+                                //.weight(0.8f)
+                                .background(routeDetails[bus.lineref]!!.toColor()),
+
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
@@ -272,25 +273,29 @@ fun BottomSheetContent(
 
                         Text(
                             text = bus.destinationdisplay,
-                            fontWeight = FontWeight.Medium,
+                            //fontWeight = FontWeight.Medium,
                             textAlign = TextAlign.Start,
-                            modifier = Modifier.weight(3.1f),
-                            style = MaterialTheme.typography.titleLarge,
-                            softWrap = true
+                            modifier = Modifier
+                                .weight(3.0f)
+                                .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            softWrap = true,
+
                         )
                         if (bus.aikaero() >= 60) {
                             Image(
                                 painter = painterResource(Res.drawable.hourglass),
                                 contentDescription = null,
-                                modifier = Modifier.size(25.dp, 25.dp),
+                                modifier = Modifier.size(25.dp, 30.dp).padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                alignment = Alignment.TopEnd
                             )
                         }
                         if (bus.aikaero() <= -60) {
                                 Image(
                                     painter = painterResource(Res.drawable.bolt),
                                     contentDescription = null,
-                                    modifier = Modifier.size(25.dp, 35.dp),
-                                    alignment = Alignment.TopCenter
+                                    modifier = Modifier.size(25.dp, 30.dp).padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                    alignment = Alignment.TopEnd
                                 )
                                 println(bus.aikaero())
                         }
@@ -298,8 +303,10 @@ fun BottomSheetContent(
                                 text = bus.getDeparture(),
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.End,
-                                modifier = Modifier.weight(0.8f),
-                                style = MaterialTheme.typography.titleLarge
+                                modifier = Modifier
+                                    //.weight(0.8f)
+                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                                style = MaterialTheme.typography.titleMedium
                             )
                             println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
                         }

@@ -121,10 +121,11 @@ fun MapComponent(
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = Position(latitude = 60.448985, longitude = 22.292180),
+                    target = Position(latitude =  60.45195547084046, longitude = 22.267010954960753),
                     zoom = 15.0
                 )
         )
+
 
     val styleState = rememberStyleState()
 
