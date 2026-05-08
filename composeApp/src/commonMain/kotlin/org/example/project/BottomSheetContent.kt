@@ -173,8 +173,8 @@ fun BottomSheetContent(
 
 
     LazyColumn(
-        modifier = Modifier.padding(bottom = 20.dp),
-        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 30.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 1.dp, top = 6.dp, end = 1.dp, bottom = 60.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
         userScrollEnabled = true,
@@ -184,7 +184,7 @@ fun BottomSheetContent(
 
         if (feature?.getStringProperty("stop_code").isNullOrEmpty()) {
             item {
-                Column(Modifier.padding(bottom = 16.dp)) {
+                Column(Modifier.padding(top = 5.dp)) {
                     Text(
                         text = "Valitse pysäkki",
                         style = MaterialTheme.typography.headlineSmall,
