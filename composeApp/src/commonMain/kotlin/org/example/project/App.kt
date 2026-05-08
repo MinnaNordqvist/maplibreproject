@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
+import maplibreproject.composeapp.generated.resources.bolt
+import maplibreproject.composeapp.generated.resources.hourglass
 import maplibreproject.composeapp.generated.resources.info
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Geometry
@@ -122,13 +125,36 @@ fun App() {
                                     ),
                                 tooltip = {
                                     RichTooltip(
-                                        title = { Text("Lähde") },
+                                        title = { Text("Info") },
                                         caretShape = null,
                                     ) {
-                                        Text("Turun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
+
+                                        Column(
+                                            verticalArrangement = Arrangement.Bottom
+                                        ) {
+                                            Image(
+                                                painter = painterResource(Res.drawable.bolt),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(25.dp, 30.dp)
+                                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                                //alignment = Alignment.TopEnd
+                                            )
+                                            Text("\n")
+                                            Image(
+                                                painter = painterResource(Res.drawable.hourglass),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(25.dp, 30.dp)
+                                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                               // alignment = Alignment.TopEnd
+                                            )
+                                            Text("\n")
+                                            Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
+                                        }
                                     }
+
                                 },
-                                state = tooltipState
+                                state = tooltipState,
+
                             ) {
                                 IconButton(
                                     modifier = Modifier.padding(
@@ -153,7 +179,7 @@ fun App() {
                         }
                     )
 
-                },  // Main content
+                }, // Main content
                 content = { paddingValues ->
                     Box(
                         modifier = Modifier
