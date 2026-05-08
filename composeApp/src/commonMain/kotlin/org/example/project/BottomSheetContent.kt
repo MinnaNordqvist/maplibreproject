@@ -56,6 +56,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,11 +73,12 @@ import org.example.project.data.Routes
 import org.example.project.data.Trips
 
 import org.example.project.data.getRoutes
+import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
 
-
+//Linjojen värit
 fun String.toColor(): Color {
     val hex = this
     val colorLong = when (hex.length) {
@@ -101,7 +103,7 @@ fun BottomSheetContent(
     // https://data.foli.fi/gtfs/routes
     val routes: List<Routes> = remember { runBlocking { getRoutes() } }
     // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
-   // val trips: List<Trips> = remember {runBlocking { getTrips() }}
+    val trips: List<Trips> = remember {runBlocking { getTrips() }}
 
 
     val lazyListState = rememberLazyListState()
@@ -128,6 +130,7 @@ fun BottomSheetContent(
         routesAndIds.put(value.route_id, value.route_short_name)
     }
 
+    val displayNames = remember { mutableStateMapOf<String, List<String>>()}
 
 
 
@@ -136,13 +139,29 @@ fun BottomSheetContent(
 
         if (stopSearch != null) {
             busViewModel.getBusList(stopSearch)
-
             httpStatus = busViewModel.getResponseStatus(stopSearch).value
 
+            //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
+            if (!stopTimes.containsKey(stopSearch)){
+                //  https://data.foli.fi/gtfs/stop_times/stop/stop_id
+                val tripIds = getStopTimes(stopSearch).map{it.trip_id}.toSet()
+                val routeroutes = arrayListOf<String>()
+                trips
+                    .filter{tripIds.contains(it.trip_id)}
+                    .forEach { routesAndIds[it.route_id]?.let { element -> routeroutes.add(element)
+                    } }
+                displayNames.put(stopSearch!!, routeroutes)
+                stopTimes.put(stopSearch!!, tripIds)
+
+            }
 
         }
 
 
+    }
+
+    fun getDisplayNames(): List<String>? {
+        return displayNames[stopSearch]?.toList()?.distinct()
     }
 
 
@@ -227,6 +246,7 @@ fun BottomSheetContent(
                                 )
                             }
                         }
+                        Text(text = "Linjat: " + getDisplayNames()?.joinToString { it }, fontWeight = FontWeight.Light)
                     }
                 }
             }

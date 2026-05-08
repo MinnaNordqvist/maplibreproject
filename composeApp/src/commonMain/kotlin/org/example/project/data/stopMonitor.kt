@@ -68,8 +68,6 @@ data class Response(
         var lineref: String,
         val monitored: Boolean,
         val destinationdisplay: String,
-        //val aimedarrivaltime: Long,
-        //val expectedarrivaltime: Long,
         val aimeddeparturetime: Long,
         val expecteddeparturetime: Long,
         @SerialName("__tripref")
