@@ -90,8 +90,6 @@ fun String.toColor(): Color {
 }
 
 
-
-val busList = arrayListOf<Response.Bus>()
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BottomSheetContent(
@@ -121,7 +119,7 @@ fun BottomSheetContent(
     var httpStatus by remember { mutableStateOf(0) }
     var stopSearch: String? by remember {
         mutableStateOf(
-            feature?.getStringProperty("stop_code") ?: ""
+            feature?.getStringProperty("stop_code")
         )
     }
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
@@ -138,7 +136,7 @@ fun BottomSheetContent(
 
 
 
-    LaunchedEffect(feature?.getStringProperty("stop_code") ?: "") {
+    LaunchedEffect(feature?.getStringProperty("stop_code")) {
         stopSearch = feature?.getStringProperty("stop_code")
 
         if (stopSearch != null) {
@@ -176,7 +174,7 @@ fun BottomSheetContent(
 
     LazyColumn(
         modifier = Modifier.padding(bottom = 20.dp),
-        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 30.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
         userScrollEnabled = true,
@@ -184,7 +182,7 @@ fun BottomSheetContent(
         overscrollEffect = overScrollEffect,
     ) {
 
-        if (httpStatus != 200) {
+        if (feature?.getStringProperty("stop_code").isNullOrEmpty()) {
             item {
                 Column(Modifier.padding(bottom = 16.dp)) {
                     Text(
