@@ -118,9 +118,7 @@ fun BottomSheetContent(
 
     var httpStatus by remember { mutableStateOf(0) }
     var stopSearch: String? by remember {
-        mutableStateOf(
-            feature?.getStringProperty("stop_code")
-        )
+        mutableStateOf(feature?.getStringProperty("stop_code"))
     }
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
 
@@ -174,7 +172,7 @@ fun BottomSheetContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 1.dp, top = 6.dp, end = 1.dp, bottom = 60.dp),
+        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
         userScrollEnabled = true,
@@ -361,7 +359,14 @@ fun BottomSheetContent(
                 }
             }
         }
+        item{
+            Column(
+                modifier = Modifier.padding(bottom = 40.dp),
+                verticalArrangement = Arrangement.Bottom
+            ){
 
+            }
+        }
 
     }
 }
