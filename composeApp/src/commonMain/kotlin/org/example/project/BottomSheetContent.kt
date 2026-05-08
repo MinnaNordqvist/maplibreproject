@@ -103,7 +103,7 @@ fun BottomSheetContent(
     // https://data.foli.fi/gtfs/routes
     val routes: List<Routes> = remember { runBlocking { getRoutes() } }
     // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
-    val trips: List<Trips> = remember {runBlocking { getTrips() }}
+    val trips: List<Trips> = remember { runBlocking { getTrips() } }
 
 
     val lazyListState = rememberLazyListState()
@@ -118,23 +118,27 @@ fun BottomSheetContent(
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
 
 
-    var httpStatus by remember {mutableStateOf(0)}
-    var stopSearch: String? by remember { mutableStateOf(feature?.getStringProperty("stop_code") ?: "" )}
-    val stopTimes = remember {mutableMapOf<String, Set<String>> ()}
+    var httpStatus by remember { mutableStateOf(0) }
+    var stopSearch: String? by remember {
+        mutableStateOf(
+            feature?.getStringProperty("stop_code") ?: ""
+        )
+    }
+    val stopTimes = remember { mutableMapOf<String, Set<String>>() }
 
     // Route
-    val routeDetails = remember {mutableMapOf<String, String>()}
-    val routesAndIds = remember {mutableMapOf<String, String>()}
-    for (value in routes){
+    val routeDetails = remember { mutableMapOf<String, String>() }
+    val routesAndIds = remember { mutableMapOf<String, String>() }
+    for (value in routes) {
         routeDetails.put(value.route_short_name, value.route_color)
         routesAndIds.put(value.route_id, value.route_short_name)
     }
 
-    val displayNames = remember { mutableStateMapOf<String, List<String>>()}
+    val displayNames = remember { mutableStateMapOf<String, List<String>>() }
 
 
 
-    LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
+    LaunchedEffect(feature?.getStringProperty("stop_code") ?: "") {
         stopSearch = feature?.getStringProperty("stop_code")
 
         if (stopSearch != null) {
@@ -142,14 +146,17 @@ fun BottomSheetContent(
             httpStatus = busViewModel.getResponseStatus(stopSearch).value
 
             //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
-            if (!stopTimes.containsKey(stopSearch)){
+            if (!stopTimes.containsKey(stopSearch)) {
                 //  https://data.foli.fi/gtfs/stop_times/stop/stop_id
-                val tripIds = getStopTimes(stopSearch).map{it.trip_id}.toSet()
+                val tripIds = getStopTimes(stopSearch).map { it.trip_id }.toSet()
                 val routeroutes = arrayListOf<String>()
                 trips
-                    .filter{tripIds.contains(it.trip_id)}
-                    .forEach { routesAndIds[it.route_id]?.let { element -> routeroutes.add(element)
-                    } }
+                    .filter { tripIds.contains(it.trip_id) }
+                    .forEach {
+                        routesAndIds[it.route_id]?.let { element ->
+                            routeroutes.add(element)
+                        }
+                    }
                 displayNames.put(stopSearch!!, routeroutes)
                 stopTimes.put(stopSearch!!, tripIds)
 
@@ -189,8 +196,6 @@ fun BottomSheetContent(
                 }
 
             }
-
-
         }
         stickyHeader {
             feature?.let {
@@ -246,7 +251,7 @@ fun BottomSheetContent(
                                 )
                             }
                         }
-                        Text(text = ("Linjat: " + getDisplayNames() ), fontWeight = FontWeight.Light)
+                        Text(text = ("Linjat: " + getDisplayNames()), fontWeight = FontWeight.Light)
                     }
                 }
             }
@@ -301,40 +306,42 @@ fun BottomSheetContent(
                             style = MaterialTheme.typography.titleMedium,
                             softWrap = true,
 
-                        )
+                            )
                         if (bus.aikaero() >= 60) {
                             Image(
                                 painter = painterResource(Res.drawable.hourglass),
                                 contentDescription = null,
-                                modifier = Modifier.size(25.dp, 30.dp).padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                modifier = Modifier.size(25.dp, 30.dp)
+                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
                                 alignment = Alignment.TopEnd
                             )
                         }
                         if (bus.aikaero() <= -60) {
-                                Image(
-                                    painter = painterResource(Res.drawable.bolt),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(25.dp, 30.dp).padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
-                                    alignment = Alignment.TopEnd
-                                )
-                                println(bus.aikaero())
-                        }
-                            Text(
-                                text = bus.getDeparture(),
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier
-                                    //.weight(0.8f)
-                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                                style = MaterialTheme.typography.titleMedium
+                            Image(
+                                painter = painterResource(Res.drawable.bolt),
+                                contentDescription = null,
+                                modifier = Modifier.size(25.dp, 30.dp)
+                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
+                                alignment = Alignment.TopEnd
                             )
-                            println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
+                            println(bus.aikaero())
                         }
+                        Text(
+                            text = bus.getDeparture(),
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier
+                                //.weight(0.8f)
+                                .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
                     }
                 }
             }
+        }
 
-        if (httpStatus == 200 &&  uiState.busList.isEmpty()) {
+        if (httpStatus == 200 && uiState.busList.isEmpty()) {
             item {
                 Card(
                     colors = CardDefaults.cardColors(
@@ -347,51 +354,15 @@ fun BottomSheetContent(
                         modifier = Modifier.padding(8.dp),
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Ei linjoja seuraavan tunnin aikana", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            text = "Ei linjoja seuraavan tunnin aikana",
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
                 }
             }
         }
 
-        // Infobutton. Näytetään lähde ja selitykset symboleille.
-            item {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
-                        // Tooltip implementation
-                        TooltipBox(
-                            positionProvider =
-                                TooltipDefaults.rememberTooltipPositionProvider(
-                                    TooltipAnchorPosition.Above
-                                ),
-                            tooltip = {
-                                RichTooltip(
-                                    title = { Text("Lähde") },
-                                    caretShape = null,
-                                ) {
-                                    Text("Turun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
-                                }
-                            },
-                            state = tooltipState
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        tooltipState.show()
-                                    }
-                                }
-                            ) {
-                                Image(
-                                    painter = painterResource(Res.drawable.info),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
 
-        }
-
+    }
+}
