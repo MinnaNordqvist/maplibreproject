@@ -109,7 +109,7 @@ fun BottomSheetContent(
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
-    val tooltipState = rememberTooltipState(isPersistent = true)
+
     val scope = rememberCoroutineScope()
 
 
@@ -143,7 +143,7 @@ fun BottomSheetContent(
 
         if (stopSearch != null) {
             busViewModel.getBusList(stopSearch)
-            httpStatus = busViewModel.getResponseStatus(stopSearch).value
+
 
             //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
             if (!stopTimes.containsKey(stopSearch)) {
@@ -162,6 +162,7 @@ fun BottomSheetContent(
 
             }
 
+            httpStatus = busViewModel.getResponseStatus(stopSearch).value
         }
 
 
