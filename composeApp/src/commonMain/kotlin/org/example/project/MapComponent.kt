@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,7 +63,7 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 import org.maplibre.spatialk.geojson.toJson
-
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 
 private suspend fun getStopsAsGeoJson(): String{
@@ -229,7 +230,7 @@ fun PopupCard(
     }
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-
+    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
 
     Card(
         modifier = Modifier
@@ -239,6 +240,7 @@ fun PopupCard(
                     y = off.y.toInt().minus(190)  // position above the marker
                 )
             },
+        shape = shape,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {

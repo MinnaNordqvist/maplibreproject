@@ -62,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import kotlinx.coroutines.runBlocking
@@ -213,17 +214,21 @@ fun BottomSheetContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = " ${it.getStringProperty("stop_name")}  ${
-                                    it.getStringProperty(
-                                        "stop_code"
-                                    )
-                                } ",
+                                text = "${it.getStringProperty("stop_name")}",
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp)
+                                    .padding(start = 0.dp, top = 6.dp, end = 2.dp, bottom = 0.dp)
                                     .weight(3.0f)
                             )
+                            Text(text =  "${it.getStringProperty("stop_code")}",
+                                fontWeight = FontWeight.Medium, fontSize = 20.sp,
+                                textAlign = TextAlign.Start,
+                                textDecoration = TextDecoration.Underline,
+                                modifier = Modifier
+                                    .padding(start = 0.dp, top = 6.dp, end = 20.dp, bottom = 0.dp)
+                                    //.weight(3.0f)
+                                )
                             OutlinedIconButton(
                                 onClick = {
                                     scope.launch {
