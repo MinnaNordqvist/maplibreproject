@@ -230,14 +230,14 @@ fun PopupCard(
     }
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
+    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 2.dp)
 
     Card(
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt().minus(100), // center horizontally (adjust based on card width)
-                    y = off.y.toInt().minus(190)  // position above the marker
+                    x = off.x.toInt().minus(10), //  horizontal
+                    y = off.y.toInt().minus(200)  // position above the marker
                 )
             },
         shape = shape,
