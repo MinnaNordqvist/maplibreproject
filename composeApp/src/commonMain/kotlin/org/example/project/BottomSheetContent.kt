@@ -171,7 +171,7 @@ fun BottomSheetContent(
 
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.padding(bottom = 20.dp),
         contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
@@ -361,7 +361,7 @@ fun BottomSheetContent(
         }
         item{
             Column(
-                modifier = Modifier.padding(bottom = 40.dp),
+                modifier = Modifier.padding(bottom = 20.dp),
                 verticalArrangement = Arrangement.Bottom
             ){
 
