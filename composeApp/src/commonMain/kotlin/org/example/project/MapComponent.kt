@@ -177,10 +177,10 @@ fun MapComponent(
                 id = "bus-stop",
                 source = markerSource,
                 iconImage = image((marker), drawAsSdf = true),
-                iconColor = const(Color.Blue),
+                iconColor = const(Color(0xFF5985E1)),
                 iconSize = const(3.0f),
                 iconHaloColor = const(Color.White),
-                iconHaloWidth = const(20.dp),
+                iconHaloWidth = const(15.dp),
                 iconHaloBlur = const(1.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
@@ -203,9 +203,10 @@ fun MapComponent(
                 source = markerSource,
                 iconImage = image((marker), drawAsSdf = true),
                 iconSize = const(3.0f),
-                iconColor = const(Color.Blue),
+                iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
                 iconHaloWidth = const(30.dp),
+               // iconHaloBlur = const(3.dp),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
                 onClick = {features ->
                     features.firstOrNull()?.let {
@@ -268,14 +269,14 @@ fun PopupCard(
     }
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 2.dp)
+    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 1.dp)
 
     Card(
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt().minus(10), //  horizontal
-                    y = off.y.toInt().minus(200)  // position above the marker
+                    y = off.y.toInt().minus(205)  // position above the marker
                 )
             },
         shape = shape,
