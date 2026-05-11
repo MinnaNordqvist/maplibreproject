@@ -64,6 +64,16 @@ import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 import org.maplibre.spatialk.geojson.toJson
 import androidx.compose.foundation.shape.RoundedCornerShape
+import kotlin.coroutines.EmptyCoroutineContext.get
+import androidx.compose.ui.graphics.colorspace.ColorSpaces.match
+import org.maplibre.compose.expressions.ast.Expression
+import org.maplibre.compose.expressions.dsl.Feature.get
+import org.maplibre.compose.expressions.dsl.asString
+import org.maplibre.compose.expressions.dsl.eq
+import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.const
+
+import kotlin.math.exp
 
 
 private suspend fun getStopsAsGeoJson(): String{
@@ -114,9 +124,9 @@ fun MapComponent(
         }
     }
 
-    val marker = painterResource(Res.drawable.bus)
-    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
 
+    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+    var selectedStop by remember { mutableStateOf<String?>("") }
 
     val camera =
         rememberCameraState(
@@ -139,11 +149,13 @@ fun MapComponent(
             zoomRange = 6.8f..17f,
             onMapClick = { point, screenPoint ->
                 selectedFeature = null
+                selectedStop = ""
                 ClickResult.Pass
             },
 
             onMapLongClick = { point, screenPoint ->
                 selectedFeature = null
+                selectedStop = ""
                 ClickResult.Pass
             },
 
@@ -154,27 +166,53 @@ fun MapComponent(
 
             ) {
             //Symbol Layer
-
+            val marker = painterResource(Res.drawable.bus)
             val markerSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(data)
             )
+
+
+
             SymbolLayer(
                 id = "bus-stop",
                 source = markerSource,
-                iconImage = image(marker),
+                iconImage = image((marker), drawAsSdf = true),
+                iconColor = const(Color.Blue),
+                iconSize = const(3.0f),
+                iconHaloColor = const(Color.White),
+                iconHaloWidth = const(20.dp),
+                iconHaloBlur = const(1.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
                 iconAnchor = const(SymbolAnchor.Center),
                 minZoom = 0.0f,
                 maxZoom = 24.0f,
-                iconSize = const(3.0f),
+
                 onClick = { features ->
                     selectedFeature = features.firstOrNull()
-
+                    selectedStop = selectedFeature?.getStringProperty("stop_code")
                     selectedFeature?.let { onMarkerClick(it) }
                     println("Clicked on ${features[0].toJson()}")
                     ClickResult.Consume
                 },
+            )
+
+
+            SymbolLayer(
+                id = "highlight-layer",
+                source = markerSource,
+                iconImage = image((marker), drawAsSdf = true),
+                iconSize = const(3.0f),
+                iconColor = const(Color.Blue),
+                iconHaloColor = const(Color.Black),
+                iconHaloWidth = const(30.dp),
+                filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
+                onClick = {features ->
+                    features.firstOrNull()?.let {
+                        selectedStop = it.getStringProperty("stop_code")
+                    }
+                    ClickResult.Consume
+                }
             )
 
         }
