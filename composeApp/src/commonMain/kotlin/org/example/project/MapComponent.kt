@@ -148,7 +148,7 @@ fun MapComponent(
 
             options = MapOptions(
                 ornamentOptions = OrnamentOptions.OnlyLogo,
-                gestureOptions = GestureOptions.Standard
+                gestureOptions = GestureOptions.RotationLocked
             ),
 
             ) {
