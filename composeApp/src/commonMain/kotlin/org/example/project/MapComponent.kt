@@ -72,8 +72,11 @@ import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.zoom
+import org.maplibre.compose.location.LocationChangeScope
 
 import kotlin.math.exp
+import kotlin.time.Duration.Companion.milliseconds
 
 
 private suspend fun getStopsAsGeoJson(): String{
@@ -114,8 +117,8 @@ fun MapComponent(
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
             try {
-                httpStat = getStopStatus().value
                 data = getStopsAsGeoJson()
+                httpStat = getStopStatus().value
                 isLoading = false
                 //println(httpStat)
             } catch(e: Exception){
@@ -127,6 +130,7 @@ fun MapComponent(
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
+
 
     val camera =
         rememberCameraState(
@@ -148,6 +152,7 @@ fun MapComponent(
             styleState = styleState,
             zoomRange = 6.8f..17f,
             onMapClick = { point, screenPoint ->
+
                 selectedFeature = null
                 selectedStop = ""
                 ClickResult.Pass
@@ -181,7 +186,6 @@ fun MapComponent(
                 iconSize = const(3.0f),
                 iconHaloColor = const(Color.White),
                 iconHaloWidth = const(18.dp),
-                //iconHaloBlur = const(1.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
                 iconAnchor = const(SymbolAnchor.Center),
@@ -192,6 +196,7 @@ fun MapComponent(
                     selectedFeature = features.firstOrNull()
                     selectedStop = selectedFeature?.getStringProperty("stop_code")
                     selectedFeature?.let { onMarkerClick(it) }
+
                     println("Clicked on ${features[0].toJson()}")
                     ClickResult.Consume
                 },
@@ -206,7 +211,6 @@ fun MapComponent(
                 iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
                 iconHaloWidth = const(19.dp),
-                //iconHaloBlur = const(3.dp),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
                 onClick = {features ->
                     features.firstOrNull()?.let {
@@ -235,19 +239,34 @@ fun MapComponent(
             }
         }
         // Näytetään PopupCard kun pysäkki valitaan
-        if (selectedFeature != null) {
-                selectedFeature?.let { feature ->
-                    PopupCard(
-                        feature = feature,
-                        cameraState = camera,
-                        onDismiss = {
-                            selectedFeature = null
+           if (selectedFeature != null) {
+               selectedFeature?.let { feature ->
+                   LaunchedEffect(feature.geometry) {
+                       val currentZoom = camera.position.zoom
+                       camera.animateTo(
+                           finalPosition = CameraPosition(
+                               target = (feature.geometry as Point).coordinates,
+                               zoom = currentZoom
+                           ),
+                           duration = 1200.milliseconds
+                       )
 
-                        }
-                    )
 
-                }
-        }
+                   }
+                   PopupCard(
+                       feature = feature,
+                       cameraState = camera,
+                       onDismiss = {
+                           selectedFeature = null
+
+                       }
+                   )
+
+
+               }
+
+           }
+
 
 
 
@@ -276,7 +295,7 @@ fun PopupCard(
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt().minus(10), //  horizontal
-                    y = off.y.toInt().minus(203)  // position above the marker
+                    y = off.y.toInt().minus(205)  // position above the marker
                 )
             },
         shape = shape,
