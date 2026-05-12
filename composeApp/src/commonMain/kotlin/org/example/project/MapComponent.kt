@@ -180,8 +180,8 @@ fun MapComponent(
                 iconColor = const(Color(0xFF5985E1)),
                 iconSize = const(3.0f),
                 iconHaloColor = const(Color.White),
-                iconHaloWidth = const(15.dp),
-                iconHaloBlur = const(1.dp),
+                iconHaloWidth = const(18.dp),
+                //iconHaloBlur = const(1.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
                 iconAnchor = const(SymbolAnchor.Center),
@@ -197,16 +197,16 @@ fun MapComponent(
                 },
             )
 
-
+            // Vaihdetaan valitun pysäkin ikonin taustaväri
             SymbolLayer(
                 id = "highlight-layer",
                 source = markerSource,
                 iconImage = image((marker), drawAsSdf = true),
-                iconSize = const(3.0f),
+                iconSize = const(3.1f),
                 iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
-                iconHaloWidth = const(30.dp),
-               // iconHaloBlur = const(3.dp),
+                iconHaloWidth = const(19.dp),
+                //iconHaloBlur = const(3.dp),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
                 onClick = {features ->
                     features.firstOrNull()?.let {
@@ -217,8 +217,8 @@ fun MapComponent(
             )
 
         }
-            //UI Layer
-
+        //UI Layer
+        // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
         if (isLoading && httpStat == 0) {
             Box(
                 Modifier.fillMaxSize(),
@@ -234,8 +234,8 @@ fun MapComponent(
 
             }
         }
-
-            if (selectedFeature != null) {
+        // Näytetään PopupCard kun pysäkki valitaan
+        if (selectedFeature != null) {
                 selectedFeature?.let { feature ->
                     PopupCard(
                         feature = feature,
@@ -247,7 +247,7 @@ fun MapComponent(
                     )
 
                 }
-            }
+        }
 
 
 
@@ -276,11 +276,11 @@ fun PopupCard(
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt().minus(10), //  horizontal
-                    y = off.y.toInt().minus(205)  // position above the marker
+                    y = off.y.toInt().minus(203)  // position above the marker
                 )
             },
         shape = shape,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
