@@ -2,6 +2,7 @@ package org.example.project
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,6 +67,7 @@ import org.maplibre.spatialk.geojson.toJson
 import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlin.coroutines.EmptyCoroutineContext.get
 import androidx.compose.ui.graphics.colorspace.ColorSpaces.match
+import androidx.compose.ui.unit.Dp
 import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
@@ -74,6 +76,7 @@ import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.location.LocationChangeScope
+
 
 import kotlin.math.exp
 import kotlin.time.Duration.Companion.milliseconds
@@ -144,7 +147,11 @@ fun MapComponent(
 
     val styleState = rememberStyleState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val density = LocalDensity.current
+        val screenWidth = with(density) { maxWidth }
+        val screenHeight = with(density) { maxHeight }
+
         //Map Layer
         MaplibreMap(
             baseStyle = BaseStyle.Uri(Res.getUri("files/style.json")),
@@ -223,6 +230,7 @@ fun MapComponent(
         }
         //UI Layer
         // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
+
         if (isLoading && httpStat == 0) {
             Box(
                 Modifier.fillMaxSize(),
@@ -239,18 +247,35 @@ fun MapComponent(
             }
         }
         // Näytetään PopupCard kun pysäkki valitaan
-           if (selectedFeature != null) {
+
+        if (selectedFeature != null) {
                selectedFeature?.let { feature ->
                    LaunchedEffect(feature.geometry) {
                        val currentZoom = camera.position.zoom
-                       camera.animateTo(
-                           finalPosition = CameraPosition(
-                               target = (feature.geometry as Point).coordinates,
-                               zoom = currentZoom
-                           ),
-                           duration = 1200.milliseconds
-                       )
+                       val targ = (feature.geometry as Point).coordinates
+                       val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
+                       val horizontalMargin = 40.dp
+                       val topMargin = 50.dp// Space for the Card
+                       val bottomMargin = 10.dp
+                       val screenX = screenPos?.x
+                       val screenY = screenPos?.y
+
+                       val isUnsafe = screenX!! < horizontalMargin ||
+                               screenX > (screenWidth - horizontalMargin) ||
+                               screenY!! < topMargin ||
+                               screenY > (screenHeight - bottomMargin)
+
+                       if (isUnsafe) {
+                           camera.animateTo(
+                               CameraPosition(
+                                   target = targ,
+                                   zoom = currentZoom,
+
+                                   ),
+                               duration = 300.milliseconds
+                           )
+                       }
 
                    }
                    PopupCard(
@@ -262,13 +287,9 @@ fun MapComponent(
                        }
                    )
 
-
                }
 
            }
-
-
-
 
     }
 
