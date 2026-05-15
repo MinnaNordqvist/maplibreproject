@@ -174,13 +174,11 @@ fun MapComponent(
             ),
 
             ) {
-            //Symbol Layer
+            //SymbolLayer
             val marker = painterResource(Res.drawable.bus)
             val markerSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(data)
             )
-
-
 
             SymbolLayer(
                 id = "bus-stop",
@@ -243,7 +241,7 @@ fun MapComponent(
 
             }
         }
-        // Näytetään PopupCard kun pysäkki valitaan
+        // Näytetään InfoWindow kun pysäkki valitaan
 
         if (selectedFeature != null) {
                selectedFeature?.let { feature ->
