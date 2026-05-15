@@ -1,5 +1,6 @@
 package org.example.project
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +50,7 @@ import androidx.compose.ui.graphics.Vertices
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -67,17 +72,21 @@ fun InfoWindow(
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
 
+    var width by remember { mutableStateOf(0) }
+
     Card(
         modifier = Modifier
+            .onSizeChanged{width = it.width}
             .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt().minus(110), //  horizontal
-                    y = off.y.toInt().minus(208)  // position above the marker
+                    x = off.x.toInt() - (width/2), //  horizontal
+                    y = off.y.toInt() - (208)  // position above the marker
                 )
             },
         shape = TooltipShape(),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(width=1.dp, color = Color.Black)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
@@ -109,7 +118,6 @@ class TooltipShape : Shape {
             // Top-Right
             lineTo(w, 0f)
             // Bottom-Right (Start of the flat bottom)
-            // We'll leave 20px for the pointer height
             val pointerHeight = with(density) { 8.dp.toPx() }
             val bodyBottom = h - pointerHeight
 
