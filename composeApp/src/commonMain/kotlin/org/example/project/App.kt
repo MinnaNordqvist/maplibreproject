@@ -74,7 +74,7 @@ fun App() {
 
         val onMarkerClick: (feature: Feature<Geometry, JsonObject?>) -> Unit = { markerdata ->
             selectedMarker = markerdata
-            println("Marker $selectedMarker")
+
         }
         val tooltipState = rememberTooltipState(isPersistent = true)
 

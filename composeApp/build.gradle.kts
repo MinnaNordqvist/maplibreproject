@@ -57,6 +57,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel.navigation)
+            implementation("androidx.graphics:graphics-shapes:1.0.1")
 
 
         }

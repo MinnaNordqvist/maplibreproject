@@ -76,9 +76,6 @@ import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.location.LocationChangeScope
-
-
-import kotlin.math.exp
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -278,14 +275,14 @@ fun MapComponent(
                        }
 
                    }
-                   PopupCard(
+                  InfoWindow(
                        feature = feature,
                        cameraState = camera,
                        onDismiss = {
                            selectedFeature = null
 
                        }
-                   )
+                  )
 
                }
 
@@ -293,45 +290,4 @@ fun MapComponent(
 
     }
 
-}
-
-@Composable
-fun PopupCard(
-    feature: Feature<Geometry, JsonObject?>,
-    cameraState: CameraState,
-    onDismiss: () -> Unit
-) {
-
-    val pos = (feature.geometry as Point).coordinates
-
-    val dpTarg = remember(pos, cameraState.position) {
-        cameraState.projection?.screenLocationFromPosition(pos)
-    }
-
-    val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 1.dp)
-
-    Card(
-        modifier = Modifier
-            .absoluteOffset {
-                IntOffset(
-                    x = off.x.toInt().minus(10), //  horizontal
-                    y = off.y.toInt().minus(205)  // position above the marker
-                )
-            },
-        shape = shape,
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = feature.getStringProperty("stop_name") ?: "",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = feature.getStringProperty("stop_code") ?: "",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
 }
