@@ -123,11 +123,11 @@ class TooltipShape : Shape {
 
             lineTo(w, bodyBottom)
             // Right side of pointer
-            lineTo(w * 0.625f, bodyBottom)
+            lineTo((w * 0.5f) + 20f, bodyBottom)
             // Tip of pointer (Center Bottom)
             lineTo(w * 0.5f, h)
             // Left side of pointer
-            lineTo(w * 0.375f, bodyBottom)
+            lineTo((w * 0.5f) - 20f, bodyBottom)
             // Bottom-Left
             lineTo(0f, bodyBottom)
             close()
