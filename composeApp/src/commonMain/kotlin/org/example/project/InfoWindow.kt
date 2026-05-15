@@ -80,7 +80,7 @@ fun InfoWindow(
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt() - (width/2), //  horizontal
-                    y = off.y.toInt() - (208)  // position above the marker
+                    y = off.y.toInt() - (220)  // position above the marker
                 )
             },
         shape = TooltipShape(),
