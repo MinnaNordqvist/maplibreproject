@@ -3,6 +3,7 @@ package org.example.project
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,8 +25,11 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -44,38 +48,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.cos
-
-
-val cardHeight = 1.0f
-val cardWidth = 1.1f
-val cardMargin = 0.1f
-
-private fun DrawScope.drawInfoWindow(){
-
-    val area = Path()
-    area.moveTo(size.width * cardMargin, size.height * cardMargin)
-    area.lineTo(size.width * (cardMargin + cardWidth), size.height * cardMargin)
-    area.lineTo(size.width * (cardMargin + cardWidth), size.height * (cardMargin + cardHeight * 0.75f))
-
-    area.lineTo(size.width * (cardMargin + cardWidth * 0.625f), size.height * (cardMargin + cardHeight * 0.75f))
-
-    area.lineTo(size.width * (cardMargin + cardWidth * 0.5f), size.height * (cardMargin + cardHeight))
-    area.lineTo(size.width * (cardMargin + cardWidth * 0.375f), size.height * (cardMargin + cardHeight * 0.75f))
-
-    area.lineTo(size.width * cardMargin, size.height * (cardMargin + cardHeight * 0.75f))
-    area.close()
-
-    //area.moveTo(x = size.width* cardMargin, y = 0f)
-   // area.lineTo(size.width * cardMargin, size.width * cardHeight)
-    //area.lineTo(size.width * (cardMargin + cardWidth), size.width * cardHeight)
-   // area.lineTo(size.width*(cardMargin+cardWidth), 0f)
-   // area.lineTo(size.width * (cardMargin + cardWidth), size.width * cardHeight)
-    drawPath(path = area, color = Color.White)
-    drawPath(area, color = Color.Black, style = Stroke(2.dp.toPx()))
-
-}
-
 
 
 @Composable
@@ -91,54 +66,18 @@ fun InfoWindow(
     }
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-    val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 1.dp)
 
-
-    Box(
-        modifier = Modifier
-        .absoluteOffset {
-            IntOffset(
-                x = off.x.toInt().minus(190), //  horizontal
-                y = off.y.toInt().minus(210)  // position above the marker
-            )
-        }
-        .drawBehind {
-            translate(left = 0f, top = 0f) {
-                drawInfoWindow()
-            }
-        },
-        contentAlignment = Alignment.TopEnd
-        //.clip(RoundedCornerShape(8.dp))
-
-    ){
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                modifier = Modifier.padding(start = 20.dp, top = 2.dp, end = 0.dp, bottom = 0.dp),
-                text = feature.getStringProperty("stop_name") ?: "",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.End
-            )
-            Text(
-                modifier = Modifier.padding(start = 20.dp, top = 0.dp, end = 0.dp, bottom = 8.dp),
-                text = feature.getStringProperty("stop_code") ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.End
-            )
-        }
-    }
-/*
     Card(
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt().minus(10), //  horizontal
-                    y = off.y.toInt().minus(205)  // position above the marker
+                    x = off.x.toInt().minus(110), //  horizontal
+                    y = off.y.toInt().minus(208)  // position above the marker
                 )
-
             },
-       // shape = shape,
+        shape = TooltipShape(),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-       // colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
@@ -146,13 +85,45 @@ fun InfoWindow(
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
+                modifier = Modifier.padding(bottom = 6.dp),
                 text = feature.getStringProperty("stop_code") ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
     }
+}
 
- */
 
+class TooltipShape : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val path = Path().apply {
+            val w = size.width
+            val h = size.height
 
+            // Start Top-Left
+            moveTo(0f, 0f)
+            // Top-Right
+            lineTo(w, 0f)
+            // Bottom-Right (Start of the flat bottom)
+            // We'll leave 20px for the pointer height
+            val pointerHeight = with(density) { 8.dp.toPx() }
+            val bodyBottom = h - pointerHeight
+
+            lineTo(w, bodyBottom)
+            // Right side of pointer
+            lineTo(w * 0.625f, bodyBottom)
+            // Tip of pointer (Center Bottom)
+            lineTo(w * 0.5f, h)
+            // Left side of pointer
+            lineTo(w * 0.375f, bodyBottom)
+            // Bottom-Left
+            lineTo(0f, bodyBottom)
+            close()
+        }
+        return Outline.Generic(path)
+    }
 }
