@@ -179,7 +179,7 @@ fun MapComponent(
 
             }
         }
-        // Näytetään InfoWindow kun pysäkki valitaan
+        // Näytetään PopUpCard kun pysäkki valitaan
 
         if (selectedFeature != null) {
                selectedFeature?.let { feature ->
@@ -222,7 +222,7 @@ fun MapComponent(
 
                }
 
-           }
+        }
 
     }
 
