@@ -252,7 +252,7 @@ fun MapComponent(
 
                        val horizontalMargin = 50.dp
                        val topMargin = 70.dp// Space for the Card
-                       val bottomMargin = 20.dp
+                       val bottomMargin = 30.dp
                        val screenX = screenPos?.x
                        val screenY = screenPos?.y
 
