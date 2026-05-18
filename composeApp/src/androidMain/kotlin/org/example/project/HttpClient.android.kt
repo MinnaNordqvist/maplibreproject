@@ -35,11 +35,11 @@ actual val client: HttpClient = HttpClient(OkHttp) {
     }
 
     defaultRequest {
-        val rnds = (0..100).random()
+
         url {
             protocol = URLProtocol.HTTPS
             host = "data.foli.fi"
-            parameters.append("?hash_id=", "$rnds")
+
         }
         header("MapLibreProject-Android-Header", "Hello")
     }
