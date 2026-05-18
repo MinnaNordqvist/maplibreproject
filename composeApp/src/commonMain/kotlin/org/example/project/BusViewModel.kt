@@ -57,6 +57,7 @@ class BusViewModel : ViewModel(), KoinComponent {
 
             // Loop back to fetch fresh data
             getBusList(stop_code)
+            println("Refreshing")
         }
     }
 
