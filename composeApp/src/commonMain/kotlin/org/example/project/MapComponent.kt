@@ -1,20 +1,13 @@
 package org.example.project
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,23 +16,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
-import maplibreproject.composeapp.generated.resources.bus
-import org.example.project.data.Stop
 import org.example.project.data.getStopStatus
-import org.example.project.data.getStops
-import org.jetbrains.compose.resources.painterResource
 import org.maplibre.compose.camera.CameraPosition
-import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
@@ -49,60 +34,22 @@ import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Position
-import org.maplibre.compose.style.StyleState
-import org.maplibre.compose.util.FeaturesClickHandler
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
-import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.dsl.featureCollectionOf
 import org.maplibre.spatialk.geojson.toJson
-import androidx.compose.foundation.shape.RoundedCornerShape
-import kotlin.coroutines.EmptyCoroutineContext.get
-import androidx.compose.ui.graphics.colorspace.ColorSpaces.match
-import androidx.compose.ui.unit.Dp
-import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
-import org.maplibre.compose.expressions.dsl.feature
-import org.maplibre.compose.expressions.dsl.const
-import org.maplibre.compose.expressions.dsl.zoom
-import org.maplibre.compose.location.LocationChangeScope
 import kotlin.time.Duration.Companion.milliseconds
 
 
-private suspend fun getStopsAsGeoJson(): String{
-    // lähetetään http-get pyyntö GTFS-rajapintaan
-    // https://data.foli.fi/gtfs/stops
-    val mapping: Map<String, Stop> = getStops()
-    //println("Pysäkkejä: " + mapping.size)
-
-    val features = mapping.values.map{ value ->
-        Feature(
-            geometry =
-                Point(
-                    Position(
-                        longitude = value.stop_lon,
-                        latitude = value.stop_lat,
-                    )
-                ),
-            properties =
-                mapOf(
-                    "stop_code" to (value.stop_code),
-                    "stop_name" to (value.stop_name)
-                ),
-        )
-    }
-    return FeatureCollection(features).toJson()
-}
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
@@ -127,11 +74,6 @@ fun MapComponent(
         }
     }
 
-
-    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
-    var selectedStop by remember { mutableStateOf<String?>("") }
-
-
     val camera =
         rememberCameraState(
             firstPosition =
@@ -141,8 +83,10 @@ fun MapComponent(
                 )
         )
 
-
     val styleState = rememberStyleState()
+
+    var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+    var selectedStop by remember { mutableStateOf<String?>("") }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -156,7 +100,6 @@ fun MapComponent(
             styleState = styleState,
             zoomRange = 6.8f..17f,
             onMapClick = { point, screenPoint ->
-
                 selectedFeature = null
                 selectedStop = ""
                 ClickResult.Pass
@@ -175,15 +118,10 @@ fun MapComponent(
 
             ) {
             //SymbolLayer
-            val marker = painterResource(Res.drawable.bus)
-            val markerSource = rememberGeoJsonSource(
-                GeoJsonData.JsonString(data)
-            )
-
             SymbolLayer(
                 id = "bus-stop",
-                source = markerSource,
-                iconImage = image((marker), drawAsSdf = true),
+                source = markerSource(data),
+                iconImage = image((markerImage()), drawAsSdf = true),
                 iconColor = const(Color(0xFF5985E1)),
                 iconSize = const(3.0f),
                 iconHaloColor = const(Color.White),
@@ -207,8 +145,8 @@ fun MapComponent(
             // Vaihdetaan valitun pysäkin ikonin taustaväri
             SymbolLayer(
                 id = "highlight-layer",
-                source = markerSource,
-                iconImage = image((marker), drawAsSdf = true),
+                source = markerSource(data),
+                iconImage = image((markerImage()), drawAsSdf = true),
                 iconSize = const(3.1f),
                 iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
@@ -273,7 +211,7 @@ fun MapComponent(
                        }
 
                    }
-                  InfoWindow(
+                  PopUpCard(
                        feature = feature,
                        cameraState = camera,
                        onDismiss = {
