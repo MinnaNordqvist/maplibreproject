@@ -17,10 +17,7 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-expect fun Marker()
-
-@Composable
-fun Markera(
+fun Marker(
     
 ){
 
