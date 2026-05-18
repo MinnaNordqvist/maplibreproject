@@ -16,11 +16,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 actual val client = HttpClient(Darwin) {
-    engine {
-        configureRequest {
-            setAllowsCellularAccess(true)
-        }
-    }
 
     install(HttpTimeout) {
         socketTimeoutMillis = 60_000
@@ -37,11 +32,9 @@ actual val client = HttpClient(Darwin) {
     }
 
     defaultRequest {
-
         url {
             protocol = URLProtocol.HTTPS
             host = "data.foli.fi"
-
         }
         header("MapLibreProject-Android-Header", "Hello")
     }
@@ -53,5 +46,11 @@ actual val client = HttpClient(Darwin) {
             ignoreUnknownKeys = true
             explicitNulls = false
         })
+    }
+
+    engine {
+        configureRequest {
+            setAllowsCellularAccess(true)
+        }
     }
 }

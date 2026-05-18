@@ -35,11 +35,9 @@ actual val client: HttpClient = HttpClient(OkHttp) {
     }
 
     defaultRequest {
-
         url {
             protocol = URLProtocol.HTTPS
             host = "data.foli.fi"
-
         }
         header("MapLibreProject-Android-Header", "Hello")
     }

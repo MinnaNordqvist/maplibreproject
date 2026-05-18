@@ -250,9 +250,9 @@ fun MapComponent(
                        val targ = (feature.geometry as Point).coordinates
                        val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
-                       val horizontalMargin = 40.dp
+                       val horizontalMargin = 50.dp
                        val topMargin = 70.dp// Space for the Card
-                       val bottomMargin = 10.dp
+                       val bottomMargin = 20.dp
                        val screenX = screenPos?.x
                        val screenY = screenPos?.y
 
@@ -268,7 +268,7 @@ fun MapComponent(
                                    zoom = currentZoom,
 
                                    ),
-                               duration = 600.milliseconds
+                               duration = 800.milliseconds
                            )
                        }
 
