@@ -206,7 +206,7 @@ fun MapComponent(
                                    zoom = currentZoom,
 
                                    ),
-                               duration = 800.milliseconds
+                               //duration = 800.milliseconds
                            )
                        }
 
