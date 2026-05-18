@@ -214,21 +214,13 @@ fun BottomSheetContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "${it.getStringProperty("stop_name")}",
+                                text = "${it.getStringProperty("stop_name")}\n${it.getStringProperty("stop_code")}",
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
-                                textAlign = TextAlign.Center,
+                                textAlign = TextAlign.Start,
                                 modifier = Modifier
-                                    .padding(start = 0.dp, top = 6.dp, end = 2.dp, bottom = 0.dp)
+                                    .padding(start = 8.dp, top = 6.dp, end = 2.dp, bottom = 6.dp)
                                     .weight(3.0f)
                             )
-                            Text(text =  "${it.getStringProperty("stop_code")}",
-                                fontWeight = FontWeight.Medium, fontSize = 20.sp,
-                                textAlign = TextAlign.Start,
-                                textDecoration = TextDecoration.Underline,
-                                modifier = Modifier
-                                    .padding(start = 0.dp, top = 6.dp, end = 20.dp, bottom = 0.dp)
-                                    //.weight(3.0f)
-                                )
                             OutlinedIconButton(
                                 onClick = {
                                     scope.launch {
@@ -253,7 +245,7 @@ fun BottomSheetContent(
                                 )
                             }
                         }
-                        Text(text = ("Linjat: " + getDisplayNames()), fontWeight = FontWeight.Light)
+                        Text(text = ("Linjat: " + getDisplayNames()), Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp), fontWeight = FontWeight.Light)
                     }
                 }
             }
