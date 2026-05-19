@@ -48,18 +48,39 @@ import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
 import kotlin.time.Duration.Companion.milliseconds
+import org.maplibre.compose.location.BearingUpdate
+import org.maplibre.compose.location.LocationProvider
+import org.maplibre.compose.location.LocationPuck
+import org.maplibre.compose.location.LocationTrackingEffect
+import org.maplibre.compose.location.NullLocationProvider
+import org.maplibre.compose.location.UserLocationState
+import org.maplibre.compose.location.rememberDefaultLocationProvider
+import org.maplibre.compose.location.rememberNullLocationProvider
+import org.maplibre.compose.location.rememberUserLocationState
+import org.maplibre.compose.material3.LocationPuckDefaults
 
 
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
+private var isPermissionGranted by mutableStateOf(false)
+
+private var enableTracking by mutableStateOf(false)
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapComponent(
     onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit
-){
+) {
+
+    val permissionChecker = rememberPermissionChecker(
+        onPermissionResult = { granted -> isPermissionGranted = granted }
+    )
+
     var isLoading by remember { mutableStateOf(true) }
+
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
@@ -68,17 +89,40 @@ fun MapComponent(
                 httpStat = getStopStatus().value
                 isLoading = false
                 //println(httpStat)
-            } catch(e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (permissionChecker.hasLocationPermission) {
+            isPermissionGranted = true
+        } else {
+            permissionChecker.requestLocationPermission()
+        }
+    }
+
+    var locationProvider: LocationProvider?
+
+    if (isPermissionGranted){
+        locationProvider = rememberDefaultLocationProvider()
+        enableTracking = true
+
+    } else {
+        locationProvider = rememberNullLocationProvider()
+        enableTracking = false
+
+    }
+
+    val locationState = rememberUserLocationState(locationProvider)
+
+
     val camera =
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = Position(latitude =  60.45195547084046, longitude = 22.267010954960753),
+                    target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
                     zoom = 15.0
                 )
         )
@@ -87,6 +131,7 @@ fun MapComponent(
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
+
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -117,6 +162,23 @@ fun MapComponent(
             ),
 
             ) {
+
+            LocationPuck(
+                    idPrefix = "user",
+                    locationState = locationState,
+                    cameraState = camera,
+                )
+
+            LocationTrackingEffect(
+                locationState = locationState,
+                enabled = enableTracking
+            ) {
+                val position = locationState.location?.position
+                if(position != null) {
+                    camera.animateTo(CameraPosition(target = position, zoom = 15.0))
+                }
+            }
+
             //SymbolLayer
             SymbolLayer(
                 id = "bus-stop",
@@ -152,7 +214,7 @@ fun MapComponent(
                 iconHaloColor = const(Color.Black),
                 iconHaloWidth = const(19.dp),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
-                onClick = {features ->
+                onClick = { features ->
                     features.firstOrNull()?.let {
                         selectedStop = it.getStringProperty("stop_code")
                     }
@@ -169,7 +231,7 @@ fun MapComponent(
                 Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(
                         modifier = Modifier.width(64.dp),
                         color = MaterialTheme.colorScheme.secondary,
@@ -182,48 +244,50 @@ fun MapComponent(
         // Näytetään PopUpCard kun pysäkki valitaan
 
         if (selectedFeature != null) {
-               selectedFeature?.let { feature ->
-                   LaunchedEffect(feature.geometry) {
-                       val currentZoom = camera.position.zoom
-                       val targ = (feature.geometry as Point).coordinates
-                       val screenPos = camera.projection?.screenLocationFromPosition(targ)
+            selectedFeature?.let { feature ->
+                LaunchedEffect(feature.geometry) {
+                    val currentZoom = camera.position.zoom
+                    val targ = (feature.geometry as Point).coordinates
+                    val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
-                       val horizontalMargin = 50.dp
-                       val topMargin = 70.dp// Space for the Card
-                       val bottomMargin = 30.dp
-                       val screenX = screenPos?.x
-                       val screenY = screenPos?.y
+                    val horizontalMargin = 50.dp
+                    val topMargin = 70.dp// Space for the Card
+                    val bottomMargin = 30.dp
+                    val screenX = screenPos?.x
+                    val screenY = screenPos?.y
 
-                       val isUnsafe = screenX!! < horizontalMargin ||
-                               screenX > (screenWidth - horizontalMargin) ||
-                               screenY!! < topMargin ||
-                               screenY > (screenHeight - bottomMargin)
+                    val isUnsafe = screenX!! < horizontalMargin ||
+                            screenX > (screenWidth - horizontalMargin) ||
+                            screenY!! < topMargin ||
+                            screenY > (screenHeight - bottomMargin)
 
-                       if (isUnsafe) {
-                           camera.animateTo(
-                               CameraPosition(
-                                   target = targ,
-                                   zoom = currentZoom,
+                    if (isUnsafe) {
+                        camera.animateTo(
+                            CameraPosition(
+                                target = targ,
+                                zoom = currentZoom,
 
-                                   ),
-                               //duration = 800.milliseconds
-                           )
-                       }
+                                ),
+                            //duration = 800.milliseconds
+                        )
+                    }
 
-                   }
-                  PopUpCard(
-                       feature = feature,
-                       cameraState = camera,
-                       onDismiss = {
-                           selectedFeature = null
+                }
+                PopUpCard(
+                    feature = feature,
+                    cameraState = camera,
+                    onDismiss = {
+                        selectedFeature = null
 
-                       }
-                  )
+                    }
+                )
 
-               }
+            }
 
         }
-
     }
-
 }
+
+
+
+
