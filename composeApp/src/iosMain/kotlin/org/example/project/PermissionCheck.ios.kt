@@ -1,11 +1,15 @@
 package org.example.project
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.CoreLocation.kCLAuthorizationStatusNotDetermined
+
 
 @Composable
 actual fun rememberPermissionChecker(onPermissionResult: (Boolean) -> Unit): PermissionChecker {
@@ -26,6 +30,7 @@ actual fun rememberPermissionChecker(onPermissionResult: (Boolean) -> Unit): Per
                     // Note: Real iOS production apps usually listen to the delegate for changes,
                     // but calling the prompt is enough to satisfy initial checks.
                 }
+
             }
         }
     }

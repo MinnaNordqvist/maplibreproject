@@ -24,7 +24,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
 import org.example.project.data.getStopStatus
+import org.koin.core.component.getScopeId
+import org.koin.core.component.getScopeName
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
@@ -47,37 +50,46 @@ import org.maplibre.spatialk.geojson.toJson
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
-import kotlin.time.Duration.Companion.milliseconds
 import org.maplibre.compose.location.BearingUpdate
+import org.maplibre.compose.location.LocationChangeScope
 import org.maplibre.compose.location.LocationProvider
 import org.maplibre.compose.location.LocationPuck
+import org.maplibre.compose.location.LocationPuckColors
 import org.maplibre.compose.location.LocationTrackingEffect
-import org.maplibre.compose.location.NullLocationProvider
-import org.maplibre.compose.location.UserLocationState
 import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
-import org.maplibre.compose.material3.LocationPuckDefaults
-
-
+import org.maplibre.compose.location.Location
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
-private var isPermissionGranted by mutableStateOf(false)
-
 private var enableTracking by mutableStateOf(false)
 
+private var previous: Location? by mutableStateOf<Location?>(null)
+private var current: Location? by mutableStateOf<Location?>(null)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapComponent(
-    onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit
+    onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit,
+    locationPermission : Boolean
 ) {
 
-    val permissionChecker = rememberPermissionChecker(
-        onPermissionResult = { granted -> isPermissionGranted = granted }
-    )
+    var locationProvider: LocationProvider?
+
+    if (locationPermission){
+        locationProvider = rememberDefaultLocationProvider()
+        enableTracking = true
+
+    } else {
+        locationProvider = rememberNullLocationProvider()
+
+    }
+
+    println("Provider " + locationProvider.location.value)
+    val locationState = rememberUserLocationState(locationProvider)
+
 
     var isLoading by remember { mutableStateOf(true) }
 
@@ -95,37 +107,13 @@ fun MapComponent(
         }
     }
 
-    LaunchedEffect(Unit) {
-        if (permissionChecker.hasLocationPermission) {
-            isPermissionGranted = true
-        } else {
-            permissionChecker.requestLocationPermission()
-        }
-    }
-
-    var locationProvider: LocationProvider?
-
-    if (isPermissionGranted){
-        locationProvider = rememberDefaultLocationProvider()
-        enableTracking = true
-
-    } else {
-        locationProvider = rememberNullLocationProvider()
-        enableTracking = false
-
-    }
-
-    val locationState = rememberUserLocationState(locationProvider)
-
-
-    val camera =
-        rememberCameraState(
-            firstPosition =
-                CameraPosition(
-                    target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
-                    zoom = 15.0
-                )
-        )
+    val camera = rememberCameraState(
+        firstPosition =
+            CameraPosition(
+                target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
+                zoom = 15.0
+            )
+    )
 
     val styleState = rememberStyleState()
 
@@ -162,22 +150,31 @@ fun MapComponent(
             ),
 
             ) {
+            if (locationPermission) {
 
-            LocationPuck(
+                LocationTrackingEffect(
+                    locationState = locationState,
+                    enabled = enableTracking,
+                ) {
+                    previous = previousLocation
+                    current = currentLocation
+                    camera.updateFromLocation(updateBearing = BearingUpdate.TRACK_LOCATION)
+
+                   // val position = locationState.location!!.position
+                   // val currentZoom = camera.position.zoom
+                   // camera.animateTo(CameraPosition(target = position, zoom = currentZoom))
+                }
+                println("Provider " + locationProvider.location.value)
+                println("Previous " + previous + " and current " + current)
+                println("Location state " + locationState.location?.position)
+                LocationPuck(
                     idPrefix = "user",
                     locationState = locationState,
                     cameraState = camera,
+                    colors = LocationPuckColors()
                 )
-
-            LocationTrackingEffect(
-                locationState = locationState,
-                enabled = enableTracking
-            ) {
-                val position = locationState.location?.position
-                if(position != null) {
-                    camera.animateTo(CameraPosition(target = position, zoom = 15.0))
-                }
             }
+
 
             //SymbolLayer
             SymbolLayer(
@@ -222,6 +219,7 @@ fun MapComponent(
                 }
             )
 
+
         }
         //UI Layer
         // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
@@ -241,6 +239,21 @@ fun MapComponent(
 
             }
         }
+
+        if (locationState.location != null) {
+
+            LaunchedEffect(Unit) {
+                println("Enabled tracking " + locationState)
+
+
+                val position = locationState.location?.position
+                val currentZoom = camera.position.zoom
+                if (position != null) {
+                    camera.animateTo(CameraPosition(target = position, zoom = currentZoom))
+                }
+            }
+        }
+
         // Näytetään PopUpCard kun pysäkki valitaan
 
         if (selectedFeature != null) {

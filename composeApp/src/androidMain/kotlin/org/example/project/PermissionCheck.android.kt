@@ -7,7 +7,11 @@ import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+
 
 @Composable
 actual fun rememberPermissionChecker(onPermissionResult: (Boolean) -> Unit): PermissionChecker {
@@ -28,10 +32,12 @@ actual fun rememberPermissionChecker(onPermissionResult: (Boolean) -> Unit): Per
                         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
             override fun requestLocationPermission() {
+
                 launcher.launch(arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ))
+
             }
         }
     }

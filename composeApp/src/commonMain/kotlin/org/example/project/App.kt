@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,13 +55,14 @@ import org.koin.compose.KoinApplication
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.koinConfiguration
 
+private var isPermissionGranted by mutableStateOf(false)
+private  var isPermissionDialogCompleted by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class, KoinExperimentalAPI::class)
 @Composable
 @Preview
 fun App() {
     KoinApplication(configuration = koinConfiguration(koinConfig), content = {
-
 
         val coroutineScope = rememberCoroutineScope()
         val sheetState = rememberStandardBottomSheetState(
@@ -78,7 +81,23 @@ fun App() {
         }
         val tooltipState = rememberTooltipState(isPersistent = true)
 
+        val permissionChecker = rememberPermissionChecker(
+            onPermissionResult = { granted ->
+                isPermissionGranted = granted
+                isPermissionDialogCompleted = true
+            }
+        )
 
+        LaunchedEffect(Unit) {
+            if (permissionChecker.hasLocationPermission) {
+                isPermissionGranted = true
+                isPermissionDialogCompleted = true
+            } else {
+                permissionChecker.requestLocationPermission()
+
+            }
+
+        }
 
 
         MaterialTheme {
@@ -201,7 +220,15 @@ fun App() {
                             .padding(paddingValues),
                         contentAlignment = Alignment.Center
                     ) {
-                        MapComponent(onMarkerClick = onMarkerClick)
+                        if(isPermissionDialogCompleted) {
+                            MapComponent(onMarkerClick = onMarkerClick, locationPermission = isPermissionGranted)
+                        } else{
+                            CircularProgressIndicator(
+                                modifier = Modifier.width(64.dp),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            )
+                        }
                     }
 
                 },
