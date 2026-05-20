@@ -24,10 +24,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
 import org.example.project.data.getStopStatus
-import org.koin.core.component.getScopeId
-import org.koin.core.component.getScopeName
+import org.koin.core.qualifier.qualifier
+import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
-import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
@@ -50,8 +49,6 @@ import org.maplibre.spatialk.geojson.toJson
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
-import org.maplibre.compose.location.BearingUpdate
-import org.maplibre.compose.location.LocationChangeScope
 import org.maplibre.compose.location.LocationProvider
 import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.LocationPuckColors
@@ -59,15 +56,13 @@ import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
-import org.maplibre.compose.location.Location
+import org.maplibre.compose.location.LocationPuckSizes
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
 private var enableTracking by mutableStateOf(false)
 
-private var previous: Location? by mutableStateOf<Location?>(null)
-private var current: Location? by mutableStateOf<Location?>(null)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,10 +79,9 @@ fun MapComponent(
 
     } else {
         locationProvider = rememberNullLocationProvider()
-
     }
 
-    println("Provider " + locationProvider.location.value)
+
     val locationState = rememberUserLocationState(locationProvider)
 
 
@@ -150,31 +144,31 @@ fun MapComponent(
             ),
 
             ) {
+            // Näytetään LocationPuck jos sijainnin käyttö on sallittu
             if (locationPermission) {
+                LocationPuck(
+                    idPrefix = "user",
+                    locationState = locationState,
+                    cameraState = camera,
+                    colors = LocationPuckColors(),
+                    accuracyThreshold = Float.POSITIVE_INFINITY,
+                    sizes = LocationPuckSizes(),
+                    showBearing = true
+                )
 
                 LocationTrackingEffect(
                     locationState = locationState,
                     enabled = enableTracking,
                 ) {
-                    previous = previousLocation
-                    current = currentLocation
-                    camera.updateFromLocation(updateBearing = BearingUpdate.TRACK_LOCATION)
 
-                   // val position = locationState.location!!.position
-                   // val currentZoom = camera.position.zoom
-                   // camera.animateTo(CameraPosition(target = position, zoom = currentZoom))
+                    camera.updateFromLocation()
+                    if (camera.moveReason == CameraMoveReason.GESTURE){
+                        enableTracking = false
+                    }
+
                 }
-                println("Provider " + locationProvider.location.value)
-                println("Previous " + previous + " and current " + current)
-                println("Location state " + locationState.location?.position)
-                LocationPuck(
-                    idPrefix = "user",
-                    locationState = locationState,
-                    cameraState = camera,
-                    colors = LocationPuckColors()
-                )
-            }
 
+            }
 
             //SymbolLayer
             SymbolLayer(
@@ -237,20 +231,6 @@ fun MapComponent(
                     )
                 }
 
-            }
-        }
-
-        if (locationState.location != null) {
-
-            LaunchedEffect(Unit) {
-                println("Enabled tracking " + locationState)
-
-
-                val position = locationState.location?.position
-                val currentZoom = camera.position.zoom
-                if (position != null) {
-                    camera.animateTo(CameraPosition(target = position, zoom = currentZoom))
-                }
             }
         }
 
