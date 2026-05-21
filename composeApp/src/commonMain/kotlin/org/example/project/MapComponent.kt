@@ -49,6 +49,7 @@ import org.maplibre.spatialk.geojson.toJson
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
+import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationProvider
 import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.LocationPuckColors
@@ -161,7 +162,7 @@ fun MapComponent(
                     enabled = enableTracking,
                 ) {
 
-                    camera.updateFromLocation()
+                    camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
                     if (camera.moveReason == CameraMoveReason.GESTURE){
                         enableTracking = false
                     }
@@ -244,17 +245,17 @@ fun MapComponent(
                     val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
                     val horizontalMargin = 50.dp
-                    val topMargin = 70.dp// Space for the Card
+                    val topMargin = 70.dp
                     val bottomMargin = 30.dp
                     val screenX = screenPos?.x
                     val screenY = screenPos?.y
 
-                    val isUnsafe = screenX!! < horizontalMargin ||
+                    val needsUpdate = screenX!! < horizontalMargin ||
                             screenX > (screenWidth - horizontalMargin) ||
                             screenY!! < topMargin ||
                             screenY > (screenHeight - bottomMargin)
 
-                    if (isUnsafe) {
+                    if (needsUpdate) {
                         camera.animateTo(
                             CameraPosition(
                                 target = targ,
