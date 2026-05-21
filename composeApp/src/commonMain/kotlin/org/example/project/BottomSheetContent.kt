@@ -62,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -297,7 +298,7 @@ fun BottomSheetContent(
                             modifier = Modifier
                                 .weight(3.0f)
                                 .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
                             softWrap = true,
 
                             )
