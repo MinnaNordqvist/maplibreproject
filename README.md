@@ -6,6 +6,9 @@ This is an open source project connecting data from two Föli REST APIs.
 Data source: 
 Turku region public transport's transit and timetable data. The administrator of data is Turku region public transport. Dataset is downloaded from http://data.foli.fi/ using the license Creative Commons Attribution 4.0 International (CC BY 4.0). 
   
+
+Tutorial part 1
+https://medium.com/@minnanord/android-and-ios-public-transportation-timetable-app-with-maplibre-compose-part-1-539da3a97f97
  
  wip
 .  
