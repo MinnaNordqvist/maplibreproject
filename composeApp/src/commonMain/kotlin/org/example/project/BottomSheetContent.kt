@@ -302,7 +302,7 @@ fun BottomSheetContent(
                             softWrap = true,
 
                             )
-                        if (bus.aikaero() >= 60) {
+                        if (bus.aikaero() > 60) {
                             Image(
                                 painter = painterResource(Res.drawable.hourglass),
                                 contentDescription = null,
@@ -311,7 +311,7 @@ fun BottomSheetContent(
                                 alignment = Alignment.TopEnd
                             )
                         }
-                        if (bus.aikaero() <= -60) {
+                        if (bus.aikaero() < -60) {
                             Image(
                                 painter = painterResource(Res.drawable.bolt),
                                 contentDescription = null,

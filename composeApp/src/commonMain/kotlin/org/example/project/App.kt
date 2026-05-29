@@ -79,7 +79,6 @@ fun App() {
             selectedMarker = markerdata
 
         }
-        val tooltipState = rememberTooltipState(isPersistent = true)
 
         val permissionChecker = rememberPermissionChecker(
             onPermissionResult = { granted ->
@@ -137,81 +136,9 @@ fun App() {
                         },
                         actions = {
                             // Info button. Näytetään lähde ja selitykset symboleille
-                            TooltipBox(
-                                positionProvider =
-                                    TooltipDefaults.rememberTooltipPositionProvider(
-                                        TooltipAnchorPosition.Below
-                                    ),
-                                tooltip = {
-                                    RichTooltip(
-                                        title = { Text("Info") },
-                                        caretShape = null,
-                                    ) {
-
-                                        Column(
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Row() {
-                                                Image(
-                                                    painter = painterResource(Res.drawable.bolt),
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(25.dp, 25.dp)
-                                                        .padding(
-                                                            start = 0.dp,
-                                                            top = 0.dp,
-                                                            end = 0.dp,
-                                                            bottom = 0.dp
-                                                        ),
-
-                                                    )
-                                                Text("Bussi on ainakin minuutin etuajassa aikataulusta \n")
-                                            }
-                                            Row() {
-                                                Image(
-                                                    painter = painterResource(Res.drawable.hourglass),
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(25.dp, 25.dp)
-                                                        .padding(
-                                                            start = 0.dp,
-                                                            top = 0.dp,
-                                                            end = 0.dp,
-                                                            bottom = 0.dp
-                                                        ),
-
-                                                    )
-                                                Text("Bussi on ainakin minuutin myöhässä aikataulusta \n")
-                                            }
-                                            Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
-                                        }
-                                    }
-
-                                },
-                                state = tooltipState,
-
-                            ) {
-                                IconButton(
-                                    modifier = Modifier.padding(
-                                        start = 0.dp,
-                                        top = 0.dp,
-                                        end = 0.dp,
-                                        bottom = 0.dp
-                                    ),
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            tooltipState.show()
-                                        }
-                                    }
-                                ) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.info),
-                                        contentDescription = null,
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
-                                }
-                            }
+                            InfoButton()
                         }
                     )
-
                 }, // Main content
                 content = { paddingValues ->
                     Box(
