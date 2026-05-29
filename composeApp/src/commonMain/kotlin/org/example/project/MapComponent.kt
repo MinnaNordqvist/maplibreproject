@@ -49,6 +49,7 @@ import org.maplibre.spatialk.geojson.toJson
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
+import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationProvider
 import org.maplibre.compose.location.LocationPuck
@@ -58,6 +59,9 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.location.LocationPuckSizes
+import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.GeoJsonOptions
+import org.maplibre.compose.sources.rememberGeoJsonSource
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
@@ -87,6 +91,9 @@ fun MapComponent(
 
 
     var isLoading by remember { mutableStateOf(true) }
+
+
+
 
 
     LaunchedEffect(Unit) {
@@ -212,6 +219,24 @@ fun MapComponent(
                     }
                     ClickResult.Consume
                 }
+            )
+            val poiSource =
+                rememberGeoJsonSource(
+                    data =
+                        GeoJsonData.Uri(
+                            "https://data.foli.fi/geojson/poi"
+                        ),
+                    options = GeoJsonOptions(tolerance = 0.1f),
+                )
+
+            CircleLayer(
+                id = "poi",
+                source = poiSource,
+                visible = true,
+                onClick = { features ->
+                    println("Clicked on ${features[0].toJson()}")
+                    ClickResult.Consume
+                },
             )
 
 
