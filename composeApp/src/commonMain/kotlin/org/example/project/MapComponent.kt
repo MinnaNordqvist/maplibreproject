@@ -85,10 +85,6 @@ private var httpStat by mutableStateOf(0)
 
 private var enableTracking by mutableStateOf(false)
 
-private var geoJsonString by  mutableStateOf("")
-
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapComponent(
@@ -114,6 +110,9 @@ fun MapComponent(
 
 
     var svgIcon by remember { mutableStateOf("") }
+    var geoJsonString by remember { mutableStateOf("") }
+    var svgTicket by remember { mutableStateOf("") }
+    var geoJsonTicket by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
@@ -122,6 +121,8 @@ fun MapComponent(
                 httpStat = getStopStatus().value
                 geoJsonString = getGeoJson("service_points")
                 svgIcon = getSVGstring(geoJsonString)
+                geoJsonTicket = getGeoJson("ticket_machines")
+                svgTicket = getSVGstring(geoJsonTicket)
                 isLoading = false
                 //println(httpStat)
             } catch (e: Exception) {
@@ -131,7 +132,7 @@ fun MapComponent(
     }
 
     val servIcon = rememberDynamicSvgPainter(svgIcon)
-
+    val ticketIcon = rememberDynamicSvgPainter(svgTicket)
 
 
     val camera = rememberCameraState(
@@ -247,7 +248,7 @@ fun MapComponent(
 
 
 
-            val poiSource = rememberGeoJsonSource(
+            val serviceSource = rememberGeoJsonSource(
                     data =
                         GeoJsonData.Uri(
                             "https://data.foli.fi/geojson/poi/service_points"
@@ -255,18 +256,39 @@ fun MapComponent(
                     options = GeoJsonOptions(tolerance = 0.1f),
                 )
 
+            val ticketSource = rememberGeoJsonSource(
+                data = GeoJsonData.Uri(
+                    "https://data.foli.fi/geojson/poi/ticket_machines"
+                ),
+                options =  GeoJsonOptions(tolerance = 0.1f),
+            )
 
             if(!isLoading) {
                 SymbolLayer(
                     id = "service_points",
-                    source = poiSource,
+                    source = serviceSource,
                     iconImage = image(servIcon),
                     iconSize = const(0.1f),
                     visible = true,
+                    iconAllowOverlap = const(true),
                     onClick = { features ->
                         println("Clicked on ${features[0].toJson()}")
                         ClickResult.Consume
                     },
+                )
+
+                SymbolLayer(
+                    id = "ticket_machines",
+                    source = ticketSource,
+                    iconImage = image(ticketIcon),
+                    iconSize = const(0.1f),
+                    visible = true,
+                    iconAllowOverlap = const(true),
+                    onClick = { features ->
+                        println("Clicked on ${features[0].toJson()}")
+                        ClickResult.Consume
+                    },
+
                 )
             }
 
