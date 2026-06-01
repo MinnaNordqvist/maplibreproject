@@ -113,6 +113,8 @@ fun MapComponent(
     var geoJsonString by remember { mutableStateOf("") }
     var svgTicket by remember { mutableStateOf("") }
     var geoJsonTicket by remember { mutableStateOf("") }
+    var svgLoading by remember { mutableStateOf("") }
+    var geoJsonLoading by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
@@ -123,6 +125,8 @@ fun MapComponent(
                 svgIcon = getSVGstring(geoJsonString)
                 geoJsonTicket = getGeoJson("ticket_machines")
                 svgTicket = getSVGstring(geoJsonTicket)
+                geoJsonLoading = getGeoJson("loading_points")
+                svgLoading = getSVGstring(geoJsonLoading)
                 isLoading = false
                 //println(httpStat)
             } catch (e: Exception) {
@@ -133,7 +137,7 @@ fun MapComponent(
 
     val servIcon = rememberDynamicSvgPainter(svgIcon)
     val ticketIcon = rememberDynamicSvgPainter(svgTicket)
-
+    val loadingIcon = rememberDynamicSvgPainter(svgLoading)
 
     val camera = rememberCameraState(
         firstPosition =
@@ -263,12 +267,20 @@ fun MapComponent(
                 options =  GeoJsonOptions(tolerance = 0.1f),
             )
 
-            if(!isLoading) {
+            val loadingSource = rememberGeoJsonSource(
+                data = GeoJsonData.Uri(
+                    "https://data.foli.fi/geojson/poi/loading_points"
+                ),
+                options = GeoJsonOptions(tolerance = 0.1f),
+            )
+
+
+            if (!isLoading) {
                 SymbolLayer(
                     id = "service_points",
                     source = serviceSource,
                     iconImage = image(servIcon),
-                    iconSize = const(0.1f),
+                    iconSize = const(0.09f),
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
@@ -281,14 +293,26 @@ fun MapComponent(
                     id = "ticket_machines",
                     source = ticketSource,
                     iconImage = image(ticketIcon),
-                    iconSize = const(0.1f),
+                    iconSize = const(0.09f),
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
                         println("Clicked on ${features[0].toJson()}")
                         ClickResult.Consume
                     },
+                )
 
+                SymbolLayer(
+                    id = "loading_points",
+                    source = loadingSource,
+                    iconImage = image(loadingIcon),
+                    iconSize = const(0.09f),
+                    visible = true,
+                    iconAllowOverlap = const(true),
+                    onClick = { features ->
+                        println("Clicked on ${features[0].toJson()}")
+                        ClickResult.Consume
+                    },
                 )
             }
 
