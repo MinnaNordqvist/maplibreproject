@@ -152,6 +152,9 @@ fun MapComponent(
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
 
+    var selectedPoi by remember {mutableStateOf<Feature<Geometry, JsonObject?>?>(null)}
+
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val screenWidth = with(density) { maxWidth }
@@ -166,12 +169,14 @@ fun MapComponent(
             onMapClick = { point, screenPoint ->
                 selectedFeature = null
                 selectedStop = ""
+                selectedPoi = null
                 ClickResult.Pass
             },
 
             onMapLongClick = { point, screenPoint ->
                 selectedFeature = null
                 selectedStop = ""
+                selectedPoi = null
                 ClickResult.Pass
             },
 
@@ -227,7 +232,7 @@ fun MapComponent(
                     selectedStop = selectedFeature?.getStringProperty("stop_code")
                     selectedFeature?.let { onMarkerClick(it) }
 
-                    println("Clicked on ${features[0].toJson()}")
+                    //println("Clicked on ${features[0].toJson()}")
                     ClickResult.Consume
                 },
             )
@@ -284,6 +289,7 @@ fun MapComponent(
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
+                        selectedPoi = features.firstOrNull()
                         println("Clicked on ${features[0].toJson()}")
                         ClickResult.Consume
                     },
@@ -297,6 +303,7 @@ fun MapComponent(
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
+                        selectedPoi = features.firstOrNull()
                         println("Clicked on ${features[0].toJson()}")
                         ClickResult.Consume
                     },
@@ -310,9 +317,11 @@ fun MapComponent(
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
+                        selectedPoi = features.firstOrNull()
                         println("Clicked on ${features[0].toJson()}")
                         ClickResult.Consume
                     },
+
                 )
             }
 
@@ -380,6 +389,20 @@ fun MapComponent(
             }
 
         }
+
+        if (selectedPoi != null) {
+            selectedPoi?.let{ feature ->
+                LaunchedEffect(feature.geometry) {
+
+                }
+                PoiInfoCard(
+                    feature = feature,
+                    cameraState = camera
+                )
+            }
+
+        }
+
     }
 }
 

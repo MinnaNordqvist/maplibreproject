@@ -248,3 +248,48 @@ fun getSVGstring(geoJson: String): String{
     }
     return svgIcon
 }
+
+
+@Composable
+fun PoiInfoCard(
+    feature: Feature<Geometry, JsonObject?>,
+    cameraState: CameraState,
+){
+    val pos = (feature.geometry as Point).coordinates
+
+    val dpTarg = remember(pos, cameraState.position) {
+        cameraState.projection?.screenLocationFromPosition(pos)
+    }
+
+    val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
+
+    Card(
+        modifier = Modifier
+            .absoluteOffset {
+                IntOffset(
+                    x = off.x.toInt() - (100), //  horizontal
+                    y = off.y.toInt() - (250)  // position above the marker
+                )
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(width=1.dp, color = Color.Black)
+    ){
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = feature.getStringProperty("category") ?: "",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 6.dp),
+                text = feature.getStringProperty("text") ?: "",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+    }
+}
+
+
+
+
