@@ -121,15 +121,7 @@ fun MapComponent(
                 data = getStopsAsGeoJson()
                 httpStat = getStopStatus().value
                 geoJsonString = getGeoJson("service_points")
-                val json = Json.parseToJsonElement(geoJsonString).jsonObject
-                val features = json["features"]?.jsonArray
-                if (!features.isNullOrEmpty()) {
-                    val firstFeatureProps = features[0].jsonObject["properties"]?.jsonObject
-                    val iconObj = firstFeatureProps?.get("icon")?.jsonObject
-                    svgIcon = iconObj?.get("svg")?.jsonPrimitive?.content.toString()
-
-                   // println("Extracted SVG: $svgIcon")
-                }
+                svgIcon = getSVGstring(geoJsonString)
                 isLoading = false
                 //println(httpStat)
             } catch (e: Exception) {

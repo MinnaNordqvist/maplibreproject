@@ -34,7 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.FeatureSerializer
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.SvgPathParser
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import maplibreproject.composeapp.generated.resources.Res
 import maplibreproject.composeapp.generated.resources.bus
 import org.example.project.data.Stop
@@ -230,4 +234,17 @@ fun parseHtmlColor(colorString: String): Long {
         8 -> cleanHex.toLong(16)
         else -> 0xFFFFFFFF // Default fallback White
     }
+}
+
+
+fun getSVGstring(geoJson: String): String{
+    var svgIcon = ""
+    val json = Json.parseToJsonElement(geoJson).jsonObject
+    val features = json["features"]?.jsonArray
+    if (!features.isNullOrEmpty()) {
+        val firstFeatureProps = features[0].jsonObject["properties"]?.jsonObject
+        val iconObj = firstFeatureProps?.get("icon")?.jsonObject
+        svgIcon = iconObj?.get("svg")?.jsonPrimitive?.content.toString()
+    }
+    return svgIcon
 }
