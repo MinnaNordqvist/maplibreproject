@@ -107,7 +107,7 @@ fun PopUpCard(
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
 
-    var width by remember { mutableStateOf(0) }
+    var width by remember { mutableStateOf(1) }
 
     Card(
         modifier = Modifier
@@ -262,13 +262,15 @@ fun PoiInfoCard(
     }
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
+    var width by remember { mutableStateOf(1) }
 
     Card(
         modifier = Modifier
+            .onSizeChanged{width = it.width}
             .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt() - (100), //  horizontal
-                    y = off.y.toInt() - (250)  // position above the marker
+                    x = off.x.toInt() - (width/2), //  horizontal
+                    y = off.y.toInt() - (290)  // position above the marker
                 )
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
@@ -277,12 +279,12 @@ fun PoiInfoCard(
     ){
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = feature.getStringProperty("category") ?: "",
+                text = feature.getStringProperty("text") ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
                 modifier = Modifier.padding(bottom = 6.dp),
-                text = feature.getStringProperty("text") ?: "",
+                text = feature.getStringProperty("category") ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
