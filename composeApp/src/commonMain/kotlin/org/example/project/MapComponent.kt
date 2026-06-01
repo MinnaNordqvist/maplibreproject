@@ -1,5 +1,6 @@
 package org.example.project
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -16,14 +17,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import io.ktor.http.ContentType.Image.SVG
+import io.ktor.util.collections.getValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import maplibreproject.composeapp.generated.resources.Res
+import org.example.project.data.getGeoJson
 import org.example.project.data.getStopStatus
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.core.qualifier.qualifier
 import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
@@ -61,12 +75,18 @@ import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.location.LocationPuckSizes
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
+import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import androidx.compose.ui.graphics.ImageBitmap
+
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
 private var enableTracking by mutableStateOf(false)
+
+private var geoJsonString by  mutableStateOf("")
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,14 +113,23 @@ fun MapComponent(
     var isLoading by remember { mutableStateOf(true) }
 
 
-
-
+    var svgIcon by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
             try {
                 data = getStopsAsGeoJson()
                 httpStat = getStopStatus().value
+                geoJsonString = getGeoJson("service_points")
+                val json = Json.parseToJsonElement(geoJsonString).jsonObject
+                val features = json["features"]?.jsonArray
+                if (!features.isNullOrEmpty()) {
+                    val firstFeatureProps = features[0].jsonObject["properties"]?.jsonObject
+                    val iconObj = firstFeatureProps?.get("icon")?.jsonObject
+                    svgIcon = iconObj?.get("svg")?.jsonPrimitive?.content.toString()
+
+                   // println("Extracted SVG: $svgIcon")
+                }
                 isLoading = false
                 //println(httpStat)
             } catch (e: Exception) {
@@ -108,6 +137,10 @@ fun MapComponent(
             }
         }
     }
+
+    val servIcon = rememberDynamicSvgPainter(svgIcon)
+
+
 
     val camera = rememberCameraState(
         firstPosition =
@@ -121,7 +154,6 @@ fun MapComponent(
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
-
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -220,25 +252,31 @@ fun MapComponent(
                     ClickResult.Consume
                 }
             )
-            val poiSource =
-                rememberGeoJsonSource(
+
+
+
+            val poiSource = rememberGeoJsonSource(
                     data =
                         GeoJsonData.Uri(
-                            "https://data.foli.fi/geojson/poi"
+                            "https://data.foli.fi/geojson/poi/service_points"
                         ),
                     options = GeoJsonOptions(tolerance = 0.1f),
                 )
 
-            CircleLayer(
-                id = "poi",
-                source = poiSource,
-                visible = true,
-                onClick = { features ->
-                    println("Clicked on ${features[0].toJson()}")
-                    ClickResult.Consume
-                },
-            )
 
+            if(!isLoading) {
+                SymbolLayer(
+                    id = "service_points",
+                    source = poiSource,
+                    iconImage = image(servIcon),
+                    iconSize = const(0.1f),
+                    visible = true,
+                    onClick = { features ->
+                        println("Clicked on ${features[0].toJson()}")
+                        ClickResult.Consume
+                    },
+                )
+            }
 
         }
         //UI Layer

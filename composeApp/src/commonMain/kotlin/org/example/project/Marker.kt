@@ -20,13 +20,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.FeatureSerializer
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.SvgPathParser
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
 import maplibreproject.composeapp.generated.resources.bus
@@ -161,3 +168,66 @@ class TooltipShape : Shape {
 
 }
 
+
+@Composable
+fun rememberDynamicSvgPainter(svgString: String): Painter {
+    return rememberVectorPainter(
+        remember(svgString) {
+            // 1. Create a base Vector Builder matchable to your 256x256 viewpoints
+            val builder = ImageVector.Builder(
+                name = "DynamicPoiIcon",
+                defaultWidth = 256.dp,
+                defaultHeight = 256.dp,
+                viewportWidth = 256f,
+                viewportHeight = 256f
+            )
+
+            try {
+                // 2. Extract all path data chunks and their accompanying fill colors
+                // This regex finds the contents of d="..." and optionally fill="..." inside the nodes
+                val pathRegex = """<path[^>]*d="([^"]+)"[^>]*>""".toRegex()
+                val fillRegex = """fill="([^"]+)"""".toRegex()
+
+                // Also look inside group tags <g fill="..."> if paths don't have explicit colors
+                val groupFillRegex = """<g[^>]*fill="([^"]+)"""".toRegex()
+                val defaultGroupColor = groupFillRegex.find(svgString)?.groupValues?.get(1) ?: "#FFFFFF"
+
+                val matches = pathRegex.findAll(svgString)
+
+                for (match in matches) {
+                    val pathData = match.groupValues[1]
+
+                    // Determine color for this specific path layer
+                    val explicitFill = fillRegex.find(match.value)?.groupValues?.get(1)
+                    val colorHex = explicitFill ?: defaultGroupColor
+
+                    val pathColor = try {
+                        Color(parseHtmlColor(colorHex))
+                    } catch (e: Exception) {
+                        Color.White // Fallback if color format mismatch
+                    }
+
+                    // 3. Convert the raw SVG string geometry straight into Compose vector nodes
+                    builder.addPath(
+                        pathData = PathParser().parsePathString(pathData).toNodes(),
+                        fill = SolidColor(pathColor)
+                    )
+                }
+            } catch (e: Exception) {
+                // Fallback safe path (e.g. an empty/error square) if parsing completely fails
+                e.printStackTrace()
+            }
+
+            builder.build()
+        }
+    )
+}
+
+fun parseHtmlColor(colorString: String): Long {
+    val cleanHex = colorString.replace("#", "").trim()
+    return when (cleanHex.length) {
+        6 -> "FF$cleanHex".toLong(16) // Add full alpha layer if missing
+        8 -> cleanHex.toLong(16)
+        else -> 0xFFFFFFFF // Default fallback White
+    }
+}
