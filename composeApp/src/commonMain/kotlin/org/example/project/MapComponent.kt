@@ -246,6 +246,7 @@ fun MapComponent(
                 iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
                 iconHaloWidth = const(19.dp),
+                iconAllowOverlap = const(true),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
                 onClick = { features ->
                     features.firstOrNull()?.let {

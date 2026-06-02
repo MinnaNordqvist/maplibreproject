@@ -263,6 +263,13 @@ fun PoiInfoCard(
 
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
     var width by remember { mutableStateOf(1) }
+    var categoryName by remember {mutableStateOf("")}
+
+    when (feature.getStringProperty("category")){
+        "SERVICE_POINT" -> categoryName = "Palvelupiste"
+        "LOADING_POINT" -> categoryName = "Latauspiste"
+        "TICKET_MACHINE" -> categoryName = "Lippuautomaatti"
+    }
 
     Card(
         modifier = Modifier
@@ -279,14 +286,14 @@ fun PoiInfoCard(
     ){
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = (feature.getStringProperty("text") + "\n" + feature.getStringProperty("city")) ?: "",
+                text = categoryName,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                modifier = Modifier.padding(bottom = 6.dp),
-                text = feature.getStringProperty("category") ?: "",
+                text = (feature.getStringProperty("text") + "\n" + feature.getStringProperty("city")) ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
+
         }
 
     }
