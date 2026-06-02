@@ -42,5 +42,5 @@ suspend fun getStopTimes(stop_id: String?) : List<StopTimes> {
 suspend fun getGeoJson(layer: String?): String {
     return org.example.project.client.get("https://data.foli.fi/geojson/poi/$layer"){
         method = HttpMethod.Get
-    }.bodyAsText()
+    }.body()
 }

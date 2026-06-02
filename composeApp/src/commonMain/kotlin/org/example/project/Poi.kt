@@ -43,9 +43,23 @@ import org.maplibre.spatialk.geojson.Point
 
 
 
+fun getSVGstring(geoJson: String): String{
+    var svgIcon = ""
+    val json = Json.parseToJsonElement(geoJson).jsonObject
+    val features = json["features"]?.jsonArray
+    if (!features.isNullOrEmpty()) {
+        val firstFeatureProps = features[0].jsonObject["properties"]?.jsonObject
+        val iconObj = firstFeatureProps?.get("icon")?.jsonObject
+        svgIcon = iconObj?.get("svg")?.jsonPrimitive?.content.toString()
+    }
+    return svgIcon
+}
 
 
-
+@Composable
+fun poiSource(data: String): GeoJsonSource{
+    return rememberGeoJsonSource(GeoJsonData.Uri(data), options =  GeoJsonOptions(tolerance = 0.1f),)
+}
 
 
 
@@ -112,27 +126,6 @@ fun parseHtmlColor(colorString: String): Long {
         else -> 0xFFFFFFFF // Default fallback White
     }
 }
-
-
-fun getSVGstring(geoJson: String): String{
-    var svgIcon = ""
-    val json = Json.parseToJsonElement(geoJson).jsonObject
-    val features = json["features"]?.jsonArray
-    if (!features.isNullOrEmpty()) {
-        val firstFeatureProps = features[0].jsonObject["properties"]?.jsonObject
-        val iconObj = firstFeatureProps?.get("icon")?.jsonObject
-        svgIcon = iconObj?.get("svg")?.jsonPrimitive?.content.toString()
-    }
-    return svgIcon
-}
-
-
-@Composable
-fun poiSource(data: String): GeoJsonSource{
-    return rememberGeoJsonSource(GeoJsonData.Uri(data), options =  GeoJsonOptions(tolerance = 0.1f),)
-}
-
-
 
 
 @Composable
