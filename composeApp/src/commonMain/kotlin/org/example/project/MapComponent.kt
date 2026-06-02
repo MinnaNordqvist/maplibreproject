@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
-import org.example.project.data.getGeoJson
 import org.example.project.data.getStopStatus
 import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
@@ -165,9 +164,9 @@ fun MapComponent(
                     idPrefix = "user",
                     locationState = locationState,
                     cameraState = camera,
-                    colors = LocationPuckColors(),
+                    colors = LocationPuckColors(dotFillColorCurrentLocation = Color(0XFF27A3F5)),
                     accuracyThreshold = Float.POSITIVE_INFINITY,
-                    sizes = LocationPuckSizes(),
+                    sizes = LocationPuckSizes(dotRadius = 8.dp),
                     showBearing = true
                 )
 
