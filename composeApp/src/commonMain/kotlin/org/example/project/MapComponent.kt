@@ -286,6 +286,8 @@ fun MapComponent(
                     source = serviceSource,
                     iconImage = image(servIcon),
                     iconSize = const(0.09f),
+                    minZoom = 0.0f,
+                    maxZoom = 24.0f,
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
@@ -300,6 +302,8 @@ fun MapComponent(
                     source = ticketSource,
                     iconImage = image(ticketIcon),
                     iconSize = const(0.09f),
+                    minZoom = 0.0f,
+                    maxZoom = 24.0f,
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->
@@ -314,6 +318,8 @@ fun MapComponent(
                     source = loadingSource,
                     iconImage = image(loadingIcon),
                     iconSize = const(0.09f),
+                    minZoom = 0.0f,
+                    maxZoom = 24.0f,
                     visible = true,
                     iconAllowOverlap = const(true),
                     onClick = { features ->

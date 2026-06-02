@@ -279,7 +279,7 @@ fun PoiInfoCard(
     ){
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = feature.getStringProperty("text") ?: "",
+                text = (feature.getStringProperty("text") + "\n" + feature.getStringProperty("city")) ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
