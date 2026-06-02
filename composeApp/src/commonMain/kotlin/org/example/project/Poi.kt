@@ -30,6 +30,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.example.project.data.getGeoJson
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
@@ -41,6 +42,13 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Point
 
 
+
+suspend fun getSVG(layer: String): String{
+    var svg = ""
+    val geoJson = getGeoJson(layer)
+    svg = getSVGstring(geoJson)
+    return svg
+}
 
 
 fun getSVGstring(geoJson: String): String{

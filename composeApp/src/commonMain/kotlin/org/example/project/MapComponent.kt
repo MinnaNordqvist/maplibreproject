@@ -1,6 +1,6 @@
 package org.example.project
 
-import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -17,28 +17,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import io.ktor.http.ContentType.Image.SVG
-import io.ktor.util.collections.getValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import maplibreproject.composeapp.generated.resources.Res
 import org.example.project.data.getGeoJson
 import org.example.project.data.getStopStatus
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.vectorResource
-import org.koin.core.qualifier.qualifier
 import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
@@ -63,7 +50,6 @@ import org.maplibre.spatialk.geojson.toJson
 import org.maplibre.compose.expressions.dsl.Feature.get
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.eq
-import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationProvider
 import org.maplibre.compose.location.LocationPuck
@@ -73,10 +59,6 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.location.LocationPuckSizes
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.GeoJsonOptions
-import org.maplibre.compose.sources.GeoJsonSource
-import org.maplibre.compose.sources.rememberGeoJsonSource
 
 
 
@@ -108,25 +90,19 @@ fun MapComponent(
 
     var isLoading by remember { mutableStateOf(true) }
 
-
+    // POI icons
     var svgService by remember { mutableStateOf("") }
-    var geoJsonService by remember { mutableStateOf("") }
     var svgTicket by remember { mutableStateOf("") }
-    var geoJsonTicket by remember { mutableStateOf("") }
     var svgLoading by remember { mutableStateOf("") }
-    var geoJsonLoading by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
             try {
                 data = getStopsAsGeoJson()
                 httpStat = getStopStatus().value
-                geoJsonService = getGeoJson("service_points")
-                svgService = getSVGstring(geoJsonService)
-                geoJsonTicket = getGeoJson("ticket_machines")
-                svgTicket = getSVGstring(geoJsonTicket)
-                geoJsonLoading = getGeoJson("loading_points")
-                svgLoading = getSVGstring(geoJsonLoading)
+                svgService = getSVG("service_points")
+                svgTicket = getSVG("ticket_machines")
+                svgLoading = getSVG("loading_points")
                 isLoading = false
                 //println(httpStat)
             } catch (e: Exception) {
@@ -253,7 +229,7 @@ fun MapComponent(
                 }
             )
 
-
+            // POI layers from GeoJSON source
             if (!isLoading) {
                 SymbolLayer(
                     id = "service_points",
