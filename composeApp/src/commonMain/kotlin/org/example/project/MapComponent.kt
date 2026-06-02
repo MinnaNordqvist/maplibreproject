@@ -109,8 +109,8 @@ fun MapComponent(
     var isLoading by remember { mutableStateOf(true) }
 
 
-    var svgIcon by remember { mutableStateOf("") }
-    var geoJsonString by remember { mutableStateOf("") }
+    var svgService by remember { mutableStateOf("") }
+    var geoJsonService by remember { mutableStateOf("") }
     var svgTicket by remember { mutableStateOf("") }
     var geoJsonTicket by remember { mutableStateOf("") }
     var svgLoading by remember { mutableStateOf("") }
@@ -121,8 +121,8 @@ fun MapComponent(
             try {
                 data = getStopsAsGeoJson()
                 httpStat = getStopStatus().value
-                geoJsonString = getGeoJson("service_points")
-                svgIcon = getSVGstring(geoJsonString)
+                geoJsonService = getGeoJson("service_points")
+                svgService = getSVGstring(geoJsonService)
                 geoJsonTicket = getGeoJson("ticket_machines")
                 svgTicket = getSVGstring(geoJsonTicket)
                 geoJsonLoading = getGeoJson("loading_points")
@@ -135,9 +135,6 @@ fun MapComponent(
         }
     }
 
-    val servIcon = rememberDynamicSvgPainter(svgIcon)
-    val ticketIcon = rememberDynamicSvgPainter(svgTicket)
-    val loadingIcon = rememberDynamicSvgPainter(svgLoading)
 
     val camera = rememberCameraState(
         firstPosition =
@@ -261,7 +258,7 @@ fun MapComponent(
                 SymbolLayer(
                     id = "service_points",
                     source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
-                    iconImage = image(servIcon),
+                    iconImage = image(poiIcon(svgService)),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
                     maxZoom = 24.0f,
@@ -277,7 +274,7 @@ fun MapComponent(
                 SymbolLayer(
                     id = "ticket_machines",
                     source = poiSource("https://data.foli.fi/geojson/poi/ticket_machines"),
-                    iconImage = image(ticketIcon),
+                    iconImage = image(poiIcon(svgTicket)),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
                     maxZoom = 24.0f,
@@ -293,7 +290,7 @@ fun MapComponent(
                 SymbolLayer(
                     id = "loading_points",
                     source = poiSource("https://data.foli.fi/geojson/poi/loading_points"),
-                    iconImage = image(loadingIcon),
+                    iconImage = image(poiIcon(svgLoading)),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
                     maxZoom = 24.0f,

@@ -61,7 +61,10 @@ fun poiSource(data: String): GeoJsonSource{
     return rememberGeoJsonSource(GeoJsonData.Uri(data), options =  GeoJsonOptions(tolerance = 0.1f),)
 }
 
-
+@Composable
+fun poiIcon(svgString: String): Painter{
+    return rememberDynamicSvgPainter(svgString)
+}
 
 
 @Composable
