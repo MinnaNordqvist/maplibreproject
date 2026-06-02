@@ -77,7 +77,7 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
-import androidx.compose.ui.graphics.ImageBitmap
+
 
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
@@ -257,34 +257,10 @@ fun MapComponent(
             )
 
 
-
-            val serviceSource = rememberGeoJsonSource(
-                    data =
-                        GeoJsonData.Uri(
-                            "https://data.foli.fi/geojson/poi/service_points"
-                        ),
-                    options = GeoJsonOptions(tolerance = 0.1f),
-                )
-
-            val ticketSource = rememberGeoJsonSource(
-                data = GeoJsonData.Uri(
-                    "https://data.foli.fi/geojson/poi/ticket_machines"
-                ),
-                options =  GeoJsonOptions(tolerance = 0.1f),
-            )
-
-            val loadingSource = rememberGeoJsonSource(
-                data = GeoJsonData.Uri(
-                    "https://data.foli.fi/geojson/poi/loading_points"
-                ),
-                options = GeoJsonOptions(tolerance = 0.1f),
-            )
-
-
             if (!isLoading) {
                 SymbolLayer(
                     id = "service_points",
-                    source = serviceSource,
+                    source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
                     iconImage = image(servIcon),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
@@ -300,7 +276,7 @@ fun MapComponent(
 
                 SymbolLayer(
                     id = "ticket_machines",
-                    source = ticketSource,
+                    source = poiSource("https://data.foli.fi/geojson/poi/ticket_machines"),
                     iconImage = image(ticketIcon),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
@@ -316,7 +292,7 @@ fun MapComponent(
 
                 SymbolLayer(
                     id = "loading_points",
-                    source = loadingSource,
+                    source = poiSource("https://data.foli.fi/geojson/poi/loading_points"),
                     iconImage = image(loadingIcon),
                     iconSize = const(0.09f),
                     minZoom = 0.0f,
