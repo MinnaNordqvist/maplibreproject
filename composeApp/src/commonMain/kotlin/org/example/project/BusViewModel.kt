@@ -1,5 +1,8 @@
 package org.example.project
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.http.HttpStatusCode
@@ -62,4 +65,14 @@ class BusViewModel : ViewModel(), KoinComponent {
     }
 
 }
+/*
+val _selectedLines = remember { MutableStateFlow(listOf<String>()) }
+val selectedLines by remember { _selectedLines }.collectAsState()
 
+fun addLine(line: String) {
+    val newList = ArrayList(selectedLines)
+    newList.add(line)
+    _selectedLines.value = newList
+}
+
+ */

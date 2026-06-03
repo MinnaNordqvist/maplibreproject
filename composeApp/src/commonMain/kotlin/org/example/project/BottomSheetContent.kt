@@ -3,7 +3,6 @@ package org.example.project
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,15 +19,9 @@ import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import maplibreproject.composeapp.generated.resources.Res
-import maplibreproject.composeapp.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
@@ -49,53 +41,35 @@ import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.descriptors.PrimitiveKind
 import maplibreproject.composeapp.generated.resources.refresh
 import maplibreproject.composeapp.generated.resources.bolt
 import maplibreproject.composeapp.generated.resources.hourglass
-import org.example.project.data.Response
 import org.example.project.data.Routes
 import org.example.project.data.Trips
 
 import org.example.project.data.getRoutes
 import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
-import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.collections.setOf
 
 //Linjojen värit
+
 fun String.toColor(): Color {
     val hex = this
     val colorLong = when (hex.length) {
@@ -150,17 +124,8 @@ fun BottomSheetContent(
     val displayNames = remember { mutableStateMapOf<String, List<String>>() }
 
     val selectedFilters = remember { mutableStateMapOf<String, List<String>>() }
-    val _selectedLines = remember { MutableStateFlow(listOf<String>()) }
-    val selectedLines by remember { _selectedLines }.collectAsState()
-
-    fun addLine(line: String) {
-        val newList = ArrayList(selectedLines)
-        newList.add(line)
-        _selectedLines.value = newList
-    }
 
 
-    var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(feature?.getStringProperty("stop_code")) {
         stopSearch = feature?.getStringProperty("stop_code")
@@ -254,6 +219,7 @@ fun BottomSheetContent(
                             )
                             OutlinedIconButton(
                                 onClick = {
+                                    selectedFilters.remove(stopSearch!!)
                                     scope.launch {
                                         busViewModel.getBusList(it.getStringProperty("stop_code"))
                                     }
@@ -292,8 +258,6 @@ fun BottomSheetContent(
                             val sel = arrayListOf<String>()
 
                             FilterChip(
-                                //onClick = { selectedIndex = index },
-                                //selected = index == selectedIndex,
                                 selected = selectedFilters[stopSearch]?.contains(label) == true,
                                 onClick = {
                                     if (selectedFilters[stopSearch]?.contains(label) == true) {
@@ -319,335 +283,19 @@ fun BottomSheetContent(
         }
         if (!selectedFilters.containsKey(stopSearch)) {
             itemsIndexed(uiState.busList) { index, bus ->
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0XFFf3f6f4)
-                    ),
-                    border = BorderStroke(1.dp, Color.Black),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(2.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
-                                    .size(60.dp, 40.dp)
-                                    //.weight(0.8f)
-                                    .background(routeDetails[bus.lineref]!!.toColor()),
-
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = bus.lineref,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 6.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                            }
-
-                            Text(
-                                text = bus.destinationdisplay,
-                                //fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .weight(3.0f)
-                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                                style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                                softWrap = true,
-
-                                )
-                            if (bus.aikaero() > 60) {
-                                Image(
-                                    painter = painterResource(Res.drawable.hourglass),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(25.dp, 30.dp)
-                                        .padding(
-                                            start = 2.dp,
-                                            top = 8.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    alignment = Alignment.TopEnd
-                                )
-                            }
-                            if (bus.aikaero() < -60) {
-                                Image(
-                                    painter = painterResource(Res.drawable.bolt),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(25.dp, 30.dp)
-                                        .padding(
-                                            start = 2.dp,
-                                            top = 8.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    alignment = Alignment.TopEnd
-                                )
-                                println(bus.aikaero())
-                            }
-                            Text(
-                                text = bus.getDeparture(),
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier
-                                    //.weight(0.8f)
-                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
-                        }
-                    }
-                }
+               Timetable(bus, routeDetails)
             }
         } else {
             itemsIndexed(uiState.busList) { index, line ->
                 if (selectedFilters[stopSearch]?.contains(line.lineref) == true) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0XFFf3f6f4)
-                        ),
-                        border = BorderStroke(1.dp, Color.Black),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(2.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 0.dp,
-                                            end = 6.dp,
-                                            bottom = 0.dp
-                                        )
-                                        .size(60.dp, 40.dp)
-                                        //.weight(0.8f)
-                                        .background(routeDetails[line.lineref]!!.toColor()),
+                   Timetable(line, routeDetails)
 
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = line.lineref,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .padding(
-                                                start = 0.dp,
-                                                top = 6.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                }
-
-                                Text(
-                                    text = line.destinationdisplay,
-                                    //fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Start,
-                                    modifier = Modifier
-                                        .weight(3.0f)
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 6.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                                    softWrap = true,
-
-                                    )
-                                if (line.aikaero() > 60) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.hourglass),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(25.dp, 30.dp)
-                                            .padding(
-                                                start = 2.dp,
-                                                top = 8.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        alignment = Alignment.TopEnd
-                                    )
-                                }
-                                if (line.aikaero() < -60) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.bolt),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(25.dp, 30.dp)
-                                            .padding(
-                                                start = 2.dp,
-                                                top = 8.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        alignment = Alignment.TopEnd
-                                    )
-                                    println(line.aikaero())
-                                }
-                                Text(
-                                    text = line.getDeparture(),
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.End,
-                                    modifier = Modifier
-                                        //.weight(0.8f)
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 6.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                println(line.destinationdisplay + " aikataulun mukainen " + line.getAimedDeparture() + " reealiaika " + line.getDeparture())
-                            }
-                        }
-                    }
                 }
                 if (selectedFilters[stopSearch]?.isEmpty() == true) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0XFFf3f6f4)
-                        ),
-                        border = BorderStroke(1.dp, Color.Black),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(2.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 0.dp,
-                                            end = 6.dp,
-                                            bottom = 0.dp
-                                        )
-                                        .size(60.dp, 40.dp)
-                                        //.weight(0.8f)
-                                        .background(routeDetails[line.lineref]!!.toColor()),
-
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = line.lineref,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .padding(
-                                                start = 0.dp,
-                                                top = 6.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                }
-
-                                Text(
-                                    text = line.destinationdisplay,
-                                    //fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Start,
-                                    modifier = Modifier
-                                        .weight(3.0f)
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 6.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                                    softWrap = true,
-
-                                    )
-                                if (line.aikaero() > 60) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.hourglass),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(25.dp, 30.dp)
-                                            .padding(
-                                                start = 2.dp,
-                                                top = 8.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        alignment = Alignment.TopEnd
-                                    )
-                                }
-                                if (line.aikaero() < -60) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.bolt),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(25.dp, 30.dp)
-                                            .padding(
-                                                start = 2.dp,
-                                                top = 8.dp,
-                                                end = 0.dp,
-                                                bottom = 0.dp
-                                            ),
-                                        alignment = Alignment.TopEnd
-                                    )
-                                    println(line.aikaero())
-                                }
-                                Text(
-                                    text = line.getDeparture(),
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.End,
-                                    modifier = Modifier
-                                        //.weight(0.8f)
-                                        .padding(
-                                            start = 0.dp,
-                                            top = 6.dp,
-                                            end = 0.dp,
-                                            bottom = 0.dp
-                                        ),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                println(line.destinationdisplay + " aikataulun mukainen " + line.getAimedDeparture() + " reealiaika " + line.getDeparture())
-                            }
-                        }
-                    }
+                    Timetable(line, routeDetails)
                 }
             }
+
         }
             if (httpStatus == 200 && uiState.busList.isEmpty()) {
                 item {

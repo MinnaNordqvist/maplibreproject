@@ -175,10 +175,12 @@ fun MapComponent(
                     enabled = enableTracking,
                 ) {
 
-                    camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
                     if (camera.moveReason == CameraMoveReason.GESTURE){
                         enableTracking = false
                     }
+
+                    camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
+
 
                 }
 
