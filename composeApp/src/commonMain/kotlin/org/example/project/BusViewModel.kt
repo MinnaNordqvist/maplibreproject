@@ -61,10 +61,5 @@ class BusViewModel : ViewModel(), KoinComponent {
         }
     }
 
-
-    fun stopAutoRefresh() {
-        refreshJob?.cancel()
-    }
-
 }
 

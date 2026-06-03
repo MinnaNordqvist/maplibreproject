@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -50,14 +51,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.BlendMode
@@ -65,8 +77,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.descriptors.PrimitiveKind
 import maplibreproject.composeapp.generated.resources.refresh
 import maplibreproject.composeapp.generated.resources.bolt
 import maplibreproject.composeapp.generated.resources.hourglass
@@ -79,6 +93,7 @@ import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.collections.setOf
 
 //Linjojen värit
 fun String.toColor(): Color {
@@ -134,7 +149,18 @@ fun BottomSheetContent(
 
     val displayNames = remember { mutableStateMapOf<String, List<String>>() }
 
+    val selectedFilters = remember { mutableStateMapOf<String, List<String>>() }
+    val _selectedLines = remember { MutableStateFlow(listOf<String>()) }
+    val selectedLines by remember { _selectedLines }.collectAsState()
 
+    fun addLine(line: String) {
+        val newList = ArrayList(selectedLines)
+        newList.add(line)
+        _selectedLines.value = newList
+    }
+
+
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(feature?.getStringProperty("stop_code")) {
         stopSearch = feature?.getStringProperty("stop_code")
@@ -215,7 +241,11 @@ fun BottomSheetContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "${it.getStringProperty("stop_name")}\n${it.getStringProperty("stop_code")}",
+                                text = "${it.getStringProperty("stop_name")}\n${
+                                    it.getStringProperty(
+                                        "stop_code"
+                                    )
+                                }",
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier
@@ -246,98 +276,49 @@ fun BottomSheetContent(
                                 )
                             }
                         }
-                        Text(text = ("Linjat: " + getDisplayNames()), Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp), fontWeight = FontWeight.Light)
-                    }
-                }
-            }
-        }
-        itemsIndexed(uiState.busList) { index, bus ->
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0XFFf3f6f4)
-                ),
-                border = BorderStroke(1.dp, Color.Black),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(2.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
-                                .size(60.dp, 40.dp)
-                                //.weight(0.8f)
-                                .background(routeDetails[bus.lineref]!!.toColor()),
-
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = bus.lineref,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
-
                         Text(
-                            text = bus.destinationdisplay,
-                            //fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier
-                                .weight(3.0f)
-                                .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                            style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                            softWrap = true,
-
-                            )
-                        if (bus.aikaero() > 60) {
-                            Image(
-                                painter = painterResource(Res.drawable.hourglass),
-                                contentDescription = null,
-                                modifier = Modifier.size(25.dp, 30.dp)
-                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
-                                alignment = Alignment.TopEnd
-                            )
-                        }
-                        if (bus.aikaero() < -60) {
-                            Image(
-                                painter = painterResource(Res.drawable.bolt),
-                                contentDescription = null,
-                                modifier = Modifier.size(25.dp, 30.dp)
-                                    .padding(start = 2.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
-                                alignment = Alignment.TopEnd
-                            )
-                            println(bus.aikaero())
-                        }
-                        Text(
-                            text = bus.getDeparture(),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier
-                                //.weight(0.8f)
-                                .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
-                            style = MaterialTheme.typography.titleMedium
+                            text = ("Linjat: " + getDisplayNames()),
+                            Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp),
+                            fontWeight = FontWeight.Light
                         )
-                        println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
+
+                    }
+                    FlowRow(
+                        modifier = Modifier.padding(horizontal = 6.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        maxItemsInEachRow = 8,
+                    ) {
+                        lines.forEachIndexed { index, label ->
+                            val sel = arrayListOf<String>()
+
+                            FilterChip(
+                                //onClick = { selectedIndex = index },
+                                //selected = index == selectedIndex,
+                                selected = selectedFilters[stopSearch]?.contains(label) == true,
+                                onClick = {
+                                    if (selectedFilters[stopSearch]?.contains(label) == true) {
+                                        sel.remove(label)
+                                        selectedFilters.put(stopSearch!!, sel)
+
+                                    } else {
+                                        sel.add(label)
+                                        selectedFilters.put(stopSearch!!, sel)
+                                        println(selectedFilters.toMap())
+                                    }
+                                },
+
+                                label = { Text(label) },
+
+                                modifier = Modifier.padding(end = 5.dp)
+                            )
+                        }
                     }
                 }
+
             }
         }
-
-        if (httpStatus == 200 && uiState.busList.isEmpty()) {
-            item {
+        if (!selectedFilters.containsKey(stopSearch)) {
+            itemsIndexed(uiState.busList) { index, bus ->
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0XFFf3f6f4)
@@ -346,25 +327,357 @@ fun BottomSheetContent(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(2.dp),
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = "Ei linjoja seuraavan tunnin aikana",
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
+                                    .size(60.dp, 40.dp)
+                                    //.weight(0.8f)
+                                    .background(routeDetails[bus.lineref]!!.toColor()),
+
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = bus.lineref,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 6.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                            }
+
+                            Text(
+                                text = bus.destinationdisplay,
+                                //fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .weight(3.0f)
+                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                                style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
+                                softWrap = true,
+
+                                )
+                            if (bus.aikaero() > 60) {
+                                Image(
+                                    painter = painterResource(Res.drawable.hourglass),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp, 30.dp)
+                                        .padding(
+                                            start = 2.dp,
+                                            top = 8.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    alignment = Alignment.TopEnd
+                                )
+                            }
+                            if (bus.aikaero() < -60) {
+                                Image(
+                                    painter = painterResource(Res.drawable.bolt),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp, 30.dp)
+                                        .padding(
+                                            start = 2.dp,
+                                            top = 8.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    alignment = Alignment.TopEnd
+                                )
+                                println(bus.aikaero())
+                            }
+                            Text(
+                                text = bus.getDeparture(),
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier
+                                    //.weight(0.8f)
+                                    .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
+                        }
+                    }
+                }
+            }
+        } else {
+            itemsIndexed(uiState.busList) { index, line ->
+                if (selectedFilters[stopSearch]?.contains(line.lineref) == true) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0XFFf3f6f4)
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(2.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 0.dp,
+                                            end = 6.dp,
+                                            bottom = 0.dp
+                                        )
+                                        .size(60.dp, 40.dp)
+                                        //.weight(0.8f)
+                                        .background(routeDetails[line.lineref]!!.toColor()),
+
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = line.lineref,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .padding(
+                                                start = 0.dp,
+                                                top = 6.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                }
+
+                                Text(
+                                    text = line.destinationdisplay,
+                                    //fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier
+                                        .weight(3.0f)
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 6.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
+                                    softWrap = true,
+
+                                    )
+                                if (line.aikaero() > 60) {
+                                    Image(
+                                        painter = painterResource(Res.drawable.hourglass),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(25.dp, 30.dp)
+                                            .padding(
+                                                start = 2.dp,
+                                                top = 8.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        alignment = Alignment.TopEnd
+                                    )
+                                }
+                                if (line.aikaero() < -60) {
+                                    Image(
+                                        painter = painterResource(Res.drawable.bolt),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(25.dp, 30.dp)
+                                            .padding(
+                                                start = 2.dp,
+                                                top = 8.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        alignment = Alignment.TopEnd
+                                    )
+                                    println(line.aikaero())
+                                }
+                                Text(
+                                    text = line.getDeparture(),
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.End,
+                                    modifier = Modifier
+                                        //.weight(0.8f)
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 6.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                println(line.destinationdisplay + " aikataulun mukainen " + line.getAimedDeparture() + " reealiaika " + line.getDeparture())
+                            }
+                        }
+                    }
+                }
+                if (selectedFilters[stopSearch]?.isEmpty() == true) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0XFFf3f6f4)
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(2.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 0.dp,
+                                            end = 6.dp,
+                                            bottom = 0.dp
+                                        )
+                                        .size(60.dp, 40.dp)
+                                        //.weight(0.8f)
+                                        .background(routeDetails[line.lineref]!!.toColor()),
+
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = line.lineref,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .padding(
+                                                start = 0.dp,
+                                                top = 6.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                }
+
+                                Text(
+                                    text = line.destinationdisplay,
+                                    //fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier
+                                        .weight(3.0f)
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 6.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
+                                    softWrap = true,
+
+                                    )
+                                if (line.aikaero() > 60) {
+                                    Image(
+                                        painter = painterResource(Res.drawable.hourglass),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(25.dp, 30.dp)
+                                            .padding(
+                                                start = 2.dp,
+                                                top = 8.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        alignment = Alignment.TopEnd
+                                    )
+                                }
+                                if (line.aikaero() < -60) {
+                                    Image(
+                                        painter = painterResource(Res.drawable.bolt),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(25.dp, 30.dp)
+                                            .padding(
+                                                start = 2.dp,
+                                                top = 8.dp,
+                                                end = 0.dp,
+                                                bottom = 0.dp
+                                            ),
+                                        alignment = Alignment.TopEnd
+                                    )
+                                    println(line.aikaero())
+                                }
+                                Text(
+                                    text = line.getDeparture(),
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.End,
+                                    modifier = Modifier
+                                        //.weight(0.8f)
+                                        .padding(
+                                            start = 0.dp,
+                                            top = 6.dp,
+                                            end = 0.dp,
+                                            bottom = 0.dp
+                                        ),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                println(line.destinationdisplay + " aikataulun mukainen " + line.getAimedDeparture() + " reealiaika " + line.getDeparture())
+                            }
+                        }
                     }
                 }
             }
         }
-        item{
-            Column(
-                modifier = Modifier.padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.Bottom
-            ){
-
+            if (httpStatus == 200 && uiState.busList.isEmpty()) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0XFFf3f6f4)
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Ei linjoja seuraavan tunnin aikana",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
+                }
             }
-        }
+            item {
+                Column(
+                    modifier = Modifier.padding(bottom = 20.dp),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
 
+                }
+            }
+
+        }
     }
-}

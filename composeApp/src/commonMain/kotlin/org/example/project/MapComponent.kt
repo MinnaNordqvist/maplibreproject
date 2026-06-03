@@ -229,7 +229,7 @@ fun MapComponent(
             )
 
             // POI layers from GeoJSON source
-            if (!isLoading) {
+
                 SymbolLayer(
                     id = "service_points",
                     source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
@@ -278,7 +278,7 @@ fun MapComponent(
                     },
 
                 )
-            }
+
 
         }
         //UI Layer
