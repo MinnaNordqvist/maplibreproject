@@ -166,9 +166,10 @@ fun PoiInfoCard(
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt() - (width/2), //  horizontal
-                    y = off.y.toInt() - (320)  // position above the marker
+                    y = off.y.toInt() - (310)  // position above the marker
                 )
             },
+        shape = TooltipShape(),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(width=1.dp, color = Color.Black)
@@ -179,6 +180,7 @@ fun PoiInfoCard(
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
+                modifier = Modifier.padding(bottom = 6.dp),
                 text = (feature.getStringProperty("text") + "\n" + feature.getStringProperty("city")),
                 style = MaterialTheme.typography.bodyMedium
             )
