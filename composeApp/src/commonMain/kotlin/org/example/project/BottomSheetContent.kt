@@ -42,6 +42,7 @@ import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,15 +79,17 @@ import org.example.project.data.getRoutes
 import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.component.getScopeId
 import kotlin.collections.emptyList
 import kotlin.collections.listOf
 import kotlin.collections.mapOf
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
-
-
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalUuidApi::class
+)
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
@@ -165,10 +168,24 @@ fun BottomSheetContent(
         return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
     }
 
+    val filteredBusList = remember(uiState.busList, listState, stopSearch?: "") {
+        val selectedLine = listState[stopSearch]
+
+        if (selectedLine.isNullOrEmpty()) {
+
+            uiState.busList
+        } else {
+
+            uiState.busList.filter { it.lineref == selectedLine }
+        }
+    }
+
+
+
 
 
     LazyColumn(
-        modifier = Modifier.padding(bottom = 20.dp),
+        modifier = Modifier.padding(bottom = 6.dp).wrapContentHeight(),
         contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
@@ -223,7 +240,7 @@ fun BottomSheetContent(
                             )
                             OutlinedIconButton(
                                 onClick = {
-                                    //selectedFilters.remove(stopSearch!!)
+
                                     scope.launch {
                                         busViewModel.getBusList(it.getStringProperty("stop_code"))
                                     }
@@ -276,6 +293,11 @@ fun BottomSheetContent(
 
                                 label = { Text(label) },
                                 elevation = FilterChipDefaults.filterChipElevation(),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = Color.White,
+                                    labelColor = Color.Black,
+                                   // selectedContainerColor = Color.Magenta,
+                                    ),
                                 modifier = Modifier.padding(end = 5.dp)
                             )
                         }
@@ -284,25 +306,12 @@ fun BottomSheetContent(
 
             }
         }
-        if (!listState.containsKey(stopSearch)) {
-            itemsIndexed(uiState.busList) { index, bus ->
-               Timetable(bus, routeDetails)
-            }
-        } else {
-            items(uiState.busList) {  line ->
-                if (listState[stopSearch!!].equals(line.lineref)) {
-                    Timetable(line, routeDetails)
-                }
 
-                if (listState[stopSearch]?.isEmpty() == true) {
-                    Timetable(line, routeDetails)
-                }
-
-
-            }
-
+        itemsIndexed(items = filteredBusList, key = { index, bus -> "${stopSearch}_${bus.lineref}_${index}" }) { index, bus ->
+            Timetable(bus, routeDetails)
         }
-            if (httpStatus == 200 && uiState.busList.isEmpty()) {
+
+        if (httpStatus == 200 && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(

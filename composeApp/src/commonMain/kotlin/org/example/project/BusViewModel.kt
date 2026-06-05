@@ -68,21 +68,11 @@ class BusViewModel : ViewModel(), KoinComponent {
     }
 
 }
-/*
-val _selectedLines = remember { MutableStateFlow(listOf<String>()) }
-val selectedLines by remember { _selectedLines }.collectAsState()
 
-fun addLine(line: String) {
-    val newList = ArrayList(selectedLines)
-    newList.add(line)
-    _selectedLines.value = newList
-}
-
- */
 
 class StateFlowViewModel : ViewModel() {
     private val _selectedLines = MutableStateFlow<Map<String, String>>(emptyMap())
-    var selectedLines : StateFlow<Map<String, String>> = _selectedLines.asStateFlow()
+    val selectedLines : StateFlow<Map<String, String>> = _selectedLines.asStateFlow()
 
     fun addLine(stopSearch: String, label: String){
         _selectedLines.update { oldmap ->
