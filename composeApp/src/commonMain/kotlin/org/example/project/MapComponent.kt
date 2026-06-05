@@ -64,7 +64,7 @@ import org.maplibre.compose.location.LocationPuckSizes
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
-private var enableTracking by mutableStateOf(false)
+//private var enableTracking by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +74,7 @@ fun MapComponent(
 ) {
 
     var locationProvider: LocationProvider?
+    var enableTracking by remember{mutableStateOf(false)}
 
     if (locationPermission){
         locationProvider = rememberDefaultLocationProvider()
@@ -175,12 +176,11 @@ fun MapComponent(
                     enabled = enableTracking,
                 ) {
 
+                    camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
+
                     if (camera.moveReason == CameraMoveReason.GESTURE){
                         enableTracking = false
                     }
-
-                    camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
-
 
                 }
 

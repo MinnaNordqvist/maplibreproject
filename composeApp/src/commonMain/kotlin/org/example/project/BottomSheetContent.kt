@@ -3,6 +3,7 @@ package org.example.project
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,20 +42,30 @@ import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.Hyphens
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 
 import kotlinx.coroutines.runBlocking
 import maplibreproject.composeapp.generated.resources.refresh
@@ -67,18 +78,12 @@ import org.example.project.data.getRoutes
 import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.collections.emptyList
+import kotlin.collections.listOf
+import kotlin.collections.mapOf
 
-//Linjojen värit
 
-fun String.toColor(): Color {
-    val hex = this
-    val colorLong = when (hex.length) {
-        6 -> ("FF$hex").toLong(16) // Add full opacity if missing
-        8 -> hex.toLong(16)        // Use provided alpha
-        else -> throw IllegalArgumentException("Invalid hex color format")
-    }
-    return Color(colorLong)
-}
+
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -105,7 +110,8 @@ fun BottomSheetContent(
     val busViewModel: BusViewModel = koinViewModel()
     val uiState by busViewModel.uiState.collectAsStateWithLifecycle()
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
-
+    val listViewModel: StateFlowViewModel = viewModel()
+    val listState by listViewModel.selectedLines.collectAsStateWithLifecycle()
 
     var httpStatus by remember { mutableStateOf(0) }
     var stopSearch: String? by remember {
@@ -122,8 +128,6 @@ fun BottomSheetContent(
     }
 
     val displayNames = remember { mutableStateMapOf<String, List<String>>() }
-
-    val selectedFilters = remember { mutableStateMapOf<String, List<String>>() }
 
 
 
@@ -219,7 +223,7 @@ fun BottomSheetContent(
                             )
                             OutlinedIconButton(
                                 onClick = {
-                                    selectedFilters.remove(stopSearch!!)
+                                    //selectedFilters.remove(stopSearch!!)
                                     scope.launch {
                                         busViewModel.getBusList(it.getStringProperty("stop_code"))
                                     }
@@ -255,24 +259,23 @@ fun BottomSheetContent(
                         maxItemsInEachRow = 8,
                     ) {
                         lines.forEachIndexed { index, label ->
-                            val sel = arrayListOf<String>()
-
+                            val isSelected = listState[stopSearch!!] == label
                             FilterChip(
-                                selected = selectedFilters[stopSearch]?.contains(label) == true,
+                                selected = isSelected,
                                 onClick = {
-                                    if (selectedFilters[stopSearch]?.contains(label) == true) {
-                                        sel.remove(label)
-                                        selectedFilters.put(stopSearch!!, sel)
+                                    if ( listState[stopSearch!!] == label) {
+                                        listViewModel.removeLine(stopSearch!!)
 
                                     } else {
-                                        sel.add(label)
-                                        selectedFilters.put(stopSearch!!, sel)
-                                        println(selectedFilters.toMap())
+                                        listViewModel.addLine(stopSearch!!, label)
+                                        println(listState.entries)
+
                                     }
+
                                 },
 
                                 label = { Text(label) },
-
+                                elevation = FilterChipDefaults.filterChipElevation(),
                                 modifier = Modifier.padding(end = 5.dp)
                             )
                         }
@@ -281,19 +284,21 @@ fun BottomSheetContent(
 
             }
         }
-        if (!selectedFilters.containsKey(stopSearch)) {
+        if (!listState.containsKey(stopSearch)) {
             itemsIndexed(uiState.busList) { index, bus ->
                Timetable(bus, routeDetails)
             }
         } else {
-            itemsIndexed(uiState.busList) { index, line ->
-                if (selectedFilters[stopSearch]?.contains(line.lineref) == true) {
-                   Timetable(line, routeDetails)
-
-                }
-                if (selectedFilters[stopSearch]?.isEmpty() == true) {
+            items(uiState.busList) {  line ->
+                if (listState[stopSearch!!].equals(line.lineref)) {
                     Timetable(line, routeDetails)
                 }
+
+                if (listState[stopSearch]?.isEmpty() == true) {
+                    Timetable(line, routeDetails)
+                }
+
+
             }
 
         }

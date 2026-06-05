@@ -10,11 +10,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.Response
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.example.project.data.SiriApi
+import kotlin.collections.plus
 import kotlin.time.Duration.Companion.minutes
 
 data class BusListUIState(
@@ -76,3 +79,22 @@ fun addLine(line: String) {
 }
 
  */
+
+class StateFlowViewModel : ViewModel() {
+    private val _selectedLines = MutableStateFlow<Map<String, String>>(emptyMap())
+    var selectedLines : StateFlow<Map<String, String>> = _selectedLines.asStateFlow()
+
+    fun addLine(stopSearch: String, label: String){
+        _selectedLines.update { oldmap ->
+            oldmap + (stopSearch to label)
+        }
+    }
+
+    fun removeLine(stopSearch: String){
+        _selectedLines.update{ oldmap ->
+            oldmap - stopSearch
+        }
+    }
+
+
+}
