@@ -31,21 +31,11 @@ import org.example.project.data.Response
 import org.jetbrains.compose.resources.painterResource
 
 
-fun String.toColour(): Color {
+fun String.toColor(): Color {
     val hex = this
-    val colorLong = when (hex.length) {
-        6 -> ("FF$hex").toLong(16) // Add full opacity if missing
-        8 -> hex.toLong(16)        // Use provided alpha
-        else -> throw IllegalArgumentException("Invalid hex color format")
-    }
+    val colorLong = ("FF$hex").toLong(16)
     return Color(colorLong)
 }
-
-
-
-
-
-
 
 @Composable
 fun Timetable(
@@ -76,7 +66,7 @@ fun Timetable(
                         .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
                         .size(60.dp, 40.dp)
                         //.weight(0.8f)
-                        .background(routeDetails[bus.lineref]!!.toColour()),
+                        .background(routeDetails[bus.lineref]!!.toColor()),
 
                     contentAlignment = Alignment.Center,
                 ) {

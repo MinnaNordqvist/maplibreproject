@@ -57,6 +57,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -118,13 +119,14 @@ fun BottomSheetContent(
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
     val selectedLines by busViewModel.selectedLines.collectAsStateWithLifecycle()
 
-    var isSelected by rememberSaveable {mutableStateOf(false)}
+    var isSelected by rememberSaveable { mutableStateOf(false) }
 
     var httpStatus by remember { mutableStateOf(0) }
 
-    var stopSearch by rememberSaveable {
-        mutableStateOf(feature?.getStringProperty("stop_code"))
-    }
+    var stopSearch: String? by rememberSaveable { mutableStateOf(feature?.getStringProperty("stop_code")) }
+    var stickyText by rememberSaveable { mutableStateOf("") }
+
+
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
 
     // Route
@@ -140,9 +142,13 @@ fun BottomSheetContent(
 
 
     LaunchedEffect(feature?.getStringProperty("stop_code")) {
-        stopSearch = feature?.getStringProperty("stop_code")
+        if (feature?.getStringProperty("stop_code")?.isNotEmpty() == true) {
+            stopSearch = feature.getStringProperty("stop_code")
+            stickyText =
+                "${feature.getStringProperty("stop_name")}\n${feature.getStringProperty("stop_code")}"
+        }
 
-        if (stopSearch != null) {
+        if (stopSearch?.isNotEmpty() == true) {
             busViewModel.getBusList(stopSearch)
 
 
@@ -173,7 +179,7 @@ fun BottomSheetContent(
         return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
     }
 
-    val filteredBusList = remember(uiState.busList, selectedLines, stopSearch?: "") {
+    val filteredBusList = remember(uiState.busList, selectedLines, stopSearch ?: "") {
         val selectedLine = selectedLines[stopSearch]
 
         if (selectedLine.isNullOrEmpty()) {
@@ -210,9 +216,8 @@ fun BottomSheetContent(
                 }
 
             }
-        }
-        stickyHeader {
-            feature?.let {
+        } else {
+            stickyHeader {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -230,11 +235,7 @@ fun BottomSheetContent(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "${it.getStringProperty("stop_name")}\n${
-                                    it.getStringProperty(
-                                        "stop_code"
-                                    )
-                                }",
+                                text = stickyText,
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier
@@ -244,7 +245,7 @@ fun BottomSheetContent(
                             OutlinedIconButton(
                                 onClick = {
                                     scope.launch {
-                                        busViewModel.getBusList(it.getStringProperty("stop_code"))
+                                        busViewModel.getBusList(stopSearch!!)
                                     }
                                 },
                                 modifier = Modifier
@@ -278,45 +279,26 @@ fun BottomSheetContent(
                         maxItemsInEachRow = 8,
                     ) {
                         lines.forEachIndexed { index, label ->
-                            if (stopSearch?.isNotEmpty() == true){
+                            if (stopSearch?.isNotEmpty() == true) {
                                 isSelected = selectedLines[stopSearch!!] == label
                             }
 
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = {
-                                    if ( selectedLines[stopSearch!!] == label) {
-                                        busViewModel.removeLine(stopSearch!!)
+                            FilterLines(isSelected, stopSearch, label, selectedLines, busViewModel)
 
-                                    } else {
-                                        busViewModel.addLine(stopSearch!!, label)
-                                        println(selectedLines.entries)
 
-                                    }
-
-                                },
-
-                                label = { Text(label) },
-                                elevation = FilterChipDefaults.filterChipElevation(),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = Color.White,
-                                    labelColor = Color.Black,
-                                   // selectedContainerColor = Color.Magenta,
-                                    ),
-                                modifier = Modifier.padding(end = 5.dp)
-                            )
                         }
                     }
                 }
 
             }
-        }
 
-        itemsIndexed(items = filteredBusList, key = { index, bus -> "${stopSearch}_${bus.lineref}_${index}" }) { index, bus ->
-            Timetable(bus, routeDetails)
-        }
+            itemsIndexed(
+                items = filteredBusList,
+                key = { index, bus -> "${stopSearch}_${bus.lineref}_${index}" }) { index, bus ->
+                Timetable(bus, routeDetails)
+            }
 
-        if (httpStatus == 200 && uiState.busList.isEmpty()) {
+            if (httpStatus == 200 && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -348,3 +330,4 @@ fun BottomSheetContent(
 
         }
     }
+}
