@@ -166,7 +166,7 @@ fun PoiInfoCard(
             .absoluteOffset {
                 IntOffset(
                     x = off.x.toInt() - (width/2), //  horizontal
-                    y = off.y.toInt() - (310)  // position above the marker
+                    y = off.y.toInt() - (210)  // position above the marker
                 )
             },
         shape = TooltipShape(),

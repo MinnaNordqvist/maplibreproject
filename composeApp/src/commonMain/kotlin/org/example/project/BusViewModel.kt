@@ -30,6 +30,9 @@ class BusViewModel : ViewModel(), KoinComponent {
     val uiState: StateFlow<BusListUIState> = _uiState
     private val _linesList = MutableStateFlow<List<String>>(emptyList())
     val linesList:  StateFlow<List<String>> = _linesList
+    private val _selectedLines = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    val selectedLines : StateFlow<Map<String, String>> = _selectedLines.asStateFlow()
 
     private var refreshJob: Job? = null
 
@@ -67,13 +70,6 @@ class BusViewModel : ViewModel(), KoinComponent {
         }
     }
 
-}
-
-
-class StateFlowViewModel : ViewModel() {
-    private val _selectedLines = MutableStateFlow<Map<String, String>>(emptyMap())
-    val selectedLines : StateFlow<Map<String, String>> = _selectedLines.asStateFlow()
-
     fun addLine(stopSearch: String, label: String){
         _selectedLines.update { oldmap ->
             oldmap + (stopSearch to label)
@@ -86,5 +82,6 @@ class StateFlowViewModel : ViewModel() {
         }
     }
 
-
 }
+
+

@@ -58,6 +58,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.Hyphens
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,6 +88,8 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 
+
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalUuidApi::class
 )
@@ -113,11 +116,13 @@ fun BottomSheetContent(
     val busViewModel: BusViewModel = koinViewModel()
     val uiState by busViewModel.uiState.collectAsStateWithLifecycle()
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
-    val listViewModel: StateFlowViewModel = viewModel()
-    val listState by listViewModel.selectedLines.collectAsStateWithLifecycle()
+    val selectedLines by busViewModel.selectedLines.collectAsStateWithLifecycle()
+
+    var isSelected by rememberSaveable {mutableStateOf(false)}
 
     var httpStatus by remember { mutableStateOf(0) }
-    var stopSearch: String? by remember {
+
+    var stopSearch by rememberSaveable {
         mutableStateOf(feature?.getStringProperty("stop_code"))
     }
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
@@ -168,8 +173,8 @@ fun BottomSheetContent(
         return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
     }
 
-    val filteredBusList = remember(uiState.busList, listState, stopSearch?: "") {
-        val selectedLine = listState[stopSearch]
+    val filteredBusList = remember(uiState.busList, selectedLines, stopSearch?: "") {
+        val selectedLine = selectedLines[stopSearch]
 
         if (selectedLine.isNullOrEmpty()) {
 
@@ -179,8 +184,6 @@ fun BottomSheetContent(
             uiState.busList.filter { it.lineref == selectedLine }
         }
     }
-
-
 
 
 
@@ -194,7 +197,7 @@ fun BottomSheetContent(
         overscrollEffect = overScrollEffect,
     ) {
 
-        if (feature?.getStringProperty("stop_code").isNullOrEmpty()) {
+        if (stopSearch.isNullOrEmpty()) {
             item {
                 Column(Modifier.padding(top = 5.dp)) {
                     Text(
@@ -240,7 +243,6 @@ fun BottomSheetContent(
                             )
                             OutlinedIconButton(
                                 onClick = {
-
                                     scope.launch {
                                         busViewModel.getBusList(it.getStringProperty("stop_code"))
                                     }
@@ -276,16 +278,19 @@ fun BottomSheetContent(
                         maxItemsInEachRow = 8,
                     ) {
                         lines.forEachIndexed { index, label ->
-                            val isSelected = listState[stopSearch!!] == label
+                            if (stopSearch?.isNotEmpty() == true){
+                                isSelected = selectedLines[stopSearch!!] == label
+                            }
+
                             FilterChip(
                                 selected = isSelected,
                                 onClick = {
-                                    if ( listState[stopSearch!!] == label) {
-                                        listViewModel.removeLine(stopSearch!!)
+                                    if ( selectedLines[stopSearch!!] == label) {
+                                        busViewModel.removeLine(stopSearch!!)
 
                                     } else {
-                                        listViewModel.addLine(stopSearch!!, label)
-                                        println(listState.entries)
+                                        busViewModel.addLine(stopSearch!!, label)
+                                        println(selectedLines.entries)
 
                                     }
 
