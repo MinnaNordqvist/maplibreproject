@@ -23,36 +23,36 @@ import kotlinx.datetime.toLocalDateTime
  {
   "sys": "SM",
   "status": "OK",
-  "servertime": "2025.09.26 09:01:56",
+  "servertime": 1781165341,
   "result": [
-   {
-      "recordedattime": 1760697682,
+    {
+      "recordedattime": 1781165341,
       "lineref": "10",
-      "dataframeref": "2025-10-17",
-      "datedvehiclejourneyref": "[@10004.0.345075124@][2][1755149395917]/13",
+      "dataframeref": "2026-06-11",
+      "datedvehiclejourneyref": "[@10004.0.358299174@][2][1767603127745]/49",
       "directionname": "2",
       "originref": "1",
       "destinationref": "1704",
-      "originaimeddeparturetime": 1760698500,
-      "destinationaimedarrivaltime": 1760702430,
+      "originaimeddeparturetime": 1781165460,
+      "destinationaimedarrivaltime": 1781169060,
       "monitored": true,
       "incongestion": false,
-      "longitude": 22.22282,
-      "latitude": 60.43398,
-      "blockref": "1010101100",
-      "vehicleref": "550021",
-      "visitnumber": 1,
+      "longitude": 22.21968,
+      "latitude": 60.435,
+      "blockref": "1010040200",
+      "vehicleref": "550037",
+      "visitnumber": 3,
       "vehicleatstop": false,
-      "destinationdisplay": "Länsikeskus-Kupittaa-Uittamo",
-      "aimedarrivaltime": 1760698500,
-      "expectedarrivaltime": 1760697200,
-      "aimeddeparturetime": 1760698500,
-      "expecteddeparturetime": 1760698500,
-      "destinationdisplay_sv": "Västcentrum-Kuppis-Uittamo",
-      "__tripref": "00021067__1010101100",
-      "__routeref": "18",
+      "destinationdisplay": "Länsikeskus-Kupittaa-Skanssi-Uittamo",
+      "aimedarrivaltime": 1781165556,
+      "expectedarrivaltime": 1781165556,
+      "aimeddeparturetime": 1781165556,
+      "expecteddeparturetime": 1781165556,
+      "destinationdisplay_sv": "Västcentrum-Kuppis-Skansen-Uittamo",
+      "__tripref": "00018481__1010040200",
+      "__routeref": "20",
       "__directionid": "1"
-   },
+    },
          .....
   ]
  }
@@ -66,22 +66,14 @@ data class Response(
     @Serializable
     data class Bus(
         var lineref: String,
-        val monitored: Boolean,
         val destinationdisplay: String,
         val aimeddeparturetime: Long,
         val expecteddeparturetime: Long,
-        @SerialName("__tripref")
-        val trip_id: String? = null,
-        @SerialName("__routeref")
-        val route_id: String? = null,
-        @SerialName("__directionid")
-        val direction_id: String? = null,
     ) {
-
-        fun getDeparture(): String {
-            val instant1 = Instant.fromEpochSeconds(expecteddeparturetime)
-            val departure = instant1.toLocalDateTime(TimeZone.currentSystemDefault()).format(
-                LocalDateTime.Format {
+        fun getDepartures(epochs: Long): String {
+            val instant = Instant.fromEpochSeconds(epochs)
+            val departure = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                .format(LocalDateTime.Format {
                     hour()
                     char(':')
                     minute()
@@ -89,16 +81,6 @@ data class Response(
             return departure
         }
 
-        fun getAimedDeparture(): String {
-            val instant1 = Instant.fromEpochSeconds(aimeddeparturetime)
-            val departure = instant1.toLocalDateTime(TimeZone.currentSystemDefault()).format(
-                LocalDateTime.Format {
-                    hour()
-                    char(':')
-                    minute()
-                })
-            return departure
-        }
 
         fun aikaero() : Long {
             val erotus = expecteddeparturetime - aimeddeparturetime

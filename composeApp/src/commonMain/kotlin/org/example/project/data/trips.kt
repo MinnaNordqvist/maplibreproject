@@ -6,17 +6,16 @@ import kotlinx.serialization.Serializable
 Lähetetään http get pyyntö osoitteeseen https://data.foli.fi/gtfs/trips/all
 Vastaus tulee muodossa
 [
-  {
-     "route_id": "206",
-     "service_id": "1206020120",
-     "trip_id": "00010000__1206020120",
-     "trip_headsign": "Raisio-Kaanaa",
-     "direction_id": 1,
-     "block_id": "1206020120",
-     "shape_id": "205",
-     "wheelchair_accessible": 1,
-     "bikes_allowed": 0
-   },
+    {
+        "route_id": "28",
+        "service_id": "1052010204",
+        "trip_id": "00010000__1052010204",
+        "trip_headsign": "Puutori",
+        "direction_id": 0,
+        "block_id": "1052010204",
+        "shape_id": "109",
+        "wheelchair_accessible": 2
+    },
          ...
  ]
  */
