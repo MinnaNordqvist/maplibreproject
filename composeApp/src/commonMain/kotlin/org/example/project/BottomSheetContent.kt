@@ -1,16 +1,11 @@
 package org.example.project
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,13 +14,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -40,60 +33,34 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.style.Hyphens
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.update
 
 import kotlinx.coroutines.runBlocking
+
 import maplibreproject.composeapp.generated.resources.refresh
-import maplibreproject.composeapp.generated.resources.bolt
-import maplibreproject.composeapp.generated.resources.hourglass
-import org.example.project.data.Routes
+import org.example.project.data.Route
 import org.example.project.data.Trips
 
 import org.example.project.data.getRoutes
 import org.example.project.data.getStopTimes
 import org.example.project.data.getTrips
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.component.getScopeId
-import kotlin.collections.emptyList
-import kotlin.collections.listOf
-import kotlin.collections.mapOf
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 
-
-
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalUuidApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,)
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
@@ -102,9 +69,10 @@ fun BottomSheetContent(
 
     // Kun ohjelma käynnistyy, 2 lähetetään http-get pyyntöä GTFS rajapintaan
     // https://data.foli.fi/gtfs/routes
-    val routes: List<Routes> = remember { runBlocking { getRoutes() } }
+    val routes: List<Route> = remember { runBlocking { getRoutes() } }
     // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
     val trips: List<Trips> = remember { runBlocking { getTrips() } }
+
 
 
     val lazyListState = rememberLazyListState()
@@ -124,6 +92,7 @@ fun BottomSheetContent(
     var httpStatus by remember { mutableStateOf(0) }
 
     var stopSearch: String? by rememberSaveable { mutableStateOf(feature?.getStringProperty("stop_code")) }
+
     var stickyText by rememberSaveable { mutableStateOf("") }
 
 
@@ -141,39 +110,44 @@ fun BottomSheetContent(
 
 
 
-    LaunchedEffect(feature?.getStringProperty("stop_code")) {
+    LaunchedEffect(feature?.getStringProperty("stop_code") ?: "" ){
         if (feature?.getStringProperty("stop_code")?.isNotEmpty() == true) {
+
             stopSearch = feature.getStringProperty("stop_code")
-            stickyText =
-                "${feature.getStringProperty("stop_name")}\n${feature.getStringProperty("stop_code")}"
+            stickyText = "${feature.getStringProperty("stop_name")}\n" +
+                    "${feature.getStringProperty("stop_code")}"
         }
 
-        if (stopSearch?.isNotEmpty() == true) {
-            busViewModel.getBusList(stopSearch)
+            if (stopSearch?.isNotEmpty() == true) {
+
+                busViewModel.getBusList(stopSearch)
 
 
-            //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
-            if (!stopTimes.containsKey(stopSearch)) {
-                //  https://data.foli.fi/gtfs/stop_times/stop/stop_id
-                val tripIds = getStopTimes(stopSearch).map { it.trip_id }.toSet()
-                val routeroutes = arrayListOf<String>()
-                trips
-                    .filter { tripIds.contains(it.trip_id) }
-                    .forEach {
-                        routesAndIds[it.route_id]?.let { element ->
-                            routeroutes.add(element)
+                //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
+                if (!stopTimes.containsKey(stopSearch)) {
+                    //  https://data.foli.fi/gtfs/stop_times/stop/stop_id
+                    val tripIds = getStopTimes(stopSearch).map { it.trip_id }.toSet()
+                    val routeroutes = arrayListOf<String>()
+                    trips
+                        .filter { tripIds.contains(it.trip_id) }
+                        .forEach {
+                            routesAndIds[it.route_id]?.let { element ->
+                                routeroutes.add(element)
+                            }
                         }
-                    }
-                displayNames.put(stopSearch!!, routeroutes)
-                stopTimes.put(stopSearch!!, tripIds)
+                    displayNames.put(stopSearch!!, routeroutes)
+                    stopTimes.put(stopSearch!!, tripIds)
 
+                }
+
+
+
+                httpStatus = busViewModel.getResponseStatus(stopSearch).value
             }
-
-            httpStatus = busViewModel.getResponseStatus(stopSearch).value
-        }
-
-
     }
+
+
+
 
     fun getDisplayNames(): String? {
         return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
@@ -193,6 +167,8 @@ fun BottomSheetContent(
 
 
 
+
+
     LazyColumn(
         modifier = Modifier.padding(bottom = 20.dp),
         contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
@@ -203,19 +179,57 @@ fun BottomSheetContent(
         overscrollEffect = overScrollEffect,
     ) {
 
-        if (stopSearch.isNullOrEmpty()) {
+        if ((stopSearch.isNullOrEmpty())) {
             item {
                 Column(Modifier.padding(top = 5.dp)) {
                     Text(
-                        text = "Valitse pysäkki",
+                        text = "Select a bus stop",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
 
                     )
+
+                }
+            }
+            /*
+        } else {
+            stickyHeader {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(2.dp, Color.Black),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stickyText,
+                                fontWeight = FontWeight.Bold, fontSize = 20.sp,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .padding(
+                                        start = 8.dp,
+                                        top = 6.dp,
+                                        end = 2.dp,
+                                        bottom = 6.dp
+                                    )
+                                    .weight(3.0f)
+                            )
+                        }
+                    }
                 }
 
             }
+
+             */
+
+
         } else {
             stickyHeader {
                 Card(
@@ -267,36 +281,45 @@ fun BottomSheetContent(
                             }
                         }
                         Text(
-                            text = ("Linjat: " + getDisplayNames()),
+                            text = ("Lines: " + getDisplayNames()),
                             Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp),
                             fontWeight = FontWeight.Light
                         )
 
                     }
                     FlowRow(
-                        modifier = Modifier.padding(horizontal = 6.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        maxItemsInEachRow = 8,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        maxItemsInEachRow = 5,
                     ) {
-                        lines.forEachIndexed { index, label ->
-                            if (stopSearch?.isNotEmpty() == true) {
-                                isSelected = selectedLines[stopSearch!!] == label
-                            }
+                        lines.forEach { label ->
 
-                            FilterLines(isSelected, stopSearch, label, selectedLines, busViewModel)
+                            val isSelected = stopSearch?.isNotEmpty() == true && selectedLines[stopSearch] == label
 
-
+                            FilterLines(
+                                isSelected = isSelected,
+                                stopSearch = stopSearch,
+                                label = label,
+                                selectedLines = selectedLines,
+                                busViewModel = busViewModel
+                            )
                         }
                     }
                 }
 
             }
 
+
             itemsIndexed(
                 items = filteredBusList,
                 key = { index, bus -> "${stopSearch}_${bus.lineref}_${index}" }) { index, bus ->
                 Timetable(bus, routeDetails)
             }
+
 
             if (httpStatus == 200 && uiState.busList.isEmpty()) {
                 item {
@@ -319,6 +342,8 @@ fun BottomSheetContent(
                     }
                 }
             }
+
+
             item {
                 Column(
                     modifier = Modifier.padding(bottom = 20.dp),
@@ -329,5 +354,9 @@ fun BottomSheetContent(
             }
 
         }
-    }
-}
+
+
+    }}
+
+
+

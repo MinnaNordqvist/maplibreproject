@@ -1,12 +1,17 @@
 package org.example.project
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 
@@ -16,24 +21,23 @@ fun FilterLines(isSelected: Boolean, stopSearch: String?,  label: String, select
     FilterChip(
         selected = isSelected,
         onClick = {
-            if ( selectedLines[stopSearch!!] == label) {
-                busViewModel.removeLine(stopSearch!!)
-
-            } else {
-                busViewModel.addLine(stopSearch!!, label)
-                println(selectedLines.entries)
-
+            stopSearch?.let { search ->
+                if (selectedLines[search] == label) {
+                    busViewModel.removeLine(search)
+                } else {
+                    busViewModel.addLine(search, label)
+                }
             }
-
         },
+        label = { Text(text = label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
 
-        label = { Text(label) },
-        elevation = FilterChipDefaults.filterChipElevation(),
+        elevation = FilterChipDefaults.filterChipElevation(elevation = 2.dp),
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = Color.White,
-            labelColor = Color.Black,
-            // selectedContainerColor = Color.Magenta,
+            containerColor = Color(0xFFF5F5F5),
+            labelColor = Color.DarkGray,
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
-        modifier = Modifier.padding(end = 5.dp)
+        modifier = Modifier.width(60.dp)
     )
 }
