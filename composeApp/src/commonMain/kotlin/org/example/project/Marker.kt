@@ -103,8 +103,8 @@ fun PopUpCard(
             .onSizeChanged{width = it.width}
             .absoluteOffset {
                 IntOffset(
-                    x = off.x.toInt() - (width/2), //  horizontal
-                    y = off.y.toInt() - (210)  // position above the marker
+                    x = off.x.toInt() - (width/2),
+                    y = off.y.toInt() - (205)
                 )
             },
         shape = TooltipShape(),
