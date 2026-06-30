@@ -176,14 +176,16 @@ fun MapComponent(
                     locationState = locationState,
                     enabled = enableTracking,
                 ) {
-
                     camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
+                    //println("Camera moving " + camera.moveReason)
+                }
 
-                    if (camera.moveReason == CameraMoveReason.GESTURE){
+                LaunchedEffect(camera.moveReason) {
+                    if (camera.moveReason == CameraMoveReason.GESTURE) {
                         enableTracking = false
                     }
-
                 }
+
 
             }
 
