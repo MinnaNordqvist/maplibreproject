@@ -38,6 +38,6 @@ fun FilterLines(isSelected: Boolean, stopSearch: String?,  label: String, select
             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
-        modifier = Modifier.width(60.dp)
+        modifier = Modifier.width(65.dp)
     )
 }
