@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -58,13 +59,13 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.location.LocationPuckSizes
-
+import kotlin.time.Duration.Companion.milliseconds
 
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
-//private var enableTracking by mutableStateOf(false)
+private var enableTracking by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +75,7 @@ fun MapComponent(
 ) {
 
     var locationProvider: LocationProvider?
-    var enableTracking by remember{mutableStateOf(false)}
+   // var enableTracking by remember{mutableStateOf(false)}
 
     if (locationPermission){
         locationProvider = rememberDefaultLocationProvider()
@@ -192,12 +193,12 @@ fun MapComponent(
                 source = markerSource(data),
                 iconImage = image((markerImage()), drawAsSdf = true),
                 iconColor = const(Color(0xFF5985E1)),
-                iconSize = const(3.0f),
+                iconSize = const(1.0f),
                 iconHaloColor = const(Color.White),
                 iconHaloWidth = const(18.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
-                iconAnchor = const(SymbolAnchor.Center),
+                //iconAnchor = const(SymbolAnchor.Center),
                 minZoom = 0.0f,
                 maxZoom = 24.0f,
 
@@ -216,18 +217,13 @@ fun MapComponent(
                 id = "highlight-layer",
                 source = markerSource(data),
                 iconImage = image((markerImage()), drawAsSdf = true),
-                iconSize = const(3.1f),
+                iconSize = const(1.1f),
                 iconColor = const(Color(0xFF789DE5)),
                 iconHaloColor = const(Color.Black),
                 iconHaloWidth = const(19.dp),
                 iconAllowOverlap = const(true),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
-                onClick = { features ->
-                    features.firstOrNull()?.let {
-                        selectedStop = it.getStringProperty("stop_code")
-                    }
-                    ClickResult.Consume
-                }
+
             )
 
             // POI layers from GeoJSON source
@@ -282,6 +278,8 @@ fun MapComponent(
                 )
 
 
+
+
         }
         //UI Layer
         // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
@@ -311,9 +309,9 @@ fun MapComponent(
                     val targ = (feature.geometry as Point).coordinates
                     val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
-                    val horizontalMargin = 50.dp
-                    val topMargin = 70.dp
-                    val bottomMargin = 30.dp
+                    val horizontalMargin = 55.dp
+                    val topMargin = 75.dp
+                    val bottomMargin = 35.dp
                     val screenX = screenPos?.x
                     val screenY = screenPos?.y
 
@@ -321,6 +319,7 @@ fun MapComponent(
                             screenX > (screenWidth - horizontalMargin) ||
                             screenY!! < topMargin ||
                             screenY > (screenHeight - bottomMargin)
+                    
 
                     if (needsUpdate) {
                         camera.animateTo(
@@ -329,9 +328,11 @@ fun MapComponent(
                                 zoom = currentZoom,
 
                                 ),
-                            //duration = 800.milliseconds
+                            duration = 100.milliseconds
                         )
                     }
+
+
 
                 }
                 PopUpCard(
