@@ -1,19 +1,17 @@
 package org.example.project
 
 
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +36,6 @@ import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
-import org.maplibre.compose.expressions.value.SymbolAnchor
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
@@ -70,8 +66,8 @@ import org.maplibre.compose.location.LocationPuckSizes
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.launch
 import maplibreproject.composeapp.generated.resources.my_location
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
+
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
@@ -87,7 +83,6 @@ fun MapComponent(
 
     var locationProvider: LocationProvider?
 
-
     if (locationPermission){
         locationProvider = rememberDefaultLocationProvider()
         enableTracking = true
@@ -98,7 +93,6 @@ fun MapComponent(
 
     val coroutineScope = rememberCoroutineScope()
     val locationState = rememberUserLocationState(locationProvider)
-
 
     var isLoading by remember { mutableStateOf(true) }
 
@@ -123,13 +117,11 @@ fun MapComponent(
         }
     }
 
-
     val camera = rememberCameraState(
-        firstPosition =
-            CameraPosition(
+        firstPosition = CameraPosition(
                 target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
                 zoom = 15.0
-            )
+        )
     )
 
     val styleState = rememberStyleState()
@@ -138,7 +130,6 @@ fun MapComponent(
     var selectedStop by remember { mutableStateOf<String?>("") }
 
     var selectedPoi by remember {mutableStateOf<Feature<Geometry, JsonObject?>?>(null)}
-
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -171,6 +162,7 @@ fun MapComponent(
             ),
 
             ) {
+
             // Näytetään LocationPuck jos sijainnin käyttö on sallittu
             if (locationPermission) {
                 LocationPuck(
@@ -188,7 +180,7 @@ fun MapComponent(
                     enabled = enableTracking,
                 ) {
                     camera.updateFromLocation(updateBearing = BearingUpdate.IGNORE)
-                    //println("Camera moving " + camera.moveReason)
+
                 }
 
                 LaunchedEffect(camera.moveReason) {
@@ -196,11 +188,6 @@ fun MapComponent(
                         enableTracking = false
                     }
                 }
-
-
-
-
-
             }
 
             //SymbolLayer
@@ -214,7 +201,6 @@ fun MapComponent(
                 iconHaloWidth = const(18.dp),
                 visible = true,
                 iconAllowOverlap = const(true),
-                //iconAnchor = const(SymbolAnchor.Center),
                 minZoom = 0.0f,
                 maxZoom = 24.0f,
 
@@ -223,7 +209,6 @@ fun MapComponent(
                     selectedStop = selectedFeature?.getStringProperty("stop_code")
                     selectedFeature?.let { onMarkerClick(it) }
 
-                    //println("Clicked on ${features[0].toJson()}")
                     ClickResult.Consume
                 },
             )
@@ -243,63 +228,58 @@ fun MapComponent(
             )
 
             // POI layers from GeoJSON source
+            SymbolLayer(
+                id = "service_points",
+                source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
+                iconImage = image(poiIcon(svgService)),
+                iconSize = const(0.09f),
+                minZoom = 0.0f,
+                maxZoom = 24.0f,
+                visible = true,
+                iconAllowOverlap = const(true),
+                onClick = { features ->
+                    selectedPoi = features.firstOrNull()
+                    //println("Clicked on ${features[0].toJson()}")
+                    ClickResult.Consume
+                }
+            )
 
-                SymbolLayer(
-                    id = "service_points",
-                    source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
-                    iconImage = image(poiIcon(svgService)),
-                    iconSize = const(0.09f),
-                    minZoom = 0.0f,
-                    maxZoom = 24.0f,
-                    visible = true,
-                    iconAllowOverlap = const(true),
-                    onClick = { features ->
-                        selectedPoi = features.firstOrNull()
-                        println("Clicked on ${features[0].toJson()}")
-                        ClickResult.Consume
-                    },
-                )
+            SymbolLayer(
+                id = "ticket_machines",
+                source = poiSource("https://data.foli.fi/geojson/poi/ticket_machines"),
+                iconImage = image(poiIcon(svgTicket)),
+                iconSize = const(0.09f),
+                minZoom = 0.0f,
+                maxZoom = 24.0f,
+                visible = true,
+                iconAllowOverlap = const(true),
+                onClick = { features ->
+                    selectedPoi = features.firstOrNull()
+                    //println("Clicked on ${features[0].toJson()}")
+                    ClickResult.Consume
+                }
+            )
 
-                SymbolLayer(
-                    id = "ticket_machines",
-                    source = poiSource("https://data.foli.fi/geojson/poi/ticket_machines"),
-                    iconImage = image(poiIcon(svgTicket)),
-                    iconSize = const(0.09f),
-                    minZoom = 0.0f,
-                    maxZoom = 24.0f,
-                    visible = true,
-                    iconAllowOverlap = const(true),
-                    onClick = { features ->
-                        selectedPoi = features.firstOrNull()
-                        println("Clicked on ${features[0].toJson()}")
-                        ClickResult.Consume
-                    },
-                )
-
-                SymbolLayer(
-                    id = "loading_points",
-                    source = poiSource("https://data.foli.fi/geojson/poi/loading_points"),
-                    iconImage = image(poiIcon(svgLoading)),
-                    iconSize = const(0.09f),
-                    minZoom = 0.0f,
-                    maxZoom = 24.0f,
-                    visible = true,
-                    iconAllowOverlap = const(true),
-                    onClick = { features ->
-                        selectedPoi = features.firstOrNull()
-                        println("Clicked on ${features[0].toJson()}")
-                        ClickResult.Consume
-                    },
-
-                )
-
-
-
+            SymbolLayer(
+                id = "loading_points",
+                source = poiSource("https://data.foli.fi/geojson/poi/loading_points"),
+                iconImage = image(poiIcon(svgLoading)),
+                iconSize = const(0.09f),
+                minZoom = 0.0f,
+                maxZoom = 24.0f,
+                visible = true,
+                iconAllowOverlap = const(true),
+                onClick = { features ->
+                    selectedPoi = features.firstOrNull()
+                    //println("Clicked on ${features[0].toJson()}")
+                    ClickResult.Consume
+                }
+            )
 
         }
         //UI Layer
-        // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
 
+        // Näytetään Progress Indicator kun pysäkkejä haetaan GTFS-rajapinnasta
         if (isLoading && httpStat == 0) {
             Box(
                 Modifier.fillMaxSize(),
@@ -317,7 +297,6 @@ fun MapComponent(
         }
 
         // Näytetään PopUpCard kun pysäkki valitaan
-
         if (selectedFeature != null) {
             selectedFeature?.let { feature ->
                 LaunchedEffect(feature.geometry) {
@@ -348,8 +327,6 @@ fun MapComponent(
                         )
                     }
 
-
-
                 }
                 PopUpCard(
                     feature = feature,
@@ -364,6 +341,7 @@ fun MapComponent(
 
         }
 
+        // Näytetään POI kortti klikattaessa
         if (selectedPoi != null) {
             selectedPoi?.let{ feature ->
                 LaunchedEffect(feature.geometry) {
@@ -376,24 +354,25 @@ fun MapComponent(
             }
 
         }
+
         // Näytetään location button jos on lupa käyttää sijaintia
         if (locationPermission) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(8.dp),
                 contentAlignment = Alignment.BottomEnd
-            ) {
-                val zoom = camera.position.zoom
-                UseMyLocation(
-                    onClick = { coroutineScope.launch {
-                        locationState.location?.position?.let { camera.animateTo(CameraPosition(target = it, zoom = zoom)) }
+                ) {
+                    val zoom = camera.position.zoom
+                    UseMyLocation(
+                        onClick = {
+                            coroutineScope.launch { locationState.location?.position?.let {
+                                camera.animateTo(CameraPosition(target = it, zoom = zoom))
+                            } }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
-
-    }
-}
+   }
 
 
 @Composable
