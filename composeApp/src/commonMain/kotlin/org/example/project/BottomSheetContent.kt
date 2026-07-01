@@ -1,11 +1,13 @@
 package org.example.project
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,7 +35,9 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -59,6 +63,7 @@ import org.example.project.data.getTrips
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.ui.unit.center
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,)
 @Composable
@@ -79,6 +84,7 @@ fun BottomSheetContent(
     val overScrollEffect = rememberOverscrollEffect()
 
 
+
     val scope = rememberCoroutineScope()
 
 
@@ -86,8 +92,6 @@ fun BottomSheetContent(
     val uiState by busViewModel.uiState.collectAsStateWithLifecycle()
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
     val selectedLines by busViewModel.selectedLines.collectAsStateWithLifecycle()
-
-    var isSelected by rememberSaveable { mutableStateOf(false) }
 
     var httpStatus by remember { mutableStateOf(0) }
 
@@ -118,13 +122,12 @@ fun BottomSheetContent(
                     "${feature.getStringProperty("stop_code")}"
         }
 
-            if (stopSearch?.isNotEmpty() == true) {
+        if (stopSearch?.isNotEmpty() == true) {
 
-                busViewModel.getBusList(stopSearch)
+            busViewModel.getBusList(stopSearch)
 
-
-                //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
-                if (!stopTimes.containsKey(stopSearch)) {
+            //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
+            if (!stopTimes.containsKey(stopSearch)) {
                     //  https://data.foli.fi/gtfs/stop_times/stop/stop_id
                     val tripIds = getStopTimes(stopSearch).map { it.trip_id }.toSet()
                     val routeroutes = arrayListOf<String>()
@@ -138,12 +141,10 @@ fun BottomSheetContent(
                     displayNames.put(stopSearch!!, routeroutes)
                     stopTimes.put(stopSearch!!, tripIds)
 
-                }
-
-
-
-                httpStatus = busViewModel.getResponseStatus(stopSearch).value
             }
+
+            httpStatus = busViewModel.getResponseStatus(stopSearch).value
+        }
     }
 
 
@@ -157,11 +158,12 @@ fun BottomSheetContent(
         val selectedLine = selectedLines[stopSearch]
 
         if (selectedLine.isNullOrEmpty()) {
-
+            //println("Lazy layout unfiltered: " + lazyListState.layoutInfo.viewportSize.center + " " + lazyListState.layoutInfo.totalItemsCount)
             uiState.busList
         } else {
-
+            //println("Lazy layout: " + selectedLine + " " + lazyListState.layoutInfo.viewportSize.center + " " + lazyListState.layoutInfo.totalItemsCount)
             uiState.busList.filter { it.lineref == selectedLine }
+
         }
     }
 
@@ -170,13 +172,14 @@ fun BottomSheetContent(
 
 
     LazyColumn(
-        modifier = Modifier.padding(bottom = 20.dp),
+        modifier = Modifier.padding(bottom = 20.dp).fillMaxHeight(),
         contentPadding = PaddingValues(horizontal = 1.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = lazyListState,
         userScrollEnabled = true,
         reverseLayout = false,
         overscrollEffect = overScrollEffect,
+        flingBehavior = ScrollableDefaults.flingBehavior()
     ) {
 
         if ((stopSearch.isNullOrEmpty())) {
@@ -293,7 +296,7 @@ fun BottomSheetContent(
                             .padding(horizontal = 12.dp, vertical = 8.dp),
 
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         maxItemsInEachRow = 5,
                     ) {
                         lines.forEach { label ->
@@ -316,7 +319,7 @@ fun BottomSheetContent(
 
             itemsIndexed(
                 items = filteredBusList,
-                key = { index, bus -> "${stopSearch}_${bus.lineref}_${index}" }) { index, bus ->
+                key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { index, bus ->
                 Timetable(bus, routeDetails)
             }
 
@@ -328,7 +331,7 @@ fun BottomSheetContent(
                             containerColor = Color(0XFFf3f6f4)
                         ),
                         border = BorderStroke(1.dp, Color.Black),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(8.dp),
