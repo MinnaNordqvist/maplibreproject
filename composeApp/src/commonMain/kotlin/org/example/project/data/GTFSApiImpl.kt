@@ -2,7 +2,6 @@ package org.example.project.data
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 
@@ -20,11 +19,10 @@ suspend fun getStopStatus(): HttpStatusCode {
 }
 
 
-suspend fun getRoutes(): List<Routes> {
+suspend fun getRoutes(): List<Route> {
     return org.example.project.client.get("/gtfs/routes"){
         method = HttpMethod.Get
     }.body()
-
 }
 
 suspend fun getTrips(): List<Trips> {
