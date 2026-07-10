@@ -1,6 +1,5 @@
 package org.example.project
 
-import androidx.compose.animation.animateBounds
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,16 +24,17 @@ import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import maplibreproject.composeapp.generated.resources.Res
+
 import maplibreproject.composeapp.generated.resources.bolt
+
 import maplibreproject.composeapp.generated.resources.hourglass
 import org.example.project.data.Response
 import org.jetbrains.compose.resources.painterResource
 
 
-fun String.toColor(): Color {
+private fun String.toColor(): Color {
     val hex = this
-    val colorLong = ("FF$hex").toLong(16)
-    return Color(colorLong)
+    return Color(android.graphics.Color.parseColor("#$hex"))
 }
 
 @Composable
@@ -42,6 +42,9 @@ fun Timetable(
     bus: Response.Bus,
     routeDetails: MutableMap<String, String>
 ){
+       val departureTime = bus.getDepartures(bus.expecteddeparturetime)
+       val difference = bus.aikaero()
+       val routeColor =  routeDetails[bus.lineref]!!.toColor()
 
        Card(
         colors = CardDefaults.cardColors(
@@ -63,10 +66,9 @@ fun Timetable(
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(start = 0.dp, top = 0.dp, end = 6.dp, bottom = 0.dp)
+                        .padding(end = 6.dp)
                         .size(60.dp, 40.dp)
-                        //.weight(0.8f)
-                        .background(routeDetails[bus.lineref]!!.toColor()),
+                        .background(routeColor),
 
                     contentAlignment = Alignment.Center,
                 ) {
@@ -77,65 +79,48 @@ fun Timetable(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxHeight()
-                            .padding(
-                                start = 0.dp,
-                                top = 6.dp,
-                                end = 0.dp,
-                                bottom = 0.dp
-                            ),
+                            .padding(top = 6.dp),
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
                 Text(
                     text = bus.destinationdisplay,
-                    //fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .weight(3.0f)
-                        .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                        .padding(top = 6.dp),
                     style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
                     softWrap = true,
 
                     )
-                if (bus.aikaero() > 60) {
+                if (difference > 60) {
                     Image(
                         painter = painterResource(Res.drawable.hourglass),
                         contentDescription = null,
                         modifier = Modifier.size(25.dp, 30.dp)
-                            .padding(
-                                start = 2.dp,
-                                top = 8.dp,
-                                end = 0.dp,
-                                bottom = 0.dp
-                            ),
+                            .padding(start = 2.dp, top = 8.dp),
                         alignment = Alignment.TopEnd
                     )
+                   // println(difference)
                 }
-                if (bus.aikaero() < -60) {
+                if (difference < -60) {
                     Image(
                         painter = painterResource(Res.drawable.bolt),
                         contentDescription = null,
                         modifier = Modifier.size(25.dp, 30.dp)
-                            .padding(
-                                start = 2.dp,
-                                top = 8.dp,
-                                end = 0.dp,
-                                bottom = 0.dp
-                            ),
+                            .padding(start = 2.dp, top = 8.dp),
                         alignment = Alignment.TopEnd
                     )
-                    println(bus.aikaero())
+                   // println(difference)
                 }
                 Text(
-                    text = bus.getDeparture(),
+                    text = departureTime,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End,
-                    modifier = Modifier
-                        //.weight(0.8f)
-                        .padding(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 0.dp),
+                    modifier = Modifier.padding(top = 6.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
-                println(bus.destinationdisplay + " aikataulun mukainen " + bus.getAimedDeparture() + " reealiaika " + bus.getDeparture())
+               // println(bus.destinationdisplay + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
             }
         }
     }
