@@ -7,13 +7,9 @@ import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.http.ContentType.Application.Json
-
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.appendIfNameAbsent
 import kotlinx.serialization.json.Json
 
 
@@ -39,7 +35,7 @@ actual val client: HttpClient = HttpClient(OkHttp) {
             protocol = URLProtocol.HTTPS
             host = "data.foli.fi"
         }
-        header("MapLibreProject-Android-Header", "Hello")
+        header("MapLibreProject-Android-Header", " no-public")
     }
 
     install(ContentNegotiation) {

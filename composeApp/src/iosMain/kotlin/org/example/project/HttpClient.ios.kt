@@ -28,7 +28,7 @@ actual val client = HttpClient(Darwin) {
 
     }
     install(UserAgent) {
-        agent = "MapLibreProject Android"
+        agent = "MapLibreProject iOS"
     }
 
     defaultRequest {
@@ -36,7 +36,7 @@ actual val client = HttpClient(Darwin) {
             protocol = URLProtocol.HTTPS
             host = "data.foli.fi"
         }
-        header("MapLibreProject-Android-Header", "Hello")
+        header("MapLibreProject-ios-Header", "no-public")
     }
 
     install(ContentNegotiation) {
