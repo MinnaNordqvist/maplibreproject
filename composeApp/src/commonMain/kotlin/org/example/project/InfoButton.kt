@@ -16,29 +16,18 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.decodeToImageBitmap
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.PathParser
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import androidx.graphics.shapes.FeatureSerializer
-import androidx.graphics.shapes.RoundedPolygon
-import androidx.graphics.shapes.SvgPathParser
 import kotlinx.coroutines.launch
 import maplibreproject.composeapp.generated.resources.Res
+
 import maplibreproject.composeapp.generated.resources.bolt
+
 import maplibreproject.composeapp.generated.resources.hourglass
+
 import maplibreproject.composeapp.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
-import androidx.graphics.shapes.Feature
-import io.ktor.utils.io.core.toByteArray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
