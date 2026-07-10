@@ -9,8 +9,11 @@ Turku region public transport's transit and timetable data. The administrator of
 
 Tutorial part 1
 https://medium.com/@minnanord/android-and-ios-public-transportation-timetable-app-with-maplibre-compose-part-1-539da3a97f97
- 
- wip
+
+Tutorial part 2
+https://medium.com/@minnanord/android-and-ios-public-transportation-timetable-app-with-maplibre-compose-part-2-1d10f1cb613c
+
+wip
 
 .  
 .
