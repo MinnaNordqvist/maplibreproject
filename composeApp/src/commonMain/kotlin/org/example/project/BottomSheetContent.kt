@@ -319,7 +319,7 @@ fun BottomSheetContent(
 
             itemsIndexed(
                 items = filteredBusList,
-                key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { index, bus ->
+                key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { _, bus ->
                 Timetable(bus, routeDetails)
             }
 
