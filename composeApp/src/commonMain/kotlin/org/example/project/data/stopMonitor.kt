@@ -67,6 +67,9 @@ data class Response(
     data class Bus(
         var lineref: String,
         val destinationdisplay: String,
+        val monitored: Boolean,
+        val longitude: Double? = null,
+        val latitude: Double? = null,
         val aimeddeparturetime: Long,
         val expecteddeparturetime: Long,
     ) {

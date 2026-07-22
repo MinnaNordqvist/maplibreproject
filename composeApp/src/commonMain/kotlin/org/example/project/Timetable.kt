@@ -45,10 +45,11 @@ fun Timetable(
        val departureTime = bus.getDepartures(bus.expecteddeparturetime)
        val difference = bus.aikaero()
        val routeColor =  routeDetails[bus.lineref]!!.toColor()
+       val realTime = bus.monitored
 
        Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color(0XFFf3f6f4)
+            containerColor = (if (realTime) Color(0XFFf3f6f4) else Color(0xFFD7D8D9))
         ),
         border = BorderStroke(1.dp, Color.Black),
         modifier = Modifier.fillMaxWidth()
@@ -93,7 +94,7 @@ fun Timetable(
                     softWrap = true,
 
                     )
-                if (difference > 60) {
+                if (bus.monitored && difference > 60) {
                     Image(
                         painter = painterResource(Res.drawable.hourglass),
                         contentDescription = null,
@@ -103,7 +104,7 @@ fun Timetable(
                     )
                    // println(difference)
                 }
-                if (difference < -60) {
+                if (bus.monitored && difference < -60) {
                     Image(
                         painter = painterResource(Res.drawable.bolt),
                         contentDescription = null,
@@ -120,7 +121,7 @@ fun Timetable(
                     modifier = Modifier.padding(top = 6.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
-               // println(bus.destinationdisplay + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
+                println(bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude +  " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
             }
         }
     }
