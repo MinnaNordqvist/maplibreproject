@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,12 +29,15 @@ import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import maplibreproject.composeapp.generated.resources.Res
-
+import org.maplibre.spatialk.geojson.Position
 import maplibreproject.composeapp.generated.resources.bolt
-
+import maplibreproject.composeapp.generated.resources.bus_map_pin
 import maplibreproject.composeapp.generated.resources.hourglass
 import org.example.project.data.Response
 import org.jetbrains.compose.resources.painterResource
+import  androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import  androidx.compose.runtime.setValue
 
 
 private fun String.toColor(): Color {
@@ -40,12 +48,17 @@ private fun String.toColor(): Color {
 @Composable
 fun Timetable(
     bus: Response.Bus,
-    routeDetails: MutableMap<String, String>
+    routeDetails: MutableMap<String, String>,
+    onIconClick: (position:Position?) -> Unit
 ){
        val departureTime = bus.getDepartures(bus.expecteddeparturetime)
        val difference = bus.aikaero()
        val routeColor =  routeDetails[bus.lineref]!!.toColor()
        val realTime = bus.monitored
+       val lon = bus.longitude
+       val lat = bus.latitude
+
+       var position: Position? by remember{ mutableStateOf<Position?>(null) }
 
        Card(
         colors = CardDefaults.cardColors(
@@ -91,9 +104,26 @@ fun Timetable(
                         .weight(3.0f)
                         .padding(top = 6.dp),
                     style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                    softWrap = true,
+                    softWrap = true
+                )
 
-                    )
+                if (bus.monitored) {
+                    OutlinedIconButton(
+                        onClick = {
+                            position = Position(latitude = lat!!, longitude = lon!!)
+                            position?.let { onIconClick(it) }
+                            //println(position)
+                        },
+                        modifier = Modifier.padding(end = 6.dp)
+                    ){
+                        Icon(
+                            painter = painterResource(Res.drawable.bus_map_pin),
+                            contentDescription = null,
+                            //modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
                 if (bus.monitored && difference > 60) {
                     Image(
                         painter = painterResource(Res.drawable.hourglass),

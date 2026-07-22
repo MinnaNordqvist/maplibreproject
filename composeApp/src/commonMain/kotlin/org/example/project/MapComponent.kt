@@ -2,11 +2,15 @@ package org.example.project
 
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,6 +20,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,9 +28,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import io.ktor.client.request.invoke
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -65,8 +73,13 @@ import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.location.LocationPuckSizes
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.launch
+import maplibreproject.composeapp.generated.resources.bus_map_pin
 import maplibreproject.composeapp.generated.resources.my_location
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
+import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.spatialk.geojson.FeatureCollection
 
 
 private  var data by mutableStateOf(featureCollectionOf().toJson())
@@ -78,12 +91,13 @@ private var enableTracking by mutableStateOf(false)
 @Composable
 fun MapComponent(
     onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit,
-    locationPermission : Boolean
+    locationPermission : Boolean,
+    selectedPosition: Position?
 ) {
 
     var locationProvider: LocationProvider?
 
-    if (locationPermission){
+    if (locationPermission) {
         locationProvider = rememberDefaultLocationProvider()
         enableTracking = true
 
@@ -119,8 +133,8 @@ fun MapComponent(
 
     val camera = rememberCameraState(
         firstPosition = CameraPosition(
-                target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
-                zoom = 15.0
+            target = Position(latitude = 60.45195547084046, longitude = 22.267010954960753),
+            zoom = 15.0
         )
     )
 
@@ -129,7 +143,9 @@ fun MapComponent(
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
 
-    var selectedPoi by remember {mutableStateOf<Feature<Geometry, JsonObject?>?>(null)}
+    var selectedPoi by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
+
+    var busPosition by remember { mutableStateOf(selectedPosition) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -225,7 +241,7 @@ fun MapComponent(
                 iconAllowOverlap = const(true),
                 filter = get("stop_code").asString().eq(const(selectedStop ?: "")),
 
-            )
+                )
 
             // POI layers from GeoJSON source
             SymbolLayer(
@@ -314,7 +330,7 @@ fun MapComponent(
                             screenX > (screenWidth - horizontalMargin) ||
                             screenY!! < topMargin ||
                             screenY > (screenHeight - bottomMargin)
-                    
+
 
                     if (needsUpdate) {
                         camera.animateTo(
@@ -343,7 +359,7 @@ fun MapComponent(
 
         // Näytetään POI kortti klikattaessa
         if (selectedPoi != null) {
-            selectedPoi?.let{ feature ->
+            selectedPoi?.let { feature ->
                 LaunchedEffect(feature.geometry) {
 
                 }
@@ -360,20 +376,47 @@ fun MapComponent(
             Box(
                 modifier = Modifier.fillMaxSize().padding(8.dp),
                 contentAlignment = Alignment.BottomEnd
-                ) {
-                    val zoom = camera.position.zoom
-                    UseMyLocation(
-                        onClick = {
-                            coroutineScope.launch { locationState.location?.position?.let {
+            ) {
+                val zoom = camera.position.zoom
+                UseMyLocation(
+                    onClick = {
+                        coroutineScope.launch {
+                            locationState.location?.position?.let {
                                 camera.animateTo(CameraPosition(target = it, zoom = zoom))
-                            } }
+                            }
                         }
-                    )
-                }
+                    }
+                )
             }
         }
-   }
 
+
+        // Näytetään valitun bussin sijainti
+        if (selectedPosition != null) {
+            busPosition = selectedPosition
+
+            val dpTarg = remember(busPosition, camera.position) {
+                camera.projection?.screenLocationFromPosition(busPosition!!)
+            }
+
+            dpTarg?.let { offset ->
+                Image(
+                    painter = painterResource(Res.drawable.bus_map_pin),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp).offset(offset.x - 12.dp, offset.y - 24.dp)
+                )
+            }
+
+            LaunchedEffect(busPosition) {
+                val zoom = camera.position.zoom
+                camera.animateTo(CameraPosition(target = busPosition!!, zoom = zoom))
+                println("Animating to $busPosition")
+            }
+
+
+        }
+    }
+}
 
 @Composable
 fun UseMyLocation(onClick: () -> Unit){

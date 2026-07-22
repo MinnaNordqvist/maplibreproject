@@ -50,7 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
+import org.maplibre.spatialk.geojson.Position
 import kotlinx.coroutines.runBlocking
 
 import maplibreproject.composeapp.generated.resources.refresh
@@ -69,7 +69,8 @@ import androidx.compose.ui.unit.center
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    selectedPosition: (position:Position?) -> Unit,
 ) {
 
     // Kun ohjelma käynnistyy, 2 lähetetään http-get pyyntöä GTFS rajapintaan
@@ -99,6 +100,12 @@ fun BottomSheetContent(
 
     var stickyText by rememberSaveable { mutableStateOf("") }
 
+    var position : Position? by remember{ mutableStateOf<Position?>(null) }
+    val onIconClick: (position:Position?) -> Unit = { selectedPos ->
+        position = selectedPos
+        position?.let { selectedPosition(it) }
+       // println(position)
+    }
 
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
 
@@ -320,7 +327,7 @@ fun BottomSheetContent(
             itemsIndexed(
                 items = filteredBusList,
                 key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { _, bus ->
-                Timetable(bus, routeDetails)
+                Timetable(bus, routeDetails, onIconClick = onIconClick)
             }
 
 

@@ -44,6 +44,7 @@ import org.koin.compose.KoinApplication
 
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.koinConfiguration
+import org.maplibre.spatialk.geojson.Position
 
 private var isPermissionGranted by mutableStateOf(false)
 private  var isPermissionDialogCompleted by mutableStateOf(false)
@@ -68,6 +69,12 @@ fun App() {
         val onMarkerClick: (feature: Feature<Geometry, JsonObject?>) -> Unit = { markerdata ->
             selectedMarker = markerdata
 
+        }
+
+        var position by remember { mutableStateOf<Position?>(null) }
+
+        val selectedPosition: (position: Position?) -> Unit = { selectedPos ->
+            position = selectedPos
         }
 
         val permissionChecker = rememberPermissionChecker(
@@ -104,7 +111,8 @@ fun App() {
                                 selectedMarker = null
                                 scaffoldState.bottomSheetState.hide()
                             }
-                        }
+                        },
+                        selectedPosition = selectedPosition,
                     )
                 },
                 topBar = {
@@ -135,7 +143,7 @@ fun App() {
                         contentAlignment = Alignment.Center
                     ) {
                         if(isPermissionDialogCompleted) {
-                            MapComponent(onMarkerClick = onMarkerClick, locationPermission = isPermissionGranted)
+                            MapComponent(onMarkerClick = onMarkerClick, locationPermission = isPermissionGranted, selectedPosition = position)
                         } else{
 
                             CircularProgressIndicator(
