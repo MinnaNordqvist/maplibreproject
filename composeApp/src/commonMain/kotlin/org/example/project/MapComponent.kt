@@ -4,22 +4,28 @@ package org.example.project
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -34,7 +40,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.ktor.client.request.invoke
@@ -405,28 +413,52 @@ fun MapComponent(
             }
             val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
 
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .absoluteOffset {
-                            IntOffset(
-                                x = off.x.toInt() - 12,
-                                y = off.y.toInt() - 24
-                            )
-                        }
-                        //.clip(shape)
-                        .background(Color.Cyan),
+            Card(
+                modifier = Modifier
+                    .absoluteOffset {
+                        IntOffset(
+                            x = off.x.toInt() - 12,
+                            y = off.y.toInt() - 24
+                        )
+                    },
+                    //.size(60.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Blue),
 
-                    contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(2.dp)
+                ){
+                   Row(
+                       horizontalArrangement = Arrangement.SpaceBetween,
+                       modifier = Modifier.padding(1.dp)
+                   ){
+                       Image(
+                           painter = painterResource(Res.drawable.bus_map_pin),
+                           contentDescription = null,
+                           //modifier = Modifier.fillMaxSize(),
+                           alignment = Alignment.Center,
+                           contentScale = ContentScale.Fit,
+                       )
+                       Text(text = "666A", color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+                   }
+                    Text(text = "18:07:00", color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium )
 
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.bus_map_pin),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-
-                    )
                 }
+
+
+                /*
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+
+
+                }
+
+                 */
+            }
 
 
             LaunchedEffect(busPosition) {

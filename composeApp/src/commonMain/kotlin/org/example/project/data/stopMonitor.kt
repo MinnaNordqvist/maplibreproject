@@ -65,7 +65,8 @@ data class Response(
 ) {
     @Serializable
     data class Bus(
-        var lineref: String,
+        val recordedattime: Long,
+        val lineref: String,
         val destinationdisplay: String,
         val monitored: Boolean,
         val longitude: Double? = null,
@@ -88,6 +89,19 @@ data class Response(
         fun aikaero() : Long {
             val erotus = expecteddeparturetime - aimeddeparturetime
             return erotus
+        }
+
+        fun getTimeStamp(): String {
+            val instant = Instant.fromEpochSeconds(recordedattime)
+            val timestamp = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                .format(LocalDateTime.Format {
+                    hour()
+                    char(':')
+                    minute()
+                    char(':')
+                    second()
+                })
+            return timestamp
         }
     }
 

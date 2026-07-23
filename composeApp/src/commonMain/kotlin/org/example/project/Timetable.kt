@@ -108,19 +108,19 @@ fun Timetable(
                     softWrap = true
                 )
 
-                if (bus.monitored) {
+                if (bus.latitude != null && bus.longitude != null) {
                     OutlinedIconButton(
                         onClick = {
-                            position = Position(latitude = lat!!, longitude = lon!!)
+                            position = Position(latitude = lat, longitude = lon)
                             position?.let { onIconClick(it) }
-                            //println(position)
+                            println(bus.getTimeStamp())
                         },
                         modifier = Modifier.padding(end = 6.dp),
                         colors = IconButtonColors(
                             containerColor = Color.DarkGray,
                             contentColor = Color.White,
                             disabledContentColor = Color.White,
-                            disabledContainerColor = Color.Black
+                            disabledContainerColor = Color.Gray
                         )
                     ){
                         Icon(
