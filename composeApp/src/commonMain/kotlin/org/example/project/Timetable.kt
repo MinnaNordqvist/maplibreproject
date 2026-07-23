@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
@@ -114,7 +115,13 @@ fun Timetable(
                             position?.let { onIconClick(it) }
                             //println(position)
                         },
-                        modifier = Modifier.padding(end = 6.dp)
+                        modifier = Modifier.padding(end = 6.dp),
+                        colors = IconButtonColors(
+                            containerColor = Color.DarkGray,
+                            contentColor = Color.White,
+                            disabledContentColor = Color.White,
+                            disabledContainerColor = Color.Black
+                        )
                     ){
                         Icon(
                             painter = painterResource(Res.drawable.bus_map_pin),

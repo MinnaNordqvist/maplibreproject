@@ -3,6 +3,7 @@ package org.example.project
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,8 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -394,18 +398,36 @@ fun MapComponent(
         // Näytetään valitun bussin sijainti
         if (selectedPosition != null) {
             busPosition = selectedPosition
+            val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp)
 
             val dpTarg = remember(busPosition, camera.position) {
                 camera.projection?.screenLocationFromPosition(busPosition!!)
             }
+            val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
 
-            dpTarg?.let { offset ->
-                Image(
-                    painter = painterResource(Res.drawable.bus_map_pin),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp).offset(offset.x - 12.dp, offset.y - 24.dp)
-                )
-            }
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .absoluteOffset {
+                            IntOffset(
+                                x = off.x.toInt() - 12,
+                                y = off.y.toInt() - 24
+                            )
+                        }
+                        //.clip(shape)
+                        .background(Color.Cyan),
+
+                    contentAlignment = Alignment.Center,
+
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.bus_map_pin),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+
+                    )
+                }
+
 
             LaunchedEffect(busPosition) {
                 val zoom = camera.position.zoom
