@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,12 +40,21 @@ import org.jetbrains.compose.resources.painterResource
 import  androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import  androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import org.maplibre.compose.camera.CameraState
 
 
 private fun String.toColor(): Color {
     val hex = this
     return Color(android.graphics.Color.parseColor("#$hex"))
 }
+
+private var routeCol: Color by mutableStateOf(Color(0XFFf3f6f4))
+private var lineNum by mutableStateOf("")
+private var timeStamp by mutableStateOf("")
 
 @Composable
 fun Timetable(
@@ -113,7 +123,10 @@ fun Timetable(
                         onClick = {
                             position = Position(latitude = lat, longitude = lon)
                             position?.let { onIconClick(it) }
-                            println(bus.getTimeStamp())
+                            timeStamp = bus.getTimeStamp()
+                            lineNum = bus.lineref
+                            routeCol = routeColor
+                           // println(bus.getTimeStamp())
                         },
                         modifier = Modifier.padding(end = 6.dp),
                         colors = IconButtonColors(
@@ -164,4 +177,58 @@ fun Timetable(
     }
    }
 
+@Composable
+fun BusLocationInfo(
+    position: Position?,
+    cameraState: CameraState,
+){
+    val pos = position
+    val dpTarg = remember(pos, cameraState.position) {
+        cameraState.projection?.screenLocationFromPosition(pos!!)
+    }
+    val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
+    Card(
+        modifier = Modifier
+            .absoluteOffset {
+                IntOffset(
+                    x = off.x.toInt() - 12,
+                    y = off.y.toInt() - 24
+                )
+            },
+        //.size(60.dp),
+        colors = CardDefaults.cardColors(containerColor = routeCol),
 
+        ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(2.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.padding(1.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.bus_map_pin),
+                    contentDescription = null,
+                    //modifier = Modifier.fillMaxSize(),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Fit,
+                )
+                Text(
+                    text = lineNum,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            Text(
+                text = timeStamp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+
+}

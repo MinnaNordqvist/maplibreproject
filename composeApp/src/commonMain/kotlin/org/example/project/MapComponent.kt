@@ -174,6 +174,7 @@ fun MapComponent(
                 selectedFeature = null
                 selectedStop = ""
                 selectedPoi = null
+                busPosition = null
                 ClickResult.Pass
             },
 
@@ -181,6 +182,7 @@ fun MapComponent(
                 selectedFeature = null
                 selectedStop = ""
                 selectedPoi = null
+                busPosition = null
                 ClickResult.Pass
             },
 
@@ -359,10 +361,6 @@ fun MapComponent(
                 PopUpCard(
                     feature = feature,
                     cameraState = camera,
-                    onDismiss = {
-                        selectedFeature = null
-
-                    }
                 )
 
             }
@@ -406,68 +404,16 @@ fun MapComponent(
         // Näytetään valitun bussin sijainti
         if (selectedPosition != null) {
             busPosition = selectedPosition
-            val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp)
-
-            val dpTarg = remember(busPosition, camera.position) {
-                camera.projection?.screenLocationFromPosition(busPosition!!)
-            }
-            val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
-
-            Card(
-                modifier = Modifier
-                    .absoluteOffset {
-                        IntOffset(
-                            x = off.x.toInt() - 12,
-                            y = off.y.toInt() - 24
-                        )
-                    },
-                    //.size(60.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Blue),
-
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(2.dp)
-                ){
-                   Row(
-                       horizontalArrangement = Arrangement.SpaceBetween,
-                       modifier = Modifier.padding(1.dp)
-                   ){
-                       Image(
-                           painter = painterResource(Res.drawable.bus_map_pin),
-                           contentDescription = null,
-                           //modifier = Modifier.fillMaxSize(),
-                           alignment = Alignment.Center,
-                           contentScale = ContentScale.Fit,
-                       )
-                       Text(text = "666A", color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
-                   }
-                    Text(text = "18:07:00", color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium )
-
-                }
-
-
-                /*
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-
-
-                }
-
-                 */
-            }
-
 
             LaunchedEffect(busPosition) {
                 val zoom = camera.position.zoom
                 camera.animateTo(CameraPosition(target = busPosition!!, zoom = zoom))
                 println("Animating to $busPosition")
             }
-
-
+            BusLocationInfo(
+                position = busPosition,
+                cameraState = camera
+            )
         }
     }
 }

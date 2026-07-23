@@ -86,7 +86,6 @@ fun markerSource(data: String): GeoJsonSource {
 fun PopUpCard(
     feature: Feature<Geometry, JsonObject?>,
     cameraState: CameraState,
-    onDismiss: () -> Unit
 ){
     val pos = (feature.geometry as Point).coordinates
 
