@@ -143,7 +143,12 @@ fun App() {
                         contentAlignment = Alignment.Center
                     ) {
                         if(isPermissionDialogCompleted) {
-                            MapComponent(onMarkerClick = onMarkerClick, locationPermission = isPermissionGranted, selectedPosition = position)
+                            MapComponent(
+                                onMarkerClick = onMarkerClick,
+                                locationPermission = isPermissionGranted,
+                                selectedPosition = position,
+                                onClearPosition = { position = null }
+                            )
                         } else{
 
                             CircularProgressIndicator(

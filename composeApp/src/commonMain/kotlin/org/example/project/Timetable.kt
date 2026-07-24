@@ -66,8 +66,6 @@ fun Timetable(
        val difference = bus.aikaero()
        val routeColor =  routeDetails[bus.lineref]!!.toColor()
        val realTime = bus.monitored
-       val lon = bus.longitude
-       val lat = bus.latitude
 
        var position: Position? by remember{ mutableStateOf<Position?>(null) }
 
@@ -121,7 +119,7 @@ fun Timetable(
                 if (bus.latitude != null && bus.longitude != null) {
                     OutlinedIconButton(
                         onClick = {
-                            position = Position(latitude = lat, longitude = lon)
+                            position = Position(latitude = bus.latitude, longitude = bus.longitude)
                             position?.let { onIconClick(it) }
                             timeStamp = bus.getTimeStamp()
                             lineNum = bus.lineref
@@ -181,6 +179,7 @@ fun Timetable(
 fun BusLocationInfo(
     position: Position?,
     cameraState: CameraState,
+    onClick: () -> Unit
 ){
     val pos = position
     val dpTarg = remember(pos, cameraState.position) {
@@ -188,6 +187,7 @@ fun BusLocationInfo(
     }
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
     Card(
+        onClick = { onClick() },
         modifier = Modifier
             .absoluteOffset {
                 IntOffset(
@@ -200,26 +200,26 @@ fun BusLocationInfo(
 
         ) {
         Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(2.dp)
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.padding(1.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.Start,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.padding(1.dp)
             ) {
                 Image(
                     painter = painterResource(Res.drawable.bus_map_pin),
                     contentDescription = null,
                     //modifier = Modifier.fillMaxSize(),
-                    alignment = Alignment.Center,
+                    alignment = Alignment.TopStart,
                     contentScale = ContentScale.Fit,
                 )
                 Text(
                     text = lineNum,
                     color = Color.White,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
+                    textAlign = TextAlign.End,
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
             Text(

@@ -104,7 +104,8 @@ private var enableTracking by mutableStateOf(false)
 fun MapComponent(
     onMarkerClick: (feature:Feature<Geometry, JsonObject?>) -> Unit,
     locationPermission : Boolean,
-    selectedPosition: Position?
+    selectedPosition: Position?,
+    onClearPosition: () -> Unit
 ) {
 
     var locationProvider: LocationProvider?
@@ -157,7 +158,7 @@ fun MapComponent(
 
     var selectedPoi by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
 
-    var busPosition by remember { mutableStateOf(selectedPosition) }
+
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -174,7 +175,7 @@ fun MapComponent(
                 selectedFeature = null
                 selectedStop = ""
                 selectedPoi = null
-                busPosition = null
+                onClearPosition()
                 ClickResult.Pass
             },
 
@@ -182,7 +183,7 @@ fun MapComponent(
                 selectedFeature = null
                 selectedStop = ""
                 selectedPoi = null
-                busPosition = null
+                onClearPosition()
                 ClickResult.Pass
             },
 
@@ -214,6 +215,7 @@ fun MapComponent(
                 }
 
                 LaunchedEffect(camera.moveReason) {
+                    println("Camera moved: " + camera.moveReason)
                     if (camera.moveReason == CameraMoveReason.GESTURE) {
                         enableTracking = false
                     }
@@ -403,18 +405,26 @@ fun MapComponent(
 
         // Näytetään valitun bussin sijainti
         if (selectedPosition != null) {
-            busPosition = selectedPosition
 
-            LaunchedEffect(busPosition) {
-                val zoom = camera.position.zoom
-                camera.animateTo(CameraPosition(target = busPosition!!, zoom = zoom))
-                println("Animating to $busPosition")
+            val zoom = camera.position.zoom
+
+            LaunchedEffect(selectedPosition) {
+                camera.animateTo(CameraPosition(target = selectedPosition, zoom = zoom))
+                println("Animating to $selectedPosition")
             }
             BusLocationInfo(
-                position = busPosition,
-                cameraState = camera
+                position = selectedPosition,
+                cameraState = camera,
+                onClick = {
+                    coroutineScope.launch {
+                        camera.animateTo(CameraPosition(target = (selectedFeature?.geometry as Point).coordinates, zoom = zoom))
+                    }
+                    onClearPosition()
+                }
             )
         }
+
+
     }
 }
 
