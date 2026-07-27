@@ -409,7 +409,7 @@ fun MapComponent(
             val zoom = camera.position.zoom
 
             LaunchedEffect(selectedPosition) {
-                camera.animateTo(CameraPosition(target = selectedPosition, zoom = zoom))
+                camera.animateTo(CameraPosition(target = selectedPosition, zoom = zoom), duration = 1200.milliseconds)
                 println("Animating to $selectedPosition")
             }
             BusLocationInfo(
@@ -417,7 +417,7 @@ fun MapComponent(
                 cameraState = camera,
                 onClick = {
                     coroutineScope.launch {
-                        camera.animateTo(CameraPosition(target = (selectedFeature?.geometry as Point).coordinates, zoom = zoom))
+                        camera.animateTo(CameraPosition(target = (selectedFeature?.geometry as Point).coordinates, zoom = zoom), duration = 1200.milliseconds)
                     }
                     onClearPosition()
                 }
