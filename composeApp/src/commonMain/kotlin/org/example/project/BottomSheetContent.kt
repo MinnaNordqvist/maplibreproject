@@ -69,7 +69,7 @@ import androidx.compose.ui.unit.center
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
-    onDismiss: () -> Unit,
+   // onDismiss: () -> Unit,
     selectedPosition: (position:Position?) -> Unit,
 ) {
 

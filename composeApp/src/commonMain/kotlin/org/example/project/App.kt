@@ -57,7 +57,8 @@ fun App() {
 
         val coroutineScope = rememberCoroutineScope()
         val sheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded
+            initialValue = SheetValue.PartiallyExpanded,
+            skipHiddenState = true
         )
 
         val scaffoldState = rememberBottomSheetScaffoldState(
@@ -106,14 +107,20 @@ fun App() {
                 sheetContent = {
                     BottomSheetContent(
                         feature = selectedMarker,
+                       /*
                         onDismiss = {
                             coroutineScope.launch {
                                 selectedMarker = null
-                                scaffoldState.bottomSheetState.hide()
+                                scaffoldState.bottomSheetState.partialExpand()
                             }
                         },
+
+                        */
                         selectedPosition = selectedPosition,
                     )
+                    LaunchedEffect(position){
+                        scaffoldState.bottomSheetState.partialExpand()
+                    }
                 },
                 topBar = {
                     TopAppBar(
