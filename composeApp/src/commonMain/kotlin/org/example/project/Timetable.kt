@@ -47,9 +47,12 @@ import androidx.compose.ui.unit.IntOffset
 import org.maplibre.compose.camera.CameraState
 
 
-private fun String.toColor(): Color {
-    val hex = this
-    return Color(android.graphics.Color.parseColor("#$hex"))
+
+
+fun String.toColor(): Color {
+    val hex = this.toLong(16)
+
+    return Color(hex or 0xFF000000)
 }
 
 private var routeCol: Color by mutableStateOf(Color(0XFFf3f6f4))
