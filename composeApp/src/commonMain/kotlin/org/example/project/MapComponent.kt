@@ -202,7 +202,7 @@ fun MapComponent(
                     cameraState = camera,
                     colors = LocationPuckColors(dotFillColorCurrentLocation = Color(0XFF27A3F5)),
                     accuracyThreshold = Float.POSITIVE_INFINITY,
-                    sizes = LocationPuckSizes(dotRadius = 8.dp),
+                    sizes = LocationPuckSizes(dotRadius = 10.dp),
                     showBearing = true
                 )
 
@@ -215,7 +215,7 @@ fun MapComponent(
                 }
 
                 LaunchedEffect(camera.moveReason) {
-                    println("Camera moved: " + camera.moveReason)
+                    println("Camera moved: " + camera.moveReason + " tracking " + enableTracking)
                     if (camera.moveReason == CameraMoveReason.GESTURE) {
                         enableTracking = false
                     }
@@ -266,7 +266,7 @@ fun MapComponent(
                 iconImage = image(poiIcon(svgService)),
                 iconSize = const(0.09f),
                 minZoom = 0.0f,
-                maxZoom = 24.0f,
+                maxZoom = 30.0f,
                 visible = true,
                 iconAllowOverlap = const(true),
                 onClick = { features ->

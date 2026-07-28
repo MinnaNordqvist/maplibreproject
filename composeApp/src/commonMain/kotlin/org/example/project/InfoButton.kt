@@ -1,7 +1,11 @@
 package org.example.project
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +22,10 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import maplibreproject.composeapp.generated.resources.Res
@@ -59,10 +67,10 @@ fun InfoButton(){
                                     top = 0.dp,
                                     end = 0.dp,
                                     bottom = 0.dp
-                                ),
+                                )
 
-                            )
-                        Text("Bussi on ainakin minuutin etuajassa aikataulusta \n")
+                        )
+                        Text("Bussi on ainakin minuutin etuajassa aikataulusta. \n")
                     }
                     Row() {
                         Image(
@@ -74,10 +82,16 @@ fun InfoButton(){
                                     top = 0.dp,
                                     end = 0.dp,
                                     bottom = 0.dp
-                                ),
+                                )
 
-                            )
-                        Text("Bussi on ainakin minuutin myöhässä aikataulusta \n")
+                        )
+                        Text("Bussi on ainakin minuutin myöhässä aikataulusta. \n")
+                    }
+                    Row(){
+                        Box(
+                            modifier = Modifier.background(Color(0xFFD7D8D9)).size(20.dp, 25.dp)
+                        ){}
+                        Text(text = "Bussista ei ole tällä hetkellä saatavilla reaaliaikaista dataa. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
                     }
                     Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
                 }
