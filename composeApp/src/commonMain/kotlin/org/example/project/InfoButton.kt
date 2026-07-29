@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RichTooltip
@@ -22,15 +23,19 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import maplibreproject.composeapp.generated.resources.Res
 
 import maplibreproject.composeapp.generated.resources.bolt
+import maplibreproject.composeapp.generated.resources.bus_map_pin
 
 import maplibreproject.composeapp.generated.resources.hourglass
 
@@ -62,34 +67,34 @@ fun InfoButton(){
                             painter = painterResource(Res.drawable.bolt),
                             contentDescription = null,
                             modifier = Modifier.size(25.dp, 25.dp)
-                                .padding(
-                                    start = 0.dp,
-                                    top = 0.dp,
-                                    end = 0.dp,
-                                    bottom = 0.dp
-                                )
+
 
                         )
-                        Text("Bussi on ainakin minuutin etuajassa aikataulusta. \n")
+                        Text(text = "Bussi on ainakin minuutin etuajassa aikataulusta. \n",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
                     }
                     Row() {
                         Image(
                             painter = painterResource(Res.drawable.hourglass),
                             contentDescription = null,
                             modifier = Modifier.size(25.dp, 25.dp)
-                                .padding(
-                                    start = 0.dp,
-                                    top = 0.dp,
-                                    end = 0.dp,
-                                    bottom = 0.dp
-                                )
+
 
                         )
-                        Text("Bussi on ainakin minuutin myöhässä aikataulusta. \n")
+                        Text(text = "Bussi on ainakin minuutin myöhässä aikataulusta. \n",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
+                    }
+                    Row(){
+                        Image(
+                            painter = painterResource(Res.drawable.bus_map_pin),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(25.dp).background(Color.DarkGray).clip(CircleShape),
+
+                        )
+                        Text(text = "Näytä bussin sijainti kartalla. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp) )
                     }
                     Row(){
                         Box(
-                            modifier = Modifier.background(Color(0xFFD7D8D9)).size(20.dp, 25.dp)
+                            modifier = Modifier.background(Color(0xFFD7D8D9)).size(25.dp, 25.dp)
                         ){}
                         Text(text = "Bussista ei ole tällä hetkellä saatavilla reaaliaikaista dataa. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
                     }

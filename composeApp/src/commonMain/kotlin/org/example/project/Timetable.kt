@@ -129,7 +129,7 @@ fun Timetable(
                             routeCol = routeColor
                            // println(bus.getTimeStamp())
                         },
-                        modifier = Modifier.padding(end = 6.dp),
+                        modifier = Modifier.padding(start = 0.dp, top = 0.dp, end = 0.dp),
                         colors = IconButtonColors(
                             containerColor = Color.DarkGray,
                             contentColor = Color.White,
