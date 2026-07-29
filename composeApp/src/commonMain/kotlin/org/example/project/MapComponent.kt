@@ -112,8 +112,10 @@ fun MapComponent(
 
     if (locationPermission) {
         locationProvider = rememberDefaultLocationProvider()
-        enableTracking = true
 
+        LaunchedEffect(locationPermission) {
+            enableTracking = true
+        }
     } else {
         locationProvider = rememberNullLocationProvider()
     }
@@ -155,6 +157,7 @@ fun MapComponent(
 
     var selectedFeature by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
     var selectedStop by remember { mutableStateOf<String?>("") }
+    var stopCoords by remember { mutableStateOf<Position?>(null)}
 
     var selectedPoi by remember { mutableStateOf<Feature<Geometry, JsonObject?>?>(null) }
 
@@ -215,10 +218,11 @@ fun MapComponent(
                 }
 
                 LaunchedEffect(camera.moveReason) {
-                    println("Camera moved: " + camera.moveReason + " tracking " + enableTracking)
+
                     if (camera.moveReason == CameraMoveReason.GESTURE) {
                         enableTracking = false
                     }
+                    println("Camera moved: " + camera.moveReason + " tracking " + enableTracking)
                 }
             }
 
@@ -240,7 +244,7 @@ fun MapComponent(
                     selectedFeature = features.firstOrNull()
                     selectedStop = selectedFeature?.getStringProperty("stop_code")
                     selectedFeature?.let { onMarkerClick(it) }
-
+                    stopCoords = (selectedFeature?.geometry as Point).coordinates
                     ClickResult.Consume
                 },
             )
@@ -410,14 +414,15 @@ fun MapComponent(
 
             LaunchedEffect(selectedPosition) {
                 camera.animateTo(CameraPosition(target = selectedPosition, zoom = zoom), duration = 1200.milliseconds)
-                println("Animating to $selectedPosition")
+                enableTracking = false
+                println("Animating to $selectedPosition Tracking " + enableTracking)
             }
             BusLocationInfo(
                 position = selectedPosition,
                 cameraState = camera,
                 onClick = {
                     coroutineScope.launch {
-                        camera.animateTo(CameraPosition(target = (selectedFeature?.geometry as Point).coordinates, zoom = zoom), duration = 1200.milliseconds)
+                        stopCoords?.let { camera.animateTo(CameraPosition(target = it, zoom = zoom), duration = 1200.milliseconds) }
                     }
                     onClearPosition()
                 }
