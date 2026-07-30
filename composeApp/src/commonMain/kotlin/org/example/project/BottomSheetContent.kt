@@ -175,7 +175,7 @@ fun BottomSheetContent(
             httpStatus = busViewModel.getResponseStatus(stopSearch).value
             siriStatus = busViewModel.getSiriStatus(stopSearch)
             serverTime = busViewModel.getServerTime(stopSearch)
-            println("Stop monitor status: " + siriStatus)
+
         }
     }
 
@@ -407,8 +407,8 @@ fun BottomSheetContent(
                     }
                 }
             }
-
-            if (httpStatus == 200 && siriStatus == "OK" && compareServerTimes(serverTime) < 10.minutes && uiState.busList.isEmpty()) {
+            val timeAgo = compareServerTimes(serverTime)
+            if (httpStatus == 200 && siriStatus == "OK" && timeAgo < 10.minutes && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -429,7 +429,7 @@ fun BottomSheetContent(
                     }
                 }
             }
-            if (httpStatus == 200 && siriStatus == "OK" && compareServerTimes(serverTime) >= 10.minutes && uiState.busList.isEmpty()) {
+            if (httpStatus == 200 && siriStatus == "OK" && timeAgo >= 10.minutes && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -447,7 +447,7 @@ fun BottomSheetContent(
                                 style = MaterialTheme.typography.titleLarge
                             )
                             Text(
-                                text = "Viimeksi päivitetty ${compareServerTimes(serverTime)} sitten.\nYritä myöhemmin uudelleen.",
+                                text = "Viimeksi päivitetty ${timeAgo} sitten.\nYritä myöhemmin uudelleen.",
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
