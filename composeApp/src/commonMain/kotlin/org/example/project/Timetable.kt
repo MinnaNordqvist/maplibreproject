@@ -173,12 +173,8 @@ fun Timetable(
                         modifier = Modifier.padding(top = 6.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    println("Ero Siriajan ja Tämän hetken välillä: " + bus.compareTimes())
-                    println(
-                        bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude + " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(
-                            bus.aimeddeparturetime
-                        ) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero()
-                    )
+
+                    println(bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude + " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
                 }
             }
         }

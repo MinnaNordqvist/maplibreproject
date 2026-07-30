@@ -64,8 +64,21 @@ import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.ui.unit.center
+import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
+
+
+private  fun compareServerTimes(serverT: Long): Duration {
+    val clock: Clock = Clock.System
+    val instantNow = clock.now()
+    val instantServer = Instant.fromEpochSeconds(serverT)
+    val erotus = instantNow - instantServer
+    return erotus
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,)
 @Composable
@@ -98,6 +111,7 @@ fun BottomSheetContent(
 
     var httpStatus by remember { mutableStateOf(0) }
     var siriStatus by remember { mutableStateOf("")}
+    var serverTime: Long by remember { mutableStateOf(0) }
 
 
     var stopSearch: String? by rememberSaveable { mutableStateOf(feature?.getStringProperty("stop_code")) }
@@ -160,6 +174,7 @@ fun BottomSheetContent(
 
             httpStatus = busViewModel.getResponseStatus(stopSearch).value
             siriStatus = busViewModel.getSiriStatus(stopSearch)
+            serverTime = busViewModel.getServerTime(stopSearch)
             println("Stop monitor status: " + siriStatus)
         }
     }
@@ -393,7 +408,7 @@ fun BottomSheetContent(
                 }
             }
 
-            if (httpStatus == 200 && siriStatus == "OK" && uiState.busList.isEmpty()) {
+            if (httpStatus == 200 && siriStatus == "OK" && compareServerTimes(serverTime) < 10.minutes && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -410,6 +425,31 @@ fun BottomSheetContent(
                                 text = "Ei linjoja seuraavan tunnin aikana",
                                 style = MaterialTheme.typography.titleLarge
                             )
+                        }
+                    }
+                }
+            }
+            if (httpStatus == 200 && siriStatus == "OK" && compareServerTimes(serverTime) >= 10.minutes && uiState.busList.isEmpty()) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0XFFf3f6f4)
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Fölin palvelin lähettää vanhentunutta dataa.",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                text = "Viimeksi päivitetty ${compareServerTimes(serverTime)} sitten.\nYritä myöhemmin uudelleen.",
+                                style = MaterialTheme.typography.titleMedium
+                            )
                             Text(
                                 text = "Server status " + siriStatus,
                                 style = MaterialTheme.typography.bodySmall
@@ -418,7 +458,6 @@ fun BottomSheetContent(
                     }
                 }
             }
-
 
 
 

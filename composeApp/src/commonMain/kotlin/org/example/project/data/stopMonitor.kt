@@ -64,7 +64,8 @@ import kotlin.time.Duration
 @Serializable
 data class Response(
     val status: String,
-    val result: List<Bus>?
+    val result: List<Bus>?,
+    val servertime: Long
 ) {
     @Serializable
     data class Bus(
@@ -114,6 +115,8 @@ data class Response(
             val erotus = instantNow - instantSiri
             return erotus
         }
+
+
     }
 
 }

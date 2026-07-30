@@ -14,6 +14,8 @@ interface SiriApi {
     suspend fun getResponseStatus(stop_code: String?): HttpStatusCode
 
     suspend fun getSiriStatus(stop_code: String?): String
+
+    suspend fun getServerTime(stop_code: String?): Long
 }
 
 class SiriApiImpl (
@@ -48,6 +50,13 @@ class SiriApiImpl (
             method = HttpMethod.Get
         }.body<Response>().status
     }
+
+    override suspend fun getServerTime(stop_code: String?): Long {
+        return org.example.project.client.get("/siri/sm/$stop_code") {
+            method = HttpMethod.Get
+        }.body<Response>().servertime
+    }
+
 }
 
 
