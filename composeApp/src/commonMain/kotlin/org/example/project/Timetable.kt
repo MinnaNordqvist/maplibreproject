@@ -45,8 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import org.maplibre.compose.camera.CameraState
-
-
+import kotlin.time.Duration.Companion.minutes
 
 
 fun String.toColor(): Color {
@@ -72,111 +71,119 @@ fun Timetable(
 
        var position: Position? by remember{ mutableStateOf<Position?>(null) }
 
-       Card(
-        colors = CardDefaults.cardColors(
-            containerColor = (if (realTime) Color(0XFFf3f6f4) else Color(0xFFD7D8D9))
-        ),
-        border = BorderStroke(1.dp, Color.Black),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(2.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(end = 6.dp)
-                        .size(60.dp, 40.dp)
-                        .background(routeColor),
 
-                    contentAlignment = Alignment.Center,
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = (if (realTime) Color(0XFFf3f6f4) else Color(0xFFD7D8D9))
+            ),
+            border = BorderStroke(1.dp, Color.Black),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(2.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = bus.lineref,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
+                    Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .padding(top = 6.dp),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-                Text(
-                    text = bus.destinationdisplay,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .weight(3.0f)
-                        .padding(top = 6.dp),
-                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                    softWrap = true
-                )
+                            .padding(end = 6.dp)
+                            .size(60.dp, 40.dp)
+                            .background(routeColor),
 
-                if (bus.latitude != null && bus.longitude != null) {
-                    OutlinedIconButton(
-                        onClick = {
-                            position = Position(latitude = bus.latitude, longitude = bus.longitude)
-                            position?.let { onIconClick(it) }
-                            timeStamp = bus.getTimeStamp()
-                            lineNum = bus.lineref
-                            routeCol = routeColor
-                           // println(bus.getTimeStamp())
-                        },
-                        modifier = Modifier.padding(start = 0.dp, top = 0.dp, end = 0.dp),
-                        colors = IconButtonColors(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White,
-                            disabledContentColor = Color.White,
-                            disabledContainerColor = Color.Gray
-                        )
-                    ){
-                        Icon(
-                            painter = painterResource(Res.drawable.bus_map_pin),
-                            contentDescription = null,
-                            //modifier = Modifier.fillMaxSize()
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = bus.lineref,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(top = 6.dp),
+                            style = MaterialTheme.typography.titleLarge
                         )
                     }
-                }
+                    Text(
+                        text = bus.destinationdisplay,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .weight(3.0f)
+                            .padding(top = 6.dp),
+                        style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
+                        softWrap = true
+                    )
 
-                if (bus.monitored && difference > 60) {
-                    Image(
-                        painter = painterResource(Res.drawable.hourglass),
-                        contentDescription = null,
-                        modifier = Modifier.size(25.dp, 30.dp)
-                            .padding(start = 2.dp, top = 8.dp),
-                        alignment = Alignment.TopEnd
+                    if (bus.latitude != null && bus.longitude != null) {
+                        OutlinedIconButton(
+                            onClick = {
+                                position =
+                                    Position(latitude = bus.latitude, longitude = bus.longitude)
+                                position?.let { onIconClick(it) }
+                                timeStamp = bus.getTimeStamp()
+                                lineNum = bus.lineref
+                                routeCol = routeColor
+                                // println(bus.getTimeStamp())
+                            },
+                            modifier = Modifier.padding(start = 0.dp, top = 0.dp, end = 0.dp),
+                            colors = IconButtonColors(
+                                containerColor = Color.DarkGray,
+                                contentColor = Color.White,
+                                disabledContentColor = Color.White,
+                                disabledContainerColor = Color.Gray
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.bus_map_pin),
+                                contentDescription = null,
+                                //modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
+                    if (bus.monitored && difference > 60) {
+                        Image(
+                            painter = painterResource(Res.drawable.hourglass),
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp, 30.dp)
+                                .padding(start = 2.dp, top = 8.dp),
+                            alignment = Alignment.TopEnd
+                        )
+                        // println(difference)
+                    }
+                    if (bus.monitored && difference < -60) {
+                        Image(
+                            painter = painterResource(Res.drawable.bolt),
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp, 30.dp)
+                                .padding(start = 2.dp, top = 8.dp),
+                            alignment = Alignment.TopEnd
+                        )
+                        // println(difference)
+                    }
+                    Text(
+                        text = departureTime,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.padding(top = 6.dp),
+                        style = MaterialTheme.typography.titleMedium
                     )
-                   // println(difference)
-                }
-                if (bus.monitored && difference < -60) {
-                    Image(
-                        painter = painterResource(Res.drawable.bolt),
-                        contentDescription = null,
-                        modifier = Modifier.size(25.dp, 30.dp)
-                            .padding(start = 2.dp, top = 8.dp),
-                        alignment = Alignment.TopEnd
+                    println("Ero Siriajan ja Tämän hetken välillä: " + bus.compareTimes())
+                    println(
+                        bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude + " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(
+                            bus.aimeddeparturetime
+                        ) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero()
                     )
-                   // println(difference)
                 }
-                Text(
-                    text = departureTime,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.padding(top = 6.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                println(bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude +  " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
             }
         }
     }
-   }
+
 
 @Composable
 fun BusLocationInfo(

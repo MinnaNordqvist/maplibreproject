@@ -56,6 +56,10 @@ class BusViewModel : ViewModel(), KoinComponent {
 
     }
 
+    suspend fun getSiriStatus(stop_code: String?): String {
+        return siriApi.getSiriStatus(stop_code)
+    }
+
     private fun startAutoRefreshTimer(stop_code: String?) {
         // Cancel previous timer just to be safe
         refreshJob?.cancel()

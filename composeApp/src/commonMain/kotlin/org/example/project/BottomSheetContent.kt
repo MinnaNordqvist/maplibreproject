@@ -64,6 +64,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.ui.unit.center
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,)
 @Composable
@@ -95,6 +97,8 @@ fun BottomSheetContent(
     val selectedLines by busViewModel.selectedLines.collectAsStateWithLifecycle()
 
     var httpStatus by remember { mutableStateOf(0) }
+    var siriStatus by remember { mutableStateOf("")}
+
 
     var stopSearch: String? by rememberSaveable { mutableStateOf(feature?.getStringProperty("stop_code")) }
 
@@ -145,12 +149,18 @@ fun BottomSheetContent(
                                 routeroutes.add(element)
                             }
                         }
-                    displayNames.put(stopSearch!!, routeroutes)
-                    stopTimes.put(stopSearch!!, tripIds)
+
+                    if(tripIds.isNotEmpty() && routeroutes.isNotEmpty() ){
+                        displayNames.put(stopSearch!!, routeroutes)
+                        stopTimes.put(stopSearch!!, tripIds)
+                    }
+
 
             }
 
             httpStatus = busViewModel.getResponseStatus(stopSearch).value
+            siriStatus = busViewModel.getSiriStatus(stopSearch)
+            println("Stop monitor status: " + siriStatus)
         }
     }
 
@@ -291,7 +301,7 @@ fun BottomSheetContent(
                             }
                         }
                         Text(
-                            text = ("Lines: " + getDisplayNames()),
+                            text = ("Linjat: " + getDisplayNames()),
                             Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp),
                             fontWeight = FontWeight.Light
                         )
@@ -323,15 +333,67 @@ fun BottomSheetContent(
 
             }
 
+            if (uiState.busList.isNotEmpty() && uiState.busList[0].compareTimes() > 1.hours) {
+               println(uiState.busList[0].compareTimes())
+                item {
+                   Card(
+                       colors = CardDefaults.cardColors(
+                           containerColor = Color(0XFFf3f6f4)
+                       ),
+                       border = BorderStroke(1.dp, Color.Black),
+                       modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+                   ) {
+                       Column(
+                           modifier = Modifier.padding(8.dp),
+                           verticalArrangement = Arrangement.Center
+                       ) {
+                           Text(
+                               text = "Fölin palvelimella on ongelmia.",
+                               style = MaterialTheme.typography.titleLarge
+                           )
+                           Text(
+                               text = "Viimeisin aikataulu julkaistu ${uiState.busList[0].compareTimes()} sitten.\nYritä myöhemmin uudelleen",
+                               style = MaterialTheme.typography.titleMedium
+                           )
+                       }
+                   }
+               }
+            } else {
+                itemsIndexed(
+                    items = filteredBusList,
+                    key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { _, bus ->
+                    Timetable(bus, routeDetails, onIconClick = onIconClick)
 
-            itemsIndexed(
-                items = filteredBusList,
-                key = { _, bus -> "${stopSearch}_${bus.lineref}_${bus.expecteddeparturetime}" }) { _, bus ->
-                Timetable(bus, routeDetails, onIconClick = onIconClick)
+                }
             }
 
+            if (httpStatus == 200 && siriStatus == "SIRI_NO_DATA"){
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0XFFf3f6f4)
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Fölin palvelimella on ongelmia.\nYritä myöhemmin uudelleen.",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                text = "Server status: " + siriStatus,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+            }
 
-            if (httpStatus == 200 && uiState.busList.isEmpty()) {
+            if (httpStatus == 200 && siriStatus == "OK" && uiState.busList.isEmpty()) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -348,10 +410,16 @@ fun BottomSheetContent(
                                 text = "Ei linjoja seuraavan tunnin aikana",
                                 style = MaterialTheme.typography.titleLarge
                             )
+                            Text(
+                                text = "Server status " + siriStatus,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
             }
+
+
 
 
             item {

@@ -10,6 +10,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration
 
 /*
  Linja-autokohtainen vastaus osoitteesta https://data.foli.fi/siri/sm/stop_code
@@ -61,6 +63,7 @@ import kotlinx.datetime.toLocalDateTime
 @OptIn(ExperimentalTime::class)
 @Serializable
 data class Response(
+    val status: String,
     val result: List<Bus>?
 ) {
     @Serializable
@@ -102,6 +105,14 @@ data class Response(
                     second()
                 })
             return timestamp
+        }
+
+        fun compareTimes(): Duration {
+            val clock: Clock = Clock.System
+            val instantNow = clock.now()
+            val instantSiri = Instant.fromEpochSeconds(recordedattime)
+            val erotus = instantNow - instantSiri
+            return erotus
         }
     }
 
