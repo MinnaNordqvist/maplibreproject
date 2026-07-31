@@ -65,6 +65,20 @@ fun InfoButton(){
                 Column(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    Row(verticalAlignment = Alignment.CenterVertically){
+                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                            Image(
+                                painter = painterResource(Res.drawable.bus_map_pin),
+                                contentDescription = null,
+                                contentScale = ContentScale.Inside,
+                                alignment = Alignment.Center,
+                                modifier = Modifier.size(35.dp).background(color = Color.DarkGray, shape = CircleShape).border(BorderStroke(3.dp, Color.DarkGray), CircleShape)
+
+                            )
+                        }
+
+                        Text(text = "Näytä bussin sijainti kartalla.", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp) )
+                    }
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -91,20 +105,7 @@ fun InfoButton(){
 
                         Text(text = "Bussi on ainakin minuutin myöhässä aikataulusta.",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp))
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically){
-                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
-                            Image(
-                                painter = painterResource(Res.drawable.bus_map_pin),
-                                contentDescription = null,
-                                contentScale = ContentScale.Inside,
-                                alignment = Alignment.Center,
-                                modifier = Modifier.size(35.dp).background(color = Color.DarkGray, shape = CircleShape).border(BorderStroke(3.dp, Color.DarkGray), CircleShape)
 
-                            )
-                        }
-
-                        Text(text = "Näytä bussin sijainti kartalla.", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp) )
-                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
                             Box(
