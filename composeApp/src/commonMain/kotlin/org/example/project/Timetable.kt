@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -43,6 +45,7 @@ import  androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import org.maplibre.compose.camera.CameraState
 import kotlin.time.Duration.Companion.minutes
@@ -87,7 +90,8 @@ fun Timetable(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
@@ -103,9 +107,9 @@ fun Timetable(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(top = 6.dp),
+                            //modifier = Modifier
+                            //    .fillMaxHeight()
+                             //   .padding(top = 6.dp),
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
@@ -113,68 +117,87 @@ fun Timetable(
                         text = bus.destinationdisplay,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
-                            .weight(3.0f)
-                            .padding(top = 6.dp),
+                            .weight(1.0f)
+                            .padding(horizontal = 8.dp),
                         style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
-                        softWrap = true
+                        softWrap = true,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
 
-                    if (bus.latitude != null && bus.longitude != null) {
-                        OutlinedIconButton(
-                            onClick = {
-                                position =
-                                    Position(latitude = bus.latitude, longitude = bus.longitude)
-                                position?.let { onIconClick(it) }
-                                timeStamp = bus.getTimeStamp()
-                                lineNum = bus.lineref
-                                routeCol = routeColor
-                                // println(bus.getTimeStamp())
-                            },
-                            modifier = Modifier.padding(start = 0.dp, top = 0.dp, end = 0.dp),
-                            colors = IconButtonColors(
-                                containerColor = Color.DarkGray,
-                                contentColor = Color.White,
-                                disabledContentColor = Color.White,
-                                disabledContainerColor = Color.Gray
-                            )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                        Box(
+                            modifier = Modifier.size(36.dp),
+                            contentAlignment = Alignment.CenterEnd
                         ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.bus_map_pin),
-                                contentDescription = null,
-                                //modifier = Modifier.fillMaxSize()
-                            )
+                            if (bus.latitude != null && bus.longitude != null) {
+                                OutlinedIconButton(
+                                    onClick = {
+                                        position =
+                                            Position(latitude = bus.latitude, longitude = bus.longitude)
+                                        position?.let { onIconClick(it) }
+                                        timeStamp = bus.getTimeStamp()
+                                        lineNum = bus.lineref
+                                        routeCol = routeColor
+                                        // println(bus.getTimeStamp())
+                                    },
+                                    modifier = Modifier.size(36.dp), // Shrinks the button footprint
+                                    colors = IconButtonColors(
+                                        containerColor = Color.DarkGray,
+                                        contentColor = Color.White,
+                                        disabledContentColor = Color.White,
+                                        disabledContainerColor = Color.Gray
+                                    )
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.bus_map_pin),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                        //modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            }
+
                         }
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(25.dp, 25.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (bus.monitored && difference > 60) {
+                                Image(
+                                    painter = painterResource(Res.drawable.hourglass),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                // println(difference)
+                            }
+                            if (bus.monitored && difference < -60) {
+                                Image(
+                                    painter = painterResource(Res.drawable.bolt),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                // println(difference)
+                            }
+
+                        }
+                        Text(
+                            text = departureTime,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.width(46.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        println(bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude + " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
+
                     }
 
-                    if (bus.monitored && difference > 60) {
-                        Image(
-                            painter = painterResource(Res.drawable.hourglass),
-                            contentDescription = null,
-                            modifier = Modifier.size(25.dp, 30.dp)
-                                .padding(start = 2.dp, top = 8.dp),
-                            alignment = Alignment.TopEnd
-                        )
-                        // println(difference)
-                    }
-                    if (bus.monitored && difference < -60) {
-                        Image(
-                            painter = painterResource(Res.drawable.bolt),
-                            contentDescription = null,
-                            modifier = Modifier.size(25.dp, 30.dp)
-                                .padding(start = 2.dp, top = 8.dp),
-                            alignment = Alignment.TopEnd
-                        )
-                        // println(difference)
-                    }
-                    Text(
-                        text = departureTime,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.padding(top = 6.dp),
-                        style = MaterialTheme.typography.titleMedium
-                    )
 
-                    println(bus.destinationdisplay + " " + bus.monitored + " " + bus.longitude + " " + bus.latitude + " " + " aikataulun mukainen " + bus.getDepartures(bus.aimeddeparturetime) + " reealiaika " + bus.getDepartures(bus.expecteddeparturetime) + " erotus " + bus.aikaero())
                 }
             }
         }
