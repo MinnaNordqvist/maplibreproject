@@ -46,15 +46,35 @@ class SiriApiImpl (
     }
 
     override suspend fun getSiriStatus(stop_code: String?): String {
-        return org.example.project.client.get("/siri/sm/$stop_code") {
-            method = HttpMethod.Get
-        }.body<Response>().status
+        var status = ""
+        try {
+            status = org.example.project.client.get("/siri/sm/$stop_code") {
+                method = HttpMethod.Get
+            }.body<Response>().status
+        } catch (e: HttpRequestTimeoutException) {
+            println("Timeout fetching server status for stop $stop_code")
+
+        } catch (e: Exception) {
+            println("Failed to fetch server status for stop $stop_code  ${e.message}")
+
+        }
+        return status
     }
 
     override suspend fun getServerTime(stop_code: String?): Long {
-        return org.example.project.client.get("/siri/sm/$stop_code") {
-            method = HttpMethod.Get
-        }.body<Response>().servertime
+       var serverTime: Long = 0
+       try {
+           serverTime = org.example.project.client.get("/siri/sm/$stop_code") {
+               method = HttpMethod.Get
+           }.body<Response>().servertime
+       } catch (e: HttpRequestTimeoutException) {
+           println("Timeout fetching server time for stop $stop_code")
+
+       } catch (e: Exception) {
+           println("Failed to fetch server time for stop $stop_code  ${e.message}")
+
+       }
+        return serverTime
     }
 
 }

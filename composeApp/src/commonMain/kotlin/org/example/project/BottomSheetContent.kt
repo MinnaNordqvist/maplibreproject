@@ -349,7 +349,7 @@ fun BottomSheetContent(
             }
 
             if (uiState.busList.isNotEmpty() && uiState.busList[0].compareTimes() > 1.hours) {
-               println(uiState.busList[0].compareTimes())
+
                 item {
                    Card(
                        colors = CardDefaults.cardColors(
@@ -367,7 +367,7 @@ fun BottomSheetContent(
                                style = MaterialTheme.typography.titleLarge
                            )
                            Text(
-                               text = "Viimeisin aikataulu julkaistu ${uiState.busList[0].compareTimes()} sitten.\nYritä myöhemmin uudelleen",
+                               text = "Viimeisin aikataulu julkaistu ${uiState.busList[0].compareTimes()} sitten.\nYritä myöhemmin uudelleen.",
                                style = MaterialTheme.typography.titleMedium
                            )
                        }

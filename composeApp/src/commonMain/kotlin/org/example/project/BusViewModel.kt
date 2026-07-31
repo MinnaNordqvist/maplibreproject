@@ -69,10 +69,7 @@ class BusViewModel : ViewModel(), KoinComponent {
         refreshJob?.cancel()
 
         refreshJob = viewModelScope.launch {
-            // Wait for exactly 1 minute
             delay(1.minutes)
-
-            // Loop back to fetch fresh data
             getBusList(stop_code)
             println("Refreshing")
         }
