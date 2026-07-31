@@ -22,6 +22,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -66,7 +67,7 @@ fun InfoButton(){
                         Image(
                             painter = painterResource(Res.drawable.bolt),
                             contentDescription = null,
-                            modifier = Modifier.size(25.dp, 25.dp)
+                            modifier = Modifier.size(30.dp, 30.dp)
 
 
                         )
@@ -76,7 +77,7 @@ fun InfoButton(){
                         Image(
                             painter = painterResource(Res.drawable.hourglass),
                             contentDescription = null,
-                            modifier = Modifier.size(25.dp, 25.dp)
+                            modifier = Modifier.size(30.dp, 30.dp)
 
 
                         )
@@ -86,16 +87,22 @@ fun InfoButton(){
                         Image(
                             painter = painterResource(Res.drawable.bus_map_pin),
                             contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(25.dp).background(Color.DarkGray).clip(CircleShape),
+                            contentScale = ContentScale.Inside,
+                            alignment = Alignment.Center,
+                            modifier = Modifier.size(35.dp).background(color = Color.DarkGray, shape = CircleShape).border(BorderStroke(3.dp, Color.DarkGray), CircleShape)
 
                         )
-                        Text(text = "Näytä bussin sijainti kartalla. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp) )
+                        Text(text = "Näytä bussin sijainti kartalla. \n\n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp) )
                     }
                     Row(){
-                        Box(
-                            modifier = Modifier.background(Color(0xFFD7D8D9)).size(25.dp, 25.dp)
-                        ){}
+                        Box {
+                            Box(
+                                modifier = Modifier.background(Color.Black).size(30.dp, 30.dp)
+                            )
+                            Box(
+                                Modifier.matchParentSize().padding(start = 2.dp, top = 2.dp, end = 2.dp, bottom = 2.dp).background(Color(0xFFD7D8D9))
+                            )
+                        }
                         Text(text = "Bussista ei ole tällä hetkellä saatavilla reaaliaikaista dataa. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
                     }
                     Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
