@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -61,51 +63,58 @@ fun InfoButton(){
             ) {
 
                 Column(
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Row() {
-                        Image(
-                            painter = painterResource(Res.drawable.bolt),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp, 30.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(Res.drawable.bolt),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
 
-
-                        )
-                        Text(text = "Bussi on ainakin minuutin etuajassa aikataulusta. \n",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
-                    }
-                    Row() {
-                        Image(
-                            painter = painterResource(Res.drawable.hourglass),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp, 30.dp)
-
-
-                        )
-                        Text(text = "Bussi on ainakin minuutin myöhässä aikataulusta. \n",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
-                    }
-                    Row(){
-                        Image(
-                            painter = painterResource(Res.drawable.bus_map_pin),
-                            contentDescription = null,
-                            contentScale = ContentScale.Inside,
-                            alignment = Alignment.Center,
-                            modifier = Modifier.size(35.dp).background(color = Color.DarkGray, shape = CircleShape).border(BorderStroke(3.dp, Color.DarkGray), CircleShape)
-
-                        )
-                        Text(text = "Näytä bussin sijainti kartalla. \n\n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp) )
-                    }
-                    Row(){
-                        Box {
-                            Box(
-                                modifier = Modifier.background(Color.Black).size(30.dp, 30.dp)
-                            )
-                            Box(
-                                Modifier.matchParentSize().padding(start = 2.dp, top = 2.dp, end = 2.dp, bottom = 2.dp).background(Color(0xFFD7D8D9))
                             )
                         }
-                        Text(text = "Bussista ei ole tällä hetkellä saatavilla reaaliaikaista dataa. \n", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 4.dp))
+
+                        Text(text = "Bussi on ainakin minuutin etuajassa aikataulusta.",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp))
                     }
-                    Text("Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                            Image(
+                                painter = painterResource(Res.drawable.hourglass),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
+
+                            )
+                        }
+
+                        Text(text = "Bussi on ainakin minuutin myöhässä aikataulusta.",  textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp))
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically){
+                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                            Image(
+                                painter = painterResource(Res.drawable.bus_map_pin),
+                                contentDescription = null,
+                                contentScale = ContentScale.Inside,
+                                alignment = Alignment.Center,
+                                modifier = Modifier.size(35.dp).background(color = Color.DarkGray, shape = CircleShape).border(BorderStroke(3.dp, Color.DarkGray), CircleShape)
+
+                            )
+                        }
+
+                        Text(text = "Näytä bussin sijainti kartalla.", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp) )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier.background(Color(0xFFD7D8D9)).size(30.dp).border(2.dp, Color.Black)
+                            )
+                        }
+                        Text(text = "Bussista ei ole tällä hetkellä saatavilla reaaliaikaista dataa.", textAlign = TextAlign.Start, modifier = Modifier.padding(start = 8.dp))
+                    }
+                    Text(text = "Lähde:\nTurun seudun joukkoliikenteen liikennöinti- ja aikatauludata. Aineiston ylläpitäjä on Turun kaupungin joukkoliikennetoimisto. Aineisto on ladattu palvelusta http://data.foli.fi/ lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).",
+                        style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
                 }
             }
 
