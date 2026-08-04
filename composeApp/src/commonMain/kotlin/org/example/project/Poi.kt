@@ -66,7 +66,7 @@ fun getSVGstring(geoJson: String): String{
 
 @Composable
 fun poiSource(data: String): GeoJsonSource{
-    return rememberGeoJsonSource(GeoJsonData.Uri(data), options =  GeoJsonOptions(tolerance = 0.1f),)
+    return rememberGeoJsonSource(data = GeoJsonData.Uri(data), options =  GeoJsonOptions(tolerance = 0.375f),)
 }
 
 @Composable
@@ -94,9 +94,8 @@ fun rememberDynamicSvgPainter(svgString: String): Painter {
                 val pathRegex = """<path[^>]*d="([^"]+)"[^>]*>""".toRegex()
                 val fillRegex = """fill="([^"]+)"""".toRegex()
 
-                // Also look inside group tags <g fill="..."> if paths don't have explicit colors
-                val groupFillRegex = """<g[^>]*fill="([^"]+)"""".toRegex()
-                val defaultGroupColor = groupFillRegex.find(svgString)?.groupValues?.get(1) ?: "#FFFFFF"
+
+                val defaultGroupColor = "#FFFFFF"
 
                 val matches = pathRegex.findAll(svgString)
 
@@ -107,11 +106,14 @@ fun rememberDynamicSvgPainter(svgString: String): Painter {
                     val explicitFill = fillRegex.find(match.value)?.groupValues?.get(1)
                     val colorHex = explicitFill ?: defaultGroupColor
 
+
                     val pathColor = try {
-                        Color(parseHtmlColor(colorHex))
+                        parseHtmlColor(colorHex)
                     } catch (e: Exception) {
                         Color.White // Fallback if color format mismatch
                     }
+
+
 
                     // 3. Convert the raw SVG string geometry straight into Compose vector nodes
                     builder.addPath(
@@ -129,13 +131,11 @@ fun rememberDynamicSvgPainter(svgString: String): Painter {
     )
 }
 
-fun parseHtmlColor(colorString: String): Long {
+fun parseHtmlColor(colorString: String): Color {
     val cleanHex = colorString.replace("#", "").trim()
-    return when (cleanHex.length) {
-        6 -> "FF$cleanHex".toLong(16) // Add full alpha layer if missing
-        8 -> cleanHex.toLong(16)
-        else -> 0xFFFFFFFF // Default fallback White
-    }
+    val hex = cleanHex.toLong(16)
+
+    return Color(hex or  0xFF000000)
 }
 
 

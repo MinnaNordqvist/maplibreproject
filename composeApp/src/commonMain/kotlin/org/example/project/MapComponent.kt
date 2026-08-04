@@ -87,9 +87,11 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.launch
 import maplibreproject.composeapp.generated.resources.bus_map_pin
 import maplibreproject.composeapp.generated.resources.my_location
+import org.example.project.data.getGeoJson
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.spatialk.geojson.FeatureCollection
 
@@ -98,6 +100,10 @@ private  var data by mutableStateOf(featureCollectionOf().toJson())
 private var httpStat by mutableStateOf(0)
 
 private var enableTracking by mutableStateOf(false)
+
+private val serviceSource = "https://data.foli.fi/geojson/poi/service_points"
+private val ticketSource = "https://data.foli.fi/geojson/poi/ticket_machines"
+private val loadingSource = "https://data.foli.fi/geojson/poi/loading_points"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,10 +131,13 @@ fun MapComponent(
 
     var isLoading by remember { mutableStateOf(true) }
 
-    // POI icons
+    // POI icons and sources
     var svgService by remember { mutableStateOf("") }
     var svgTicket by remember { mutableStateOf("") }
     var svgLoading by remember { mutableStateOf("") }
+
+
+
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
@@ -238,7 +247,7 @@ fun MapComponent(
                 visible = true,
                 iconAllowOverlap = const(true),
                 minZoom = 0.0f,
-                maxZoom = 24.0f,
+                maxZoom = 17.0f,
 
                 onClick = { features ->
                     selectedFeature = features.firstOrNull()
@@ -266,11 +275,11 @@ fun MapComponent(
             // POI layers from GeoJSON source
             SymbolLayer(
                 id = "service_points",
-                source = poiSource("https://data.foli.fi/geojson/poi/service_points"),
+                source = poiSource(serviceSource),
                 iconImage = image(poiIcon(svgService)),
                 iconSize = const(0.09f),
                 minZoom = 0.0f,
-                maxZoom = 30.0f,
+                maxZoom = 17.0f,
                 visible = true,
                 iconAllowOverlap = const(true),
                 onClick = { features ->
@@ -282,11 +291,11 @@ fun MapComponent(
 
             SymbolLayer(
                 id = "ticket_machines",
-                source = poiSource("https://data.foli.fi/geojson/poi/ticket_machines"),
+                source = poiSource(ticketSource),
                 iconImage = image(poiIcon(svgTicket)),
                 iconSize = const(0.09f),
                 minZoom = 0.0f,
-                maxZoom = 24.0f,
+                maxZoom = 17.0f,
                 visible = true,
                 iconAllowOverlap = const(true),
                 onClick = { features ->
@@ -298,11 +307,11 @@ fun MapComponent(
 
             SymbolLayer(
                 id = "loading_points",
-                source = poiSource("https://data.foli.fi/geojson/poi/loading_points"),
+                source = poiSource(loadingSource),
                 iconImage = image(poiIcon(svgLoading)),
                 iconSize = const(0.09f),
                 minZoom = 0.0f,
-                maxZoom = 24.0f,
+                maxZoom = 17.0f,
                 visible = true,
                 iconAllowOverlap = const(true),
                 onClick = { features ->
@@ -377,7 +386,32 @@ fun MapComponent(
         if (selectedPoi != null) {
             selectedPoi?.let { feature ->
                 LaunchedEffect(feature.geometry) {
+                    val currentZoom = camera.position.zoom
+                    val targ = (feature.geometry as Point).coordinates
+                    val screenPos = camera.projection?.screenLocationFromPosition(targ)
 
+                    val horizontalMargin = 70.dp
+                    val topMargin = 80.dp
+                    val bottomMargin = 40.dp
+                    val screenX = screenPos?.x
+                    val screenY = screenPos?.y
+
+                    val needsUpdate = screenX!! < horizontalMargin ||
+                            screenX > (screenWidth - horizontalMargin) ||
+                            screenY!! < topMargin ||
+                            screenY > (screenHeight - bottomMargin)
+
+
+                    if (needsUpdate) {
+                        camera.animateTo(
+                            CameraPosition(
+                                target = targ,
+                                zoom = currentZoom,
+
+                                ),
+                            duration = 100.milliseconds
+                        )
+                    }
                 }
                 PoiInfoCard(
                     feature = feature,
