@@ -6,15 +6,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -24,7 +26,6 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,8 +48,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
 import org.maplibre.compose.camera.CameraState
-import kotlin.time.Duration.Companion.minutes
 
 
 fun String.toColor(): Color {
@@ -210,9 +211,8 @@ fun BusLocationInfo(
     cameraState: CameraState,
     onClick: () -> Unit
 ){
-    val pos = position
-    val dpTarg = remember(pos, cameraState.position) {
-        cameraState.projection?.screenLocationFromPosition(pos!!)
+    val dpTarg = remember(position, cameraState.position) {
+        cameraState.projection?.screenLocationFromPosition(position!!)
     }
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
     Card(
@@ -224,38 +224,44 @@ fun BusLocationInfo(
                     y = off.y.toInt() - 24
                 )
             },
-        //.size(60.dp),
-        colors = CardDefaults.cardColors(containerColor = routeCol),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = routeCol)
 
-        ) {
+    ) {
         Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.padding(1.dp)
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(1.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+               // modifier = Modifier.padding(1.dp)
             ) {
-                Image(
+                Icon(
                     painter = painterResource(Res.drawable.bus_map_pin),
-                    contentDescription = null,
-                    //modifier = Modifier.fillMaxSize(),
-                    alignment = Alignment.TopStart,
-                    contentScale = ContentScale.Fit,
+                    contentDescription = "Bus location icon",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = lineNum,
                     color = Color.White,
-                    textAlign = TextAlign.End,
-                    style = MaterialTheme.typography.titleLarge
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    lineHeight = 24.sp,
+                    textAlign = TextAlign.Center,
                 )
             }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = timeStamp,
-                color = Color.White,
+                color = Color.White.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium
+                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
     }
