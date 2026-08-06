@@ -16,7 +16,13 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun FilterLines(isSelected: Boolean, stopSearch: String?,  label: String, selectedLines: Map<String, String>, busViewModel: BusViewModel){
+fun FilterLines(
+    isSelected: Boolean,
+    stopSearch: String?,
+    label: String,
+    selectedLines: Map<String, String>,
+    busViewModel: BusViewModel
+){
 
     FilterChip(
         selected = isSelected,

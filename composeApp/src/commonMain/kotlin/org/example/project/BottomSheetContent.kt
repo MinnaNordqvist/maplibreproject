@@ -36,6 +36,7 @@ import org.maplibre.spatialk.geojson.Feature.Companion.getStringProperty
 import org.maplibre.spatialk.geojson.Geometry
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -84,7 +85,6 @@ private  fun compareServerTimes(serverT: Long): Duration {
 @Composable
 fun BottomSheetContent(
     feature: Feature<Geometry, JsonObject?>?,
-   // onDismiss: () -> Unit,
     selectedPosition: (position:Position?) -> Unit,
 ) {
 
@@ -94,16 +94,12 @@ fun BottomSheetContent(
     // https://data.foli.fi/gtfs/trips/all tämä hidastaa ohjelman käynnistymistä emulaattorissa
     val trips: List<Trips> = remember { runBlocking { getTrips() } }
 
-
-
     val lazyListState = rememberLazyListState()
     val overScrollEffect = rememberOverscrollEffect()
 
-
-
     val scope = rememberCoroutineScope()
 
-
+    // ViewModel
     val busViewModel: BusViewModel = koinViewModel()
     val uiState by busViewModel.uiState.collectAsStateWithLifecycle()
     val lines by busViewModel.linesList.collectAsStateWithLifecycle()
@@ -119,10 +115,10 @@ fun BottomSheetContent(
     var stickyText by rememberSaveable { mutableStateOf("") }
 
     var position : Position? by remember{ mutableStateOf<Position?>(null) }
+
     val onIconClick: (position:Position?) -> Unit = { selectedPos ->
         position = selectedPos
         position?.let { selectedPosition(it) }
-       // println(position)
     }
 
     val stopTimes = remember { mutableMapOf<String, Set<String>>() }
@@ -148,7 +144,7 @@ fun BottomSheetContent(
         }
 
         if (stopSearch?.isNotEmpty() == true) {
-
+            // Haetaan aikataulut SIRI-rajapinnasta
             busViewModel.getBusList(stopSearch)
 
             //Jos pysäkkiä ei ole vielä klikattu, lähetetään HTTP-pyyntö GTFS-rajapintaan
@@ -165,8 +161,8 @@ fun BottomSheetContent(
                         }
 
                     if(tripIds.isNotEmpty() && routeroutes.isNotEmpty() ){
-                        displayNames.put(stopSearch!!, routeroutes)
-                        stopTimes.put(stopSearch!!, tripIds)
+                        displayNames[stopSearch!!] = routeroutes
+                        stopTimes[stopSearch!!] = tripIds
                     }
 
 
@@ -180,27 +176,21 @@ fun BottomSheetContent(
     }
 
 
-
-
+    // Static Lines list
     fun getDisplayNames(): String? {
         return displayNames[stopSearch]?.toList()?.distinct()?.joinToString { it } ?: ""
     }
 
+    // Filter Chip toiminto
     val filteredBusList = remember(uiState.busList, selectedLines, stopSearch ?: "") {
         val selectedLine = selectedLines[stopSearch]
 
         if (selectedLine.isNullOrEmpty()) {
-            //println("Lazy layout unfiltered: " + lazyListState.layoutInfo.viewportSize.center + " " + lazyListState.layoutInfo.totalItemsCount)
             uiState.busList
         } else {
-            //println("Lazy layout: " + selectedLine + " " + lazyListState.layoutInfo.viewportSize.center + " " + lazyListState.layoutInfo.totalItemsCount)
             uiState.busList.filter { it.lineref == selectedLine }
-
         }
     }
-
-
-
 
 
     LazyColumn(
@@ -263,14 +253,10 @@ fun BottomSheetContent(
             }
 
              */
-
-
         } else {
             stickyHeader {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     border = BorderStroke(2.dp, Color.Black),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -279,62 +265,51 @@ fun BottomSheetContent(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
                                 text = stickyText,
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
                                 textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .padding(start = 8.dp, top = 6.dp, end = 2.dp, bottom = 6.dp)
-                                    .weight(3.0f)
+                                modifier = Modifier.padding(start = 8.dp, top = 6.dp, end = 2.dp, bottom = 6.dp).weight(3.0f)
                             )
+                            // Refresh button
                             OutlinedIconButton(
                                 onClick = {
                                     scope.launch {
                                         busViewModel.getBusList(stopSearch!!)
                                     }
                                 },
-                                modifier = Modifier
-                                    .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 6.dp)
-                                    .height(30.dp)
-                                    .width(30.dp),
+                                modifier = Modifier.padding(bottom = 6.dp).size(30.dp),
                                 enabled = true,
                                 shape = RoundedCornerShape(1.dp),
                                 border = BorderStroke(1.dp, Color.Black),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = Color.White
-                                )
+                                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White)
                             ) {
                                 Icon(
                                     painter = painterResource(Res.drawable.refresh),
-                                    contentDescription = null,
+                                    contentDescription = "Refresh",
                                     modifier = Modifier.fillMaxSize(),
                                 )
                             }
                         }
+                        // Static line list
                         Text(
                             text = ("Linjat: " + getDisplayNames()),
-                            Modifier.padding(start = 4.dp, top = 4.dp, end = 0.dp, bottom = 2.dp),
+                            Modifier.padding(start = 4.dp, top = 4.dp, bottom = 2.dp),
                             fontWeight = FontWeight.Light
                         )
-
                     }
+                    // FilterChips
                     FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         maxItemsInEachRow = 5,
                     ) {
                         lines.forEach { label ->
-
                             val isSelected = stopSearch?.isNotEmpty() == true && selectedLines[stopSearch] == label
-
                             FilterLines(
                                 isSelected = isSelected,
                                 stopSearch = stopSearch,
@@ -349,7 +324,7 @@ fun BottomSheetContent(
             }
 
             if (uiState.busList.isNotEmpty() && uiState.busList[0].compareTimes() > 1.hours) {
-
+                val dur = uiState.busList[0].compareTimes()
                 item {
                    Card(
                        colors = CardDefaults.cardColors(
@@ -367,7 +342,7 @@ fun BottomSheetContent(
                                style = MaterialTheme.typography.titleLarge
                            )
                            Text(
-                               text = "Viimeisin aikataulu julkaistu ${uiState.busList[0].compareTimes()} sitten.\nYritä myöhemmin uudelleen.",
+                               text = "Viimeisin aikataulu julkaistu $dur sitten.\nYritä myöhemmin uudelleen.",
                                style = MaterialTheme.typography.titleMedium
                            )
                        }
@@ -400,7 +375,7 @@ fun BottomSheetContent(
                                 style = MaterialTheme.typography.titleLarge
                             )
                             Text(
-                                text = "Server status: " + siriStatus,
+                                text = "Server status: $siriStatus",
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
@@ -447,19 +422,17 @@ fun BottomSheetContent(
                                 style = MaterialTheme.typography.titleLarge
                             )
                             Text(
-                                text = "Viimeksi päivitetty ${timeAgo} sitten.\nYritä myöhemmin uudelleen.",
+                                text = "Viimeksi päivitetty $timeAgo sitten.\nYritä myöhemmin uudelleen.",
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Server status " + siriStatus,
+                                text = "Server status $siriStatus",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
                 }
             }
-
-
 
             item {
                 Column(

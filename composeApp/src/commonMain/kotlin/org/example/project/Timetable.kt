@@ -88,9 +88,7 @@ fun Timetable(
                 verticalArrangement = Arrangement.Center
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -100,7 +98,6 @@ fun Timetable(
                             .padding(end = 6.dp)
                             .size(60.dp, 40.dp)
                             .background(routeColor),
-
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -108,18 +105,13 @@ fun Timetable(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            //modifier = Modifier
-                            //    .fillMaxHeight()
-                             //   .padding(top = 6.dp),
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
                     Text(
                         text = bus.destinationdisplay,
                         textAlign = TextAlign.Start,
-                        modifier = Modifier
-                            .weight(1.0f)
-                            .padding(horizontal = 8.dp),
+                        modifier = Modifier.weight(1.0f).padding(horizontal = 8.dp),
                         style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.Auto),
                         softWrap = true,
                         maxLines = 2,
@@ -143,9 +135,9 @@ fun Timetable(
                                         timeStamp = bus.getTimeStamp()
                                         lineNum = bus.lineref
                                         routeCol = routeColor
-                                        // println(bus.getTimeStamp())
+
                                     },
-                                    modifier = Modifier.size(36.dp), // Shrinks the button footprint
+                                    modifier = Modifier.size(36.dp),
                                     colors = IconButtonColors(
                                         containerColor = Color.DarkGray,
                                         contentColor = Color.White,
@@ -155,18 +147,15 @@ fun Timetable(
                                 ) {
                                     Icon(
                                         painter = painterResource(Res.drawable.bus_map_pin),
-                                        contentDescription = null,
+                                        contentDescription = "Bus location",
                                         modifier = Modifier.size(20.dp)
-                                        //modifier = Modifier.fillMaxSize()
                                     )
                                 }
                             }
 
                         }
                         Box(
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(25.dp, 25.dp),
+                            modifier = Modifier.padding(start = 4.dp).size(25.dp, 25.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             if (bus.monitored && difference > 60) {
@@ -175,7 +164,7 @@ fun Timetable(
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize()
                                 )
-                                // println(difference)
+
                             }
                             if (bus.monitored && difference < -60) {
                                 Image(
@@ -183,7 +172,7 @@ fun Timetable(
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize()
                                 )
-                                // println(difference)
+
                             }
 
                         }
@@ -217,8 +206,7 @@ fun BusLocationInfo(
     val off = with(LocalDensity.current) { Offset(dpTarg?.x?.toPx() ?: 0f, dpTarg?.y?.toPx() ?: 0f) }
     Card(
         onClick = { onClick() },
-        modifier = Modifier
-            .absoluteOffset {
+        modifier = Modifier.absoluteOffset {
                 IntOffset(
                     x = off.x.toInt() - 12,
                     y = off.y.toInt() - 24
@@ -237,7 +225,6 @@ fun BusLocationInfo(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-               // modifier = Modifier.padding(1.dp)
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.bus_map_pin),
