@@ -81,6 +81,7 @@ fun Timetable(
                 containerColor = (if (realTime) Color(0XFFf3f6f4) else Color(0xFFD7D8D9))
             ),
             border = BorderStroke(1.dp, Color.Black),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(

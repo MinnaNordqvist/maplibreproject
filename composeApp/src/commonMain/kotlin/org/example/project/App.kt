@@ -55,7 +55,7 @@ private  var isPermissionDialogCompleted by mutableStateOf(false)
 fun App() {
     KoinApplication(configuration = koinConfiguration(koinConfig), content = {
 
-        val coroutineScope = rememberCoroutineScope()
+
         val sheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.PartiallyExpanded,
             skipHiddenState = true
@@ -107,15 +107,6 @@ fun App() {
                 sheetContent = {
                     BottomSheetContent(
                         feature = selectedMarker,
-                       /*
-                        onDismiss = {
-                            coroutineScope.launch {
-                                selectedMarker = null
-                                scaffoldState.bottomSheetState.partialExpand()
-                            }
-                        },
-
-                        */
                         selectedPosition = selectedPosition,
                     )
                     LaunchedEffect(position){

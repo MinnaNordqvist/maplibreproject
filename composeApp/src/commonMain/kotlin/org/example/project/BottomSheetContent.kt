@@ -64,6 +64,9 @@ import org.example.project.data.getTrips
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.center
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -256,57 +259,59 @@ fun BottomSheetContent(
         } else {
             stickyHeader {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(2.dp, Color.Black),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                    shape = RectangleShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(8.dp),
-                        verticalArrangement = Arrangement.Center
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = stickyText,
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp,
                                 textAlign = TextAlign.Start,
-                                modifier = Modifier.padding(start = 8.dp, top = 6.dp, end = 2.dp, bottom = 6.dp).weight(3.0f)
+                                modifier = Modifier.weight(1.0f)
                             )
                             // Refresh button
-                            OutlinedIconButton(
+                            IconButton(
                                 onClick = {
                                     scope.launch {
                                         busViewModel.getBusList(stopSearch!!)
                                     }
                                 },
-                                modifier = Modifier.padding(bottom = 6.dp).size(30.dp),
-                                enabled = true,
-                                shape = RoundedCornerShape(1.dp),
-                                border = BorderStroke(1.dp, Color.Black),
-                                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White)
+                                modifier = Modifier.size(48.dp),
                             ) {
                                 Icon(
                                     painter = painterResource(Res.drawable.refresh),
                                     contentDescription = "Refresh",
                                     modifier = Modifier.fillMaxSize(),
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
                         // Static line list
                         Text(
                             text = ("Linjat: " + getDisplayNames()),
-                            Modifier.padding(start = 4.dp, top = 4.dp, bottom = 2.dp),
-                            fontWeight = FontWeight.Light
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // FilterChips
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        maxItemsInEachRow = 5,
+                        modifier = Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                       // maxItemsInEachRow = 5,
                     ) {
                         lines.forEach { label ->
                             val isSelected = stopSearch?.isNotEmpty() == true && selectedLines[stopSearch] == label
@@ -331,6 +336,7 @@ fun BottomSheetContent(
                            containerColor = Color(0XFFf3f6f4)
                        ),
                        border = BorderStroke(1.dp, Color.Black),
+                       elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                    ) {
                        Column(
@@ -364,6 +370,7 @@ fun BottomSheetContent(
                             containerColor = Color(0XFFf3f6f4)
                         ),
                         border = BorderStroke(1.dp, Color.Black),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                         modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Column(
@@ -390,6 +397,7 @@ fun BottomSheetContent(
                             containerColor = Color(0XFFf3f6f4)
                         ),
                         border = BorderStroke(1.dp, Color.Black),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                         modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Column(
@@ -411,6 +419,7 @@ fun BottomSheetContent(
                             containerColor = Color(0XFFf3f6f4)
                         ),
                         border = BorderStroke(1.dp, Color.Black),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                         modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Column(
